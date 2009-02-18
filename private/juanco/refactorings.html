@@ -1,0 +1,55 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Want Refactorings</title>
+<link rel="stylesheet" type="text/css" href="../../doc/style.css">
+</head>
+
+<body>
+
+<h1>Pending Refactorings</h1>
+<pre>$Id: refactorings.html 385 2001-05-11 17:18:14Z juanca $</pre>
+<h2>Want Classes</h2>
+<ol>
+  <li>Embed&nbsp; JclStrings routines used by WantClasses into the unit.</li>
+  <li>Remove references to all JCL units from WantClasses.</li>
+  <li>Now WantClasses is independent of third party units.</li>
+</ol>
+<h1>Already Done</h1>
+<h2>Want Classes</h2>
+<ol>
+  <li>Rename WantBase to WantResources.</li>
+  <li>Remove references to WantResources from WantClasses.</li>
+</ol>
+<h2>TChildProcess</h2>
+<ol>
+  <li>Move TChildProcess from TExecTasks into its own lib/ChildProcesses unit.</li>
+  <li>Rename TChildProcess to TWin32ChildProcess.</li>
+  <li>Factor public interface of TWin32ChildProcess into an abstract
+    TChildProcess class.</li>
+  <li>Define TChildProcessClass and var ChildProcessClass :TChildProcess class.
+    The var is used to create child processes</li>
+  <li>Move TWin32ChildProcess into its own win32/Win32ChildProcesses unit, and
+    asign the class to ChildProcessClass during initialization.</li>
+  <li>Child processes are now abstract and factored out of TExecTasks. Providing
+    a linux implementation should become easier.</li>
+</ol>
+<h2>Running logic</h2>
+<ol>
+  <li>Move TConsoleScriptRunner into its own unit.</li>
+  <li>Move Schedule, Build, DoExecute logic out of WantClasses and into
+    ScriptRunner.</li>
+  <li>Move TBuildListener into its own unit as TBasicBuildListener.</li>
+  <li>Make TScriptRunner have a Listener property.</li>
+  <li>Move FindBuildFile logic into TConsoleScriptRunner.</li>
+  <li>Make ScriptRunner contain/use rather than be a TProject.</li>
+  <li>Running logic is now factored out of WantClasses.</li>
+</ol>
+
+</body>
+
+</html>

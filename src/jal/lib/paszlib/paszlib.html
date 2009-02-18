@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0051)http://www-user.tu-chemnitz.de/~nomssi/paszlib.html -->
+<HTML><HEAD><TITLE>PasZLIB - Homepage</TITLE>
+<META http-equiv=Content-Type content="text/html; charset=Iso-8859-1">
+<META content="Jacques Nomssi Nzali" name=Author>
+<META content="About the Pascal port of the ZLib source" name=Description>
+<META content="MSHTML 5.50.4611.1300" name=GENERATOR></HEAD>
+<BODY text=#000000 vLink=#551a8b aLink=#ff0000 link=#0000ee bgColor=#cccc99>
+<HR width="100%">
+<FONT color=#800000><FONT size=+4>Pas<B>zlib</B> </FONT>Handling <B>zlib</B> 
+with Pascal.</FONT> <BR>
+<HR>
+
+<TABLE>
+  <TBODY>
+  <TR>
+    <TD vAlign=bottom><IMG alt=Zaehler 
+    src="paszlib.xbm">&nbsp;</TD>
+    <TD><FONT color=#800000><FONT size=+2>What Is Pas<B>zlib</B> 
+      ?</FONT></FONT> 
+      <P>Paszlib is a port of the <B>zlib</B> data compression library to 
+      Pascal. The original C source was written and is maintained by Jean-Loup 
+      Gailly and Mark Adler. The current Pascal release is based on zlib 
+      <B>1.1.2.</B> <BR>It was tested under DOS real mode with Turbo Pascal 7.0 
+      for DOS (TP7), under Borland Pascal 7 DPMI and under Win32 with Delphi 
+      3.02. 
+      <P><B>April 7th, 2000</B><BR>
+      <UL>
+        <LI>Fixed minizip translation error and DPMI conditional defines 
+      </LI></UL><B>March 2000</B><BR>
+      <UL>
+        <LI>Code update with minor changes, translation of the minizip packages. 
+        </LI></UL><B>Oktober 1999</B><BR>
+      <UL>
+        <LI>I recommend to change the declaration of the field "z_stream.msg" in 
+        zlib.pas, line 280, from "string" to "string[255]" (ShortString) to 
+        avoid problems with Delphi 2+ dynamic string handling. </LI></UL><B>May 
+      7th, 1999</B> 
+      <UL>
+        <LI>Some changes for Free Pascal Compiler compatibility. deflateCopy() 
+        has new parameters trees.pas - record constant definition 
+      </LI></UL><B>June 25th, 1998</B><BR>
+      <UL>
+        <LI>translation bug (memory leak) fixed: in inftrees.pas, 
+        inflate_trees_dynamic(), "ZFREE(z, v);" was missing in line 574. Thanks 
+        to Thomas Blohorn and Fabrice Doriot. </LI></UL><B>June 17th, 1998</B><BR>
+      <UL>
+        <LI>1.1.2 patch - official patch for a rare inflate buffer bug applied. 
+        <LI>demo "example.pas" now compile as is: Memcheck turned off by 
+        default. 
+        <LI>Delphi 1 - memory allocation fixed. 
+        <LI>Stream classes - dzlib.txt file added. 
+        <LI>compress2() is now exported </LI></UL>
+      <HR>
+      <FONT color=#800000><FONT size=+2>Links</FONT></FONT> 
+      <UL>
+        <LI><FONT color=#008080>Download <B>Paszlib</B></FONT> 
+        <UL>
+          <LI>Last update (April 7th, 2000): <A 
+          href="http://www.tu-chemnitz.de/~nomssi/pub/paszlib.zip">http://www.tu-chemnitz.de/~nomssi/pub/paszlib.zip</A> 
+
+          <LI>Paszlib public release: <A 
+          href="ftp://druckfix.physik.tu-chemnitz.de/pub/nv/">ftp://druckfix.physik.tu-chemnitz.de/pub/nv/</A> 
+          </LI></UL>
+        <LI><FONT color=#008080>Visit the zlib home page </FONT><BR><A 
+        href="http://www.info-zip.org/pub/infozip/zlib/">http://www.info-zip.org/pub/infozip/zlib/</A>. 
+
+        <LI>An older zlib port (inflate only), written by Oliver Fromme,<BR><A 
+        href="http://www.sourcenet.home.pages.de/">Stefan Goehler homepage</A> 
+        <LI>Check Peter Gutmann introduction to data compression in the <A 
+        href="http://www.faqs.org/faqs/compression-faq/part2/section-1.html">comp.compression 
+        FAQ</A>. <BR>The LZ method used by zlib is covered. 
+        <LI><FONT color=#008080>Another Inflate port for Delphi<BR>(FreeWare, in 
+        the DelZip package)</FONT> <A 
+        href="http://sunsite.informatik.rwth-aachen.de/delphi/ftp/d20free/delzip14.exe">DelpZip14</A> 
+
+        <LI>A Pascal port of UNZIP<BR><A 
+        href="http://ourworld.compuserve.com/homepages/African_Chief/">The 
+        African Chief´s homepage.</A> 
+        <LI>Paszlib is used in<BR><A 
+        href="http://www.multimania.com/marat/">Backup Tools</A> 
+        <LI>Data compression packages for Delphi<BR><A 
+        href="http://www.delphipages.com/skunkworks/swcompress.html">Delphi 
+        SkunkWorks - Data Compression</A> </LI></UL>
+      <HR>
+
+      <P><FONT color=#800000><FONT size=+2>How to?</FONT></FONT> 
+      <UL>
+        <LI>outline for file decompression: <A 
+        href="http://www-user.tu-chemnitz.de/~nomssi/pub/paszlb01.txt">Sample 
+        1</A> 
+        <LI>Use the compression code under real mode DOS: lower the memory 
+        requirements by lowering MAX_WBITS and MAX_MEM_LEVEL. 
+        <LI>If you are using Delphi 5, {$define Delphi5} in zconf.inc will 
+        silence some warnings. You might also change the NMAX constant in 
+        "adler.pas" <PRE>const
+  NMAX = 5552; { from 3854 }
+</PRE>This works because the "Cardinal" type is 32 bits there and not 31 
+        bits like in earlier Delphi releases. </LI></UL>
+      <HR>
+
+      <P><FONT color=#800000><FONT size=+2>Who, Me ?</FONT></FONT> 
+      <P>Nomssi is my name, Nomssi Nzali Jacques H. C. I'm cameroonian physicist 
+      studying in Chemnitz, Germany, a long time Turbo Pascal user and a 
+      graphics freak. Check out my <A 
+      href="http://www.tu-chemnitz.de/~nomssi/">home</A> page, my <A 
+      href="http://www.tu-chemnitz.de/~nomssi/nview.html">Graphics file viewer 
+      for SuperVGA</A>, my <A 
+      href="http://www-user.tu-chemnitz.de/~nomssi/pasjpeg.html">Pascal port of 
+      the IJG library</A> and send hate mail, fan mail and marriage proposals to 
+      <A 
+      href="mailto:nomssi@physik.tu-chemnitz.de">nomssi@physik.tu-chemnitz.de</A> 
+      </P></TD></TR></TBODY></TABLE>
+<HR>
+
+<CENTER>Copyright © 1998,1999, 2000 by Jacques Nomssi Nzali</CENTER>
+<CENTER><FONT size=-1>This page last updated on May 5th, 
+2000</FONT></CENTER></BODY></HTML>

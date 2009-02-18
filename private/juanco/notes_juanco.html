@@ -1,0 +1,201 @@
+<html>
+
+<head>
+<meta name="generator" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Want Notes</title>
+<link rel="stylesheet" type="text/css" href="../../doc/style.css">
+</head>
+
+<body>
+
+<h1>Notes on Want Development</h1>
+<p><i>by Juanco Añez</i></p>
+<h2><a href="uris_juanco.html">URIs</a></h2>
+<p>Notes on how Want could automagically handles URIs on behalf of task
+writers.</p>
+<h2>Test Everything that Could Possibly Break</h2>
+<p>Things that need testing:</p>
+<ul>
+  <li>That trying to build undefined targets fails.</li>
+  <li>That dependencies to undefined targets produce an error, even if they
+    aren't traversed when building the default (or requrested) target.</li>
+</ul>
+<h2>Internationalization</h2>
+<p>Want will probably speak only English for ever, but the platforms where
+Want runs may be in different locales. Therefore use the locale-friendly
+versions of Delphi functions when possible (AnsiUpperCase, AnsiCompareFileNames,
+etc.).</p>
+<h2>Parsing<br>
+(Already Implemented)</h2>
+<p>The parser will need to find task classes by their friendly name (i.e. &quot;copy&quot;for
+TCopyTask). To acheive this, set up a task registry (a simple TStringList will
+do) that maps friendly names (XML tags) to task classes.</p>
+<blockquote>
+  Implemented! See <code>&lt;want&gt;/src/WantClasses.pas</code> for details.
+</blockquote>
+<h2>Path Syntax<br>
+(Already Implemented, but no URIs yet)</h2>
+<h3>The Problem</h3>
+<p>The software world is divided between the forward slash (/) and the backslash
+(\) camps. Windows, which is on the backslash camp, runs over 90% of desktops,
+and over 60% of servers, but only a fraction of wordl computers, once you
+consider handhelds, celluar phones, and the miriads of devices running embedded
+applications. Most everything besides Windows, including the Internet, is on the
+forward slash camp.</p>
+<p>Kylix, the Linux version of Delphi, is also in the fwd/ camp.</p>
+<p>How Want will deal with paths in build scripts needs to be defined.</p>
+<h3>Proposal</h3>
+<p>For Want users, it would be easier not to think much about path syntax.
+Therefore, let Want should:</p>
+<ul>
+  <li>Consider both &quot;/&quot; and &quot;\&quot; as file separators in a
+    path.</li>
+  <li>Use &quot;,&quot; and &quot;;&quot; as the path separators in a list of
+    paths. Ignoring &quot;:&quot; avoids problems with Windows-style syntax for
+    drives (C:, etc.).</li>
+  <li>Forbid the use of the above characters for any other purpose when dealing
+    with paths.</li>
+</ul>
+<p>That solves the user problem.</p>
+<p>Internally, Want tasks need to have a unique, canonical representation for
+paths, and an API to deal with them. Most of the API should be readily
+accessible through the abstract TTask class methods.</p>
+<p>The canonical form, even if it means more work under Delphi, should probably
+be the fwd/ form, which is the one that supports most purposes (file handling,
+FTP, HTTP, WAP, XML, etc.).</p>
+<p>Canonical paths should be translated to platform dependent ones only by Want
+tasks, and only right before passing them to the relevant application or
+service.</p>
+<p>The aim should be to eventually treat all paths as URIs, as defined by
+Internic RFCs. This can be acheived by writing a simple file handling library,
+that knows how to convert URIs that refer to files to their platform specific
+form.</p>
+<h3>Things to Consider</h3>
+<p>An URI (a path) path with no protocol (no leading <code>xyz:</code> part)
+should default to <code>file:</code></p>
+<p>What about Want's non-task path logic, like getting hold of the nearest
+build script? Should that also be subject to these considerations?</p>
+<p>Kylix already has knowledge about path/file separators. Delphi 6 will too.</p>
+<h3>Research</h3>
+<p>Find how Delphi's RTTI will treat a property of a type defined as:</p>
+<blockquote>
+  <code>type<br>
+  &nbsp;&nbsp;TWantPath = string;<br>
+  </code>
+</blockquote>
+<p><b>AFTERNOTE:</b> It seems it's irrelevalnt. It should be treated as a
+string. If not, define the property as string, and let the code handle the rest.</p>
+<h3>Solution</h3>
+<p>[[State how Want currently deals with these issues right here]]</p>
+<p>Implemented up to fwd/ style paths that can be translated to System paths
+using <code>TTask.ToSystemPath(Path)</code>. The relevant units are <code>WildPaths.pas</code>
+and <code>FileOps.pas</code>.</p>
+<p>Will probably need help from <code>Indy</code> (Internet Dyrect) components
+(also in Kylix) for the rest.</p>
+<p>Tested under Windows using Delphi 4.</p>
+<h2>Dependencies</h2>
+<h3>Circular Dependencies: Finding the Culprits</h3>
+<p>Use the <code>Name=Value</code> facility of TStrings to record which target
+produced the inclusion of which target. A dependency circle can then be found by
+following the <code>=Value</code> chain until the current target is reached.</p>
+<h2>Code Structure</h2>
+<p>Methods that are neither public (published), nor virtual, must be private.
+This is the Delphi way of things.</p>
+<h2>Tasks</h2>
+<p>The most important (most used) tasks, and the ones to implement first should
+be:</p>
+<blockquote>
+  <table border="1" bordercolor="black" cellspacing="0"
+  summary="important tasks" width="60%">
+    <tr>
+      <td width="20%">mkdir</td>
+      <td>important for project setup.</td>
+      <td><b>done!</b></td>
+    </tr>
+    <tr>
+      <td>delete</td>
+      <td>(including dirs) important for good project cleanup.</td>
+      <td><b>done!</b></td>
+    </tr>
+    <tr>
+      <td>copy</td>
+      <td>important for project setup and bundling.</td>
+      <td><b>done!</b></td>
+    </tr>
+    <tr>
+      <td>move<br>
+        touch</td>
+      <td>just handy</td>
+      <td><b>done!</b></td>
+    </tr>
+    <tr>
+      <td>dcc</td>
+      <td>Delphi compile</td>
+      <td><b>done!</b></td>
+    </tr>
+  </table>
+</blockquote>
+<p>Tasks that should make it in soon are:</p>
+<blockquote>
+  <table border="1" bordercolor="black" cellspacing="0"
+  summary="important tasks" width="60%">
+    <tr>
+      <td width="20%">rc</td>
+      <td>resource compilation</td>
+    </tr>
+  </table>
+</blockquote>
+<p>Tasks that should be planned are:</p>
+<blockquote>
+  <table border="1" bordercolor="black" cellspacing="0"
+  summary="important tasks" width="60%">
+    <tr>
+      <td>zip</td>
+      <td>make a zip file</td>
+    </tr>
+    <tr>
+      <td>dunit</td>
+      <td>test the software</td>
+    </tr>
+  </table>
+</blockquote>
+<h2>Web Site/Documentation</h2>
+<p>The use of CSS (Cascading Style Sheets) really pays off. Each page should
+include as style a &quot;style.css&quot; to be found in the same path
+(directory) as the page. The &quot;style.css&quot; style can be composed of
+other stlesheet inclusions only.</p>
+<h2>Documentation</h2>
+<h3>Problem</h3>
+<p>Writing documentation is always a hassle, and no one ever seems to have the
+time to do it right</p>
+<h3>Proposal</h3>
+<p>Implement <code>EnumAttributes</code> and <code>EnumElements</code> class
+methods in <code>TTask</code> that respectively report the tasks accepted
+attributes and nested elements.</p>
+<p>For bonus points, add support for querying the documentation for attributes
+and nested elements by calling the <code>TTask</code> class method:</p>
+<pre>
+class function TTask.Ussage: string
+</pre>
+<p>and give want.exe a commandline option to query about any task (the default
+version would just provide the list of accepted attributes and nested elements).</p>
+<h2>Loadable Task Modules</h2>
+<p>Having Want automatically load taks from DLLs should be fairly easy, and
+would provide the advantage of not having to recompile Want to add the tasks.</p>
+<p>To have Want load taks from DLLs:</p>
+<ol>
+  <li>Compile all of Want's core units into a .BPL.</li>
+  <li>Compile custom tasks into a DLL compiled agains the .BPL (.DCP).</li>
+  <li>Use a standard naming convention for task DLLs (i.e., prefix_task.dll
+    (Want can easily find them using the facilities provided by WildFiles.pas).</li>
+  <li>Place task DLLs in the same directory as want.exe, or in any of the
+    directories specified in the appropiate .INI or registry entry.</li>
+</ol>
+<p>Because task units register their tasks using <code>RegisterTask</code>, task
+classes would be available to Want immediately after loading the DLL.</p>
+<center><b>~o~</b></center>
+
+</body>
+
+</html>

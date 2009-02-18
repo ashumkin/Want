@@ -1,0 +1,35 @@
+<project name="compilecode" basedir="." default="compile">
+  <patternset id="sources">
+  </patternset>
+
+  <target name="compile">
+    <dcc basedir="." source="dof2want.dpr">
+      <dcuoutput path="e:\d6\lib" />
+
+      <Optimization value="False" />
+
+      <RangeChecks value="True" />
+
+      <Overflowchecks value="True" />
+
+      <DefinitionInfo value="False" />
+
+      <UseVerbose value="True" />
+
+      <warnings value="True" />
+
+      <map value="detailed" />
+
+      <console value="True" />
+
+      <define name="DEBUG" />
+
+      <unitPath refid="sources" />
+
+      <includePath refid="sources" />
+
+      <resourcePath refid="sources" />
+    </dcc>
+  </target>
+</project>
+

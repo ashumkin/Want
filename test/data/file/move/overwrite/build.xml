@@ -1,0 +1,25 @@
+<!-- Test move task, overwriting files -->
+<project name="move_test"
+         basedir="."
+         default="test" >
+
+  <target name="test" >
+    <mkdir dir="${basedir}/dirb" />
+
+    <!-- move task will not overwrite files. Future version of task
+         might support this directly. Until then, have to delete
+         first -->
+    <delete>
+      <fileset dir="${basedir}/dirb" >
+        <include name="*.*" />
+      </fileset>
+    </delete>
+
+    <move todir="${basedir}/dirb" >
+      <fileset dir="${basedir}/dira" >
+        <include name="*.*" />
+      </fileset>
+    </move>
+  </target>
+
+</project>

@@ -1,0 +1,9 @@
+<project name="singlefile" basedir="." default="test">
+	<target name="test">
+		<style destdir="." extension="html" style="identity.xsl">
+		    <fileset dir="${basedir}" >
+                <include name="in*.xml" />
+            </fileset>
+        </style>  
+	</target>
+</project>

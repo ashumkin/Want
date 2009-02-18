@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+********************************************************************
+*  WANT - A Delphi friendly build management tool.                 *
+*  Copyright (c) 2001-2003 Juancarlo Añez, Caracas, Venezuela.     *
+*  All rights reserved.                                            *
+*                                                                  *
+********************************************************************
+
+$Id: want_want.xml 657 2003-03-10 01:11:50Z juanco $ 
+
+This is the Want script for building Want.
+See http://www.suigeneris.org/want/ for details.
+-->
+<project name="want" basedir="." default="dist">
+  <property name="want.master" value="%{want_master}" />
+  <property name="old.version"
+  value="?{release.ini:releases:current}" />
+  <regexp property="old.build" text="${old.version}"
+  pattern="^.*\.([0-9]+)$" subst="\1" />
+  <property name="build" value="={1 + ${old.build}}"
+  if="want.master" />
+  <property name="build" value="${old.build}" unless="want.master" />
+  <regexp property="version" text="${old.version}" pattern="\.[0-9]*$"
+  subst=".${build}" />
+  <regexp property="comma.version" pattern="\." subst=","
+  text="${version}" />
+  <tstamp>
+    <format property="when" pattern="yyyy,mm,dd,HH,nn,ss" />
+    <format property="date.tag" pattern="yyyy-mm-dd" />
+  </tstamp>
+  <property name="etc" value="${basedir}/etc" />
+  <property name="src" value="${basedir}/src" />
+  <property name="doc" value="${basedir}/doc" />
+  <property name="dist" value="${doc}/dist" />
+  <property name="res" value="${basedir}/res" />
+  <property name="lib" value="${basedir}/lib" />
+  <property name="test" value="${basedir}/test" />
+  <property name="examples" value="${basedir}/examples" />
+  <property name="bin" value="${basedir}/bin" />
+  <property name="dcu" value="${basedir}/dcu" />
+  <property name="jcl" value="${lib}/jcl" />
+  <property name="xml" value="${lib}/xml" />
+  <property name="paszlib" value="${lib}/paszlib" />
+  <property name="regexp" value="${lib}/perlre" />
+  <property name="zipname" value="want-${version}.zip" />
+  <property name="zipfile" value="${dist}/${zipname}" />
+  <patternset id="sources">
+    <include name="${lib}/**" />
+    <include name="${src}" />
+    <include name="${src}/**" />
+  </patternset>
+  <patternset id="resources">
+    <patternset refid="sources" />
+    <include name="${bin}" />
+  </patternset>
+  <target name="prepare">
+    <mkdir dir="${dcu}" />
+    <mkdir dir="${bin}" />
+    <echo message="version=${version}" />
+    <echo message="build=${build}" />
+  </target>
+  <target name="clean">
+    <delete dir="${bin}">
+      <include name="**" />
+      <exclude name="ide" />
+      <exclude name="ide/**" />
+    </delete>
+    <delete dir="${dcu}">
+      <include name="**" />
+      <exclude name="ide" />
+      <exclude name="ide/**" />
+    </delete>
+  </target>
+  <target name="versioninfo">
+    <echo message="version=${version}" />
+    <echo input="${src}/wantver.template.rc"
+    file="${src}/wantver.rc" />
+  </target>
+  <target name="resources" depends="prepare,versioninfo">
+    <brcc file="${src}/license.rc" output="${src}/license.res" />
+    <brcc file="${src}/wantver.rc" output="${src}/wantver.res" />
+  </target>
+  <target name="compile"
+  depends="clean,prepare,versioninfo,resources,build">
+    <dcc basedir="${src}" source="want.dpr">
+      <exeoutput path="${bin}" />
+      <dcuoutput path="${dcu}" />
+      <build value="true" />
+      <!-- optimize  value="true" / -->
+<debug value="true" />
+      <console value="true" />
+      <longstrings value="true" />
+      <define name="USE_JEDI_JCL" />
+      <define name="DUNIT_DLL" />
+      <unitpath refid="sources" />
+      <includepath refid="sources" />
+      <resourcepath refid="resources" />
+    </dcc>
+  </target>
+  <target name="test" depends="internal_tests,acceptance_tests" />
+  <target name="internal_tests"
+  depends="clean,prepare,versioninfo,resources">
+    <property name="test.app" value="WantTestLib" />
+    <dcc basedir="${test}" source="${test.app}.dpr">
+      <exeoutput path="${bin}" />
+      <dcuoutput path="${dcu}" />
+      <build value="true" />
+      <debug value="true" />
+      <console value="true" />
+      <warning name="SYMBOL_PLATFORM" value="off" />
+      <define name="USE_TEXT_RUNNER" unless="debug" />
+      <define name="DUNIT_DLL" />
+      <unitpath refid="sources">
+        <include name="${test}/**" />
+        <exclude name="${test}/data" />
+        <exclude name="${test}/data/**" />
+      </unitpath>
+      <includepath refid="sources" />
+      <resourcepath refid="resources" />
+    </dcc>
+    <dunit testlib="${bin}/${test.app}" />
+  </target>
+  <target name="acceptance_tests"
+  depends="clean,prepare,versioninfo,resources">
+    <property name="test.app" value="wantAcceptTestLib" />
+    <dcc basedir="${test}" source="${test.app}.dpr">
+      <exeoutput path="${bin}" />
+      <dcuoutput path="${dcu}" />
+      <build value="true" />
+      <debug value="true" />
+      <console value="true" />
+      <define name="USE_TEXT_RUNNER" unless="debug" />
+      <define name="DUNIT_DLL" />
+      <unitpath refid="sources">
+        <include name="${test}/**" />
+        <exclude name="${test}/data" />
+        <exclude name="${test}/data/**" />
+      </unitpath>
+      <includepath refid="sources" />
+      <resourcepath refid="resources" />
+    </dcc>
+    <dunit testlib="${bin}/${test.app}" />
+  </target>
+  <target name="dist"
+  depends="clean,compile,test,changelog,tag,package,publish" />
+  <target name="publish">
+    <echo input="${doc}/index.template.html"
+    file="${doc}/index.html" />
+  </target>
+  <target name="zip" depends="package" />
+  <target name="package">
+    <mkdir dir="${dist}" />
+    <delete file="${zipfile}" />
+    <zip zipfile="${zipfile}">
+      <exclude name="${dist}/**" />
+      <include name="${bin}/want.exe" />
+      <include name="ChangeLog" />
+      <include name="**/*.pas" />
+      <include name="**/*.dpr" />
+      <include name="**/*.inc" />
+      <include name="**/*.rc" />
+      <include name="**/*.res" />
+      <include name="**/*.html" />
+      <include name="**/*.htm" />
+      <include name="**/*.css" />
+      <include name="**/*.xml" />
+      <include name="**/*.gif" />
+      <include name="**/*.png" />
+      <include name="**/*.jpg" />
+      <include name="**/*.jpeg" />
+      <include name="**/*.txt" />
+      <include name="**/*.ini" />
+      <include name="**/*.bat" />
+      <include name="**/*.obj" />
+      <include name="${test}/data/**" />
+      <include name="${lib}/*.zip" />
+      <!-- include third party library .zips -->
+<exclude name="${basedir}/private/**" />
+    </zip>
+  </target>
+  <target name="build">
+    <ini file="release.ini" if="want.master">
+      <write section="releases" key="current" value="${version}" />
+    </ini>
+  </target>
+  <target name="changelog">
+    <exec executable="perl">
+      <arg path="tools/cvs2cl.pl" />
+      <arg value="--file ChangeLog" />
+      <arg value="--tags" />
+      <arg value="--utc" />
+      <arg value="--window 604800" />
+      <arg value="--prune" />
+    </exec>
+  </target>
+  <target name="tag">
+    <regexp property="cvs.tag" text="build_${version}" pattern="\."
+    subst="_" />
+    <exec executable="cvs rtag -R -F ${cvs.tag} ." />
+  </target>
+  <target name="tarball">
+    <exec executable="wget">
+      <arg value="--quiet" />
+      <arg value="--output-document=@{want-cvs-${date.tag}.tar.gz}" />
+      <arg value="http://cvs.sourceforge.net/cvstarballs/want-cvsroot.tar.gz" />
+    </exec>
+  </target>
+</project>

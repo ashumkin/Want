@@ -1,0 +1,10 @@
+<!-- This is a test Want script -->
+<project name="simple_unzip_test"
+         basedir="."
+         default="test" >
+
+  <target name="test" >
+    <unzip zipfile="${basedir}/zip_data.zip" todir="${basedir}" />
+  </target>
+
+</project>

@@ -1,0 +1,3 @@
+call bkudir
+::call bkudir \pub\rcs\c\home\want *
+::call bkudir \pub\rcs\c\home\jal *

@@ -1,0 +1,102 @@
+<!doctype html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+
+<head>
+<meta content="Microsoft FrontPage 5.0" name="generator">
+<meta name="generator" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Language" content="en-us">
+<title>&lt;tstamp&gt; element - Want User Manual</title>
+<link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+
+<body>
+
+<h1>&lt;<a name="tstamp">echo</a>&gt; Element </h1>
+<h2>Format </h2>
+<pre class="xml">&lt;echo <span class="meta">[</span> message=&quot;a message&quot; <span class="meta">]</span> 
+<span class="meta">  <span lang="es-ve"> </span>   [</span> file=&quot;a_filename&quot; <span class="meta">]</span> 
+<span class="meta">    <span lang="es-ve"> </span> [</span> append= <span class="meta"><span lang="es-ve">(</span></span> <span lang="es-ve">&quot;on&quot; <span class="meta">|</span> &quot;off</span>&quot;<span lang="es-ve"><span class="meta">|</span> &quot;</span>yes&quot;<span lang="es-ve"><span class="meta">|</span> &quot;</span>no&quot;<span lang="es-ve"><span class="meta">|</span> &quot;</span><span style="background-position: 0 0">true</span>&quot;<span lang="es-ve"><span class="meta">|</span> &quot;</span><span style="background-position: 0 0">false</span>&quot;<span class="meta"><span lang="es-ve">)</span> ]</span> 
+<span class="meta">     <span lang="es-ve"> </span>[</span> <span lang="es-ve">level</span>=<span lang="es-ve"><span class="meta">(</span> &quot;errors&quot; <span class="meta">|</span> &quot;warnings&quot; <span class="meta">|</span> &quot;normal&quot; <span class="meta">|</span> &quot;verbose&quot; <span class="meta">|</span> &quot;debug</span>&quot;<span class="meta"><span lang="es-ve">)</span> ]</span> 
+<span class="meta">  <span lang="es-ve"> </span>   [</span> <span lang="es-ve">input</span>=&quot;a<span lang="es-ve">n</span>_<span lang="es-ve">input_</span>filename&quot; <span class="meta">]</span> 
+&gt;
+<span class="meta">[</span> a much longer message <span class="meta">]</span>
+&lt;/echo&gt;
+</pre>
+<h2>Description </h2>
+<p>Outputs text to console or to a file. Macro substitutions are performed on 
+the message text before writing the output. </p>
+<h2>Parameters </h2>
+<table border="1" cellpadding="2" cellspacing="0" summary="&lt;tstamp&gt; attributes" width="600">
+  <tr>
+    <td valign="top" width="65"><b>Attribute</b> </td>
+    <td valign="top" width="317"><b>Description</b> </td>
+    <td align="center" valign="top" width="198"><b>Required</b> </td>
+  </tr>
+  <tr>
+    <td valign="top" width="65">message </td>
+    <td valign="top" width="317">a string with the message to output </td>
+    <td align="center" valign="top" width="198">No </td>
+  </tr>
+  <tr>
+    <td valign="top" width="65">file </td>
+    <td valign="top" width="317">the path of the file to which the output should 
+    go </td>
+    <td align="center" valign="top" width="198">No </td>
+  </tr>
+  <tr>
+    <td valign="top" width="65">append </td>
+    <td valign="top" width="317">boolean. a value of true (on,yes) indicates 
+    that the message should be appended to the file </td>
+    <td align="center" valign="top" width="198">No </td>
+  </tr>
+  <tr>
+    <td valign="top" width="65">level </td>
+    <td valign="top" width="317">indicates the debug level at which the message 
+    should be output. A level of <i>error</i> always outputs the message. A 
+    level of <i>debug</i> outputs the message only if the log level is set to 
+    debug. </td>
+    <td align="center" valign="top" width="198">No </td>
+  </tr>
+  <tr>
+    <td valign="top" width="65">input</td>
+    <td valign="top" width="317">the path of a file from which message text 
+    should be read</td>
+    <td align="center" valign="top" width="198">No</td>
+  </tr>
+</table>
+<h2>Nested Elements </h2>
+<p>The &lt;echo&gt; task supports no nested elements, but the text between the opening 
+and closing tags can be used to place a longer message. </p>
+<h2>Examples </h2>
+<pre class="xml">  &lt;echo message=&quot;The TEMP environment variable is %{TEMP}&quot; /&gt;
+
+  &lt;<a href="tstamp.html">tstamp</a>/&gt;
+  &lt;echo&gt;
+    This software is Coypright (C) ${year} My Self
+  &lt;/tstamp&gt;
+
+  &lt;echo file=&quot;build.log&quot; append=&quot;yes&quot; level=&quot;errors&quot; &gt;
+    Built again on ${year}-${month}-${day} ${hour}:${minute}
+  &lt;/echo&gt;
+
+  &lt;!-- 
+    read an input template file that contains macros
+    and output it with macros substituted
+  --&gt;
+  &lt;echo&gt;
+    &lt;input path=&quot;ProductVersion.template.pas&quot; /&gt;
+    &lt;file  path=&quot;version.rc&quot; /&gt;
+  &lt;/echo&gt;</pre>
+<hr>
+<div align="center">
+  <center>
+  <pre class="copyright">Copyright © 2003 Juancarlo Añez, Caracas, Venezuela.
+All rights Reserved.
+</pre>
+  </center>
+</div>
+
+</body>
+
+</html>

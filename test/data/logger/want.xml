@@ -1,0 +1,11 @@
+<project name="test_conditionals" default="test" >
+
+  <target name="test" >
+          <property name="app.name" value="WANT"  />
+
+          <log file="test.log" >
+                  <!-- empty log file -->
+          </log>
+  </target>
+
+</project>

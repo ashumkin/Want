@@ -1,0 +1,83 @@
+<project name="readwrite" default="test" >
+
+  <target name="test" >
+    <edit file="file.txt" >
+      <write file="empty.txt" />
+    </edit>
+
+    <edit file="empty*.txt" >
+      <delete from="0" to="$" />
+      <write />
+    </edit>
+    
+    <edit file="file.txt" >
+      <write file="full.txt" />
+    </edit>
+
+    <edit>
+      <read  file="file.txt" />
+      <write file="full2.txt" />
+    </edit>
+
+    <edit file="file.txt" >
+      <write from="1" to="3" file="threefirst.txt" />
+    </edit>
+  
+    <edit file="file.txt" >
+      <write from="4" to="6" file="nextthree.txt" />
+    </edit>
+
+    <edit file="threefirst.txt" >
+      <append text="added_dot" />
+      <write file="added_dot.txt" />
+    </edit>
+
+    <edit file="threefirst.txt" >
+      <append to="0" text="added_zero" />
+      <write file="added_zero.txt" />
+    </edit>
+
+    <edit file="threefirst.txt" >
+      <append to="$" text="added_end" />
+      <write file="added_end.txt" />
+    </edit>
+
+    <edit file="threefirst.txt" >
+      <insert text="inserted_dot" />
+      <write file="inserted_dot.txt" />
+    </edit>
+
+    <edit file="threefirst.txt" >
+      <insert to="$" text="inserted_end" />
+      <write file="inserted_end.txt" />
+    </edit>
+
+    <edit file="file.txt" >
+      <search pattern="Copyright" />
+      <print />
+      <write from="." to="." file="c.txt" />
+    </edit>
+
+    <edit file="file.txt" >
+      <goto line="25" />
+      <write from="." to="." file="c1.txt" />
+    </edit>
+
+    <edit file="file.txt" >
+      <search pattern="Copyright" />
+      <print />
+      <write from="." to="." file="c2.txt" />
+      <search from="+1" />
+      <print />
+      <write from="." to="." file="c2.txt" append="true" />
+    </edit>
+
+    <edit file="file.txt" >
+      <global pattern="Copyright" >
+        <write from="." to="." file="c_all.txt" append="true" />
+      </global>
+    </edit>
+
+  </target>
+
+</project>

@@ -1,0 +1,4 @@
+  WANT - A build management tool.                                 
+added_dot
+  Copyright (c) 2001 Juancarlo Anez, Caracas, Venezuela.          
+  All rights reserved.

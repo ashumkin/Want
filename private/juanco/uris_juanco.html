@@ -1,0 +1,144 @@
+<html>
+
+<head>
+<meta name="generator" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Want Notes</title>
+<link rel="stylesheet" type="text/css" href="../../doc/style.css">
+</head>
+
+<body>
+
+<h1>Notes on Want Development</h1>
+<p><i>by Juanco Añez</i></p>
+<h2>URIs</h2>
+<p>Users should be able to specify URIs most everywhere the path to a resource
+is required. For example:</p>
+<pre>&lt;copy file=&quot;http://www.mywebsite.org/document.html&quot;
+      tofile=&quot;${basedir}/doc/document.html&quot;
+/&gt; </pre>
+<p>Want would assume that all URIs that don't specify a protocol have an
+implicit protocol of &quot;file:&quot;.&nbsp;</p>
+<h2>** AFTER-NOTE **</h2>
+<p>This scheme seems too complicated, both in implementation and in the
+semantics exposed to the users. </p>
+<p>One of the largest problems would be FileSets that contain references to
+different resources on different servers. Normally, establishing connections to
+remote servers is expensive, so it would be silly to open an FTP connection
+three times because the same server appears three times on the list of paths on
+non-consecutive positions.</p>
+<p>A better approach (and the one used by Ant) is to define per-protocol tasks.
+Scripts can use those tasks to and from the local hard disk, and work from
+there. The standard tasks copy, move, and delete, and the libraries that
+implement them would remain unpolluted.</p>
+<pre>&lt;target name=&quot;getdoc&quot; &gt; 
+  &lt;http server=&quot;www.mywebsite.org&quot; 
+        localdir=&quot;${basedir}/doc&quot;
+  &gt;
+    &lt;include name=&quot;document.html&quot; /&gt;
+  &lt;/http&gt;
+&lt;/target&gt;</pre>
+<p>Supporting wildcards in per-protocol tasks may require implementing some of
+the ideas below. For example, the handling of wildcards should probably be moved
+away from the path handling module, which would then become
+protocol-independent, and into TFileSet, where it can be overridden by
+per-protocol implementations.</p>
+<pre>TFTPFileSet = class(TFileSet)
+protected
+  // protocol-specific implementation of FindPaths
+  // some implementations can just throw an error
+  function FindPaths(Pattern :TPath; BasePath :TPath) :TPaths; overriride;
+  // the &quot;Wild&quot; routines, whose main purpose is handling 
+  // of &quot;**&quot; patterns, would remain the same
+end;</pre>
+<p>If the above is done, then standard file tasks could be allowed to specify
+protocol specific filesets.</p>
+<pre>&lt;copy todir=&quot;${basedir}/doc&quot; &gt;
+  &lt;httpfileset basedir=&quot;http://www.mywebsite.org&quot; 
+               user=&quot;john&quot;
+               password=&quot;secret&quot;
+  &gt;
+    &lt;get name=&quot;document.html /&gt;
+  &lt;/httpfileset&gt;
+&lt;/copy&gt;</pre>
+<h2>** OLD NOTES ** </h2>
+<h3>Problem</h3>
+<p>Delphi, the system/language in which&nbsp; Want is written, is all set up
+for managing and accessing files that reside on the local disk, but it provides
+zero facilities for accessing resources elsewhere (on the Web, on FTP servers,
+etc). It would be desirable to have Want <b>transparently</b> manage URIs and
+the resources they point to on behalf of task writers, so it becomes straight
+forward to implement tasks that lets users specify.</p>
+<h3>Solution</h3>
+<p>Build a library that can perform the standard file operations (query, copy,
+move, delete, open, read, write, close) on resources specified as URIs.</p>
+<p>Different types of URIs require different kinds of logic for managing pointed
+resources. For atomic operations like query, copy, move, and delete, a single,
+entry-point routine can dispatch to the appropriate implementation routine by
+examining the protocol part of the URI.</p>
+<p>To implement open, read, write, and close, which must be dispatched based on
+the type of the resource (a local file versus a remote http document), a more
+object oriented approach is necessary.</p>
+<p>The solution is to define a stream class for&nbsp; each kind of protocol (TFTPStream,
+THTTPStream, etc.), and a TURIStream that creates a delegate stream of the
+appropriate type for the resource , and forwards all subsequent operations
+(read, write, and close) to the delegate.</p>
+<pre>function TURIStream.Read(var Buffer; Count :Integer):Integer;
+begin
+  Result := FDelegate.Read(Buffer, Count);
+end;</pre>
+Taking the object-orientedness a bit further, atomic operations (query, copy,
+delete, move) could be implemented by a TURI class. That way, the choice of
+implementations (http:, ftp:) would be done only once, at TURI instantiation.
+This would provide the advantage of being able to implement some operations in
+terms of others. For example:
+<pre>procedure MoveResource(FromPath, ToPath :TPath);
+var
+  FromURI :TURI;
+begin
+  FromURI := URI(FromPath);
+  FromURI.CopyTo(ToPath);
+  FromURI.Delete;
+end;
+</pre>
+<h3>Handling Wildcards in Remote Protocol Paths</h3>
+<p>For a sessionless protocol like http://server.com/**, one can do the
+following:</p>
+<ol>
+  <li>Add index.html, index.htm, and default.asp to the list of unprocessed
+    links.</li>
+  <li>Finish if the list of unprocessed links is empty.</li>
+  <li>Get the next unprocessed link.</li>
+  <li>Add the link to the list of processed (result) links. </li>
+  <li>Retreive the document pointed to by the link.</li>
+  <li>&nbsp;Get the list of links inside the document.&nbsp; </li>
+  <li>Add the document links which are relative to the list of unprocessed
+    links. </li>
+</ol>
+<p>For the ftp: protocol, which can provide directory listings, the work is more
+like the one for local files.</p>
+<h3>Notes</h3>
+<pre>type
+  TURI = record
+    Protocol  :string;
+    Server    :string;
+    Path      :string;
+    Resource  :string;
+    Extension :string;
+  end;
+
+function SplitURI(URI :string) :TURI;
+
+function PathIsAbsolute(Path :TPath) :boolean;
+begin
+  with SplitURI(Path) do
+    if (Protocol= '') or (Protocol = 'file:') then
+      Result := Copy(Path, 1, 1) = '/'
+    else 
+      Result := True;
+end;</pre>
+<p><center><b>~o~</b></center></p>
+
+</body>
+
+</html>

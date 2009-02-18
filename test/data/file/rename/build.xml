@@ -1,0 +1,19 @@
+<!-- This is a test Want script -->
+<project name="move_test"
+         basedir="."
+         default="test" >
+
+  <target name="test" >
+    <move tofile="renamed.txt" >
+      <fileset dir="${basedir}" >
+        <include name="rename_me.txt" />
+      </fileset>
+    </move>
+    <copy tofile="copied.txt" >
+      <fileset dir="${basedir}" >
+        <include name="copy_me.txt" />
+      </fileset>
+    </copy>
+  </target>
+
+</project>

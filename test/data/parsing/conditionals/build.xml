@@ -1,0 +1,15 @@
+<project name="test_conditionals" default="test" >
+
+  <property name="cond1" value="any" />
+
+  <target name="test" >
+    <echo if="cond1"     file="should_1.txt"     message="should_1"      />
+    <echo unless="cond1" file="should_not_1.txt" message="should_not_1"  />
+    <echo unless="cond2" file="should_2.txt"     message="should_2"      />
+    <echo if="cond2"     file="should_not_2.txt" message="should_not_2"  />
+
+    <echo ifndef="cond3" file="should_3.txt"     message="should_3"      />
+    <echo ifdef="cond3"  file="should_not_3.txt" message="should_not_3"  />
+  </target>
+
+</project>

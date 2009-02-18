@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+  <head>
+    <meta name="generator" content="HTML Tidy, see www.w3.org">
+    <meta name="generator" content="Microsoft FrontPage 4.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>
+      Juanco - Want: A Delphi-friendly build management tool.
+    </title>
+    <link rel="stylesheet" type="text/css" href=
+    "../style/suigeneris.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <!--#include file="../software/navbar.html" -->
+    <hr>
+    <h1>
+      Want
+    </h1>
+    <p>
+      Want is a Delphi-friendly build management tool.
+    </p>
+    <p>
+      Want was inspired by the <a href=
+      "http://jakarta.apache.org/ant/index.html">Jakarta Ant</a> tool,
+      but tweaked to make it fast and Delphi-friendly. Want is written
+      in Delphi.
+    </p>
+    <h2>
+      History
+    </h2>
+    <p>
+      I (<a href="../juanca/">Juanco A&ntilde;ez</a>) wrote most of the
+      core classes of Want during the Spring of 2001. See the&nbsp; <a
+      href="history.html">Want History</a> page for&nbsp; the details
+      about how it happened.
+    </p>
+    <h2>
+      The Name
+    </h2>
+    <p>
+      When I broke out of the Dante project (see the <a href=
+      "history.html">history page</a>) I started to think about a name
+      for the tool I'd continue to develop. One of the first ideas that
+      came to mind&nbsp; was "WAnt", for "Windows Ant". I quickly
+      rejected the name because it didn't fit a tool that would also
+      run on <a href="http://www.linux.org/">Linux</a>, using <a href=
+      "http://www.borland.com/kylix/">Kylix</a>, and probably on
+      several other platforms through <a href=
+      "http://www.freepascal.org/">Free Pascal</a>.&nbsp; Then, I
+      quickly came back to to the name:
+    </p>
+<pre>
+  want clean
+  want compile
+  want installer
+  want changelog
+</pre>
+    <p>
+      It seemed just too comfortable to invoke the&nbsp; tool telling it
+      what you "want", and so the name stayed.
+    </p>
+    <h2>
+      Availability
+    </h2>
+    <p>
+      The current version of Want is ${version} and you can download it
+      <a href="dist/${zipname}">here</a>. 
+      The source is
+      included, and licensed under the <a href=
+      "http://www.gnu.org/copyleft/gpl.html">GPL</a>.
+    </p>
+    <p>
+      There are very few docs, but you may be able to get along with
+      the binary and the <a href=
+      "http://jakarta.apache.org/ant/manual/">Ant Docs</a> -- with
+      which Want is fairly compatible. You can also take a look at the
+      source code for the tasks in the &lt;want&gt;/src/tasks directory
+      to know what functions they provide (their code is really
+      simple).
+    </p>
+    <h2>
+      Examples
+    </h2>
+    <p>
+      For a better view of the following scripts, you should download
+      them to your hard disk and use your favorite editor; browsers
+      will present the XML in ways different from the original text.
+    </p>
+    <p>
+      A copy of the Want <a href="want_want.xml">want.xml</a> script
+      used to build, test, and package Want itself be found <a href=
+      "want_want.xml">here</a>.
+    </p>
+    <p>
+      A copy of the <a href="dunit_want.xml">want.xml</a> script used
+      to build <a href="../dunit">DUnit</a> distributions with Want can
+      be found <a href="dunit_build.xml">here</a>.
+    </p>
+    <h2>
+      Screenshots
+    </h2>
+    <p>
+      This is a screenshot of Want building itself:
+    </p>
+    <p>
+      <img border="0" src="images/success.png" width="556" height=
+      "473">
+    </p>
+    <p>
+      &nbsp;
+    </p>
+    <p>
+      This is how an unsuccessful build may look like:
+    </p>
+    <p>
+      <img border="0" src="images/failure.png" width="549" height=
+      "155">
+    </p>
+    <p align="center">
+      ~o~
+    </p>
+    <hr>
+    <!--#include file="../software/navbar.html" -->
+    <!--#include file="../copyright.html" -->
+<pre>
+$Id: index.template.html 546 2002-01-29 21:55:00Z juanco $
+</pre>
+  </body>
+</html>
+

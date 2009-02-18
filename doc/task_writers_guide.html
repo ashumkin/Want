@@ -1,0 +1,460 @@
+<!doctype html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html>
+
+<head>
+<meta content="Microsoft FrontPage 5.0" name="generator">
+<meta name="generator" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Want Task Writers Guide</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+
+<h1>WANT Task Writers Guide </h1>
+<p><i>by Juanco Añez</i> </p>
+<h2>Basic Steps </h2>
+<p>Want lets you write your own customized tasks and make them available to 
+build scripts. In this short tutorial we'll write a basic &quot;log&quot; task for Want. 
+The complete source code for the example is included as <code>&lt;want&gt;/src/tasks/LoggerTasks.pas</code> 
+in the Want distribution. </p>
+<h3>Go! </h3>
+<p>To create a new Want task: </p>
+<ol>
+  <li>Create a new unit, and add WantClasses to the uses clause. </li>
+  <li>Define a new class that descends from WantClasses.TTask. </li>
+  <li>Override the Init procedure, and&nbsp; verify that attributes have valid 
+  values after the task has been parsed. </li>
+  <li>Override the Execute procedure to define the task's actions. </li>
+  <li>Register the the class by calling WantClasses.RegisterTask<span lang="es-ve">s</span>.
+  </li>
+  <li>Include the new unit in the uses clause of <code>&lt;want&gt;/src/tasks/CustomTasks.pas</code> 
+  (Want's standard tasks go in <code>StandardTasks.pas</code>). </li>
+</ol>
+<p>Here's an example: </p>
+<blockquote>
+  <pre>unit LoggerTask;
+interface
+uses
+  WantClasses;
+
+type
+  TLoggerTask = class(TTask)
+  public
+    procedure Init; override;
+    procedure Execute;  override;
+  end;
+
+implementation
+
+procedure TLoggerTask.Init;
+begin
+  inherited Init;
+  // Init attributes
+end;
+
+procedure TLoggerTask.Execute;
+begin
+  Log('writing log info');
+  // do nothing more for now
+end;
+
+initialization
+  RegisterTask(TLoggerTask);
+end.
+</pre>
+</blockquote>
+<p>And here's the uses clause in <code>CustomTasks.pas</code>: </p>
+<blockquote>
+  <pre>unit CustomTasks;
+interface
+uses { add the units for your customs task here }
+  LoggerTask;
+
+implementation
+end.
+</pre>
+</blockquote>
+<h3>Choosing the Task's XML tag </h3>
+<p><span lang="es-ve">WANT</span> synthesizes an XML tag for your task from its 
+class name using these rules: </p>
+<ul>
+  <li>Remove the initial 'T' from the class name, if present. </li>
+  <li>Remove the 'Task' suffix from the class name, if present. </li>
+  <li>Convert the result to lowercase. </li>
+</ul>
+<p>The XML tag for the task in the above example would be '<b>logger</b>'. </p>
+<p>&nbsp;If you followed the above steps then, after recompiling Want, you should be 
+able to use the the new task in build scripts: </p>
+<blockquote>
+  <pre>&lt;project name=&quot;myproject&quot; default=&quot;main&quot; &gt;
+  &lt;target name=&quot;main&quot; &gt;
+<b> &lt;logger /&gt;
+</b>  &lt;/target&gt;
+&lt;/project&gt;
+</pre>
+</blockquote>
+<p>To use an XML tag different from the automatically generated one, you can 
+override the <code>TagName</code> class function in your task class, and provide 
+a different name: </p>
+<blockquote>
+  <pre>  TLoggerTask = class(TTask)
+  public
+    class function TagName :string; override;
+    procedure Execute; override;
+  end;
+  //...
+  class function TLoggerTask.TagName :string;
+  begin
+    Result := '<b>log</b>';
+  end;
+</pre>
+</blockquote>
+<blockquote>
+  <pre>&lt;project name=&quot;myproject&quot; default=&quot;main&quot; &gt;
+  &lt;target name=&quot;main&quot; &gt;
+<b> &lt;log /&gt;
+</b>  &lt;/target&gt;
+&lt;/project&gt;
+</pre>
+</blockquote>
+<h2>Handling XML attributes </h2>
+<p>W<span lang="es-ve">ANT</span> interprets the published properties of task 
+classes as XML element attributes, and automatically manages them using Runtime 
+Type Information (RTTI) (currently, only properties of types string, integer, 
+boolean, enumeration<span lang="es-ve">, TPath and TStrings</span> are 
+supported). When defining properties that will map to XML attributes, keep in 
+mind that: </p>
+<ul>
+  <li>Property/attribute names are case independent in <span lang="es-ve">WANT</span>.
+  </li>
+  <li>You can use an underscore as the first character for a property/attribute 
+  name if the name would otherwise collide with an Object Pascal keyword. </li>
+</ul>
+<p>We will add two properties/attributes to our logger: '<b>file</b>', the file 
+to output to (required), and '<b>format</b>', the format to use. Note that 
+'file' is a reserved keyword in Object Pascal, so we'll name the property <code>
+'_file'</code> instead and WANT will remove the leading underscore for us: </p>
+<blockquote>
+  <pre>type
+<b>TLogFormat = (brief, normal, detailed);
+</b>
+  TLoggerTask = class(TTask)
+  protected
+<b>  FFile   :string;
+    FFormat :TLogFormat;
+</b>  public
+    class function TagName :string; override;
+    procedure Execute; override;
+  published
+<b> property _file  :string     read FFile   write FFile;
+    property format :TLogFormat read FFormat write FFormat;
+</b>  end;
+
+procedure TLoggerTask.Init;
+begin
+  inherited Init;
+<b> RequireAttribute('file');</b> 
+end;
+
+
+
+&lt;project name=&quot;myproject&quot; default=&quot;main&quot; &gt;
+  &lt;target name=&quot;main&quot; &gt;
+    &lt;log <b>file=&quot;${logs}/main.log&quot; format=&quot;brief&quot;</b> /&gt;
+  &lt;/target&gt;
+&lt;/project&gt;
+</pre>
+</blockquote>
+<p>For convenience, WANT lets script writers specify attributes as nested 
+elements. For example: </p>
+<pre>&lt;project name=&quot;myproject&quot; default=&quot;main&quot; &gt;
+  &lt;target name=&quot;main&quot; &gt;
+    &lt;log&gt;
+<b>     &lt;file   path=&quot;${logs}/main.log&quot; /&gt;
+      &lt;format value=&quot;brief&quot; /&gt;
+</b>    &lt;/log&gt;  &lt;/target&gt;
+&lt;/project&gt;
+</pre>
+<p>Use the <i>value</i> attribute to specify the nested attribute's value. Use 
+the <i>path</i> attribute when the value is a path. </p>
+<h3>Making Attributes Required </h3>
+<p>The <code>RequireAttribute</code> method is a handy way to verify that an 
+attribute was present in the build script. </p>
+<p>WANT assigns the values of attributes to their corresponding properties as 
+the build script is parsed, and the <code>Init</code> method is called after the 
+last attribute is processed. </p>
+<p>&nbsp;The following macro expansions are performed before doing the assignment:
+</p>
+<ol>
+  <li>Any appearance of a macro of the form <code>%{name}</code> is replaced by 
+  the value of the environment variable &quot;<code>name</code>&quot;. </li>
+  <li>Any appearance of a macro of the form <code>${name}</code> is replaced by 
+  the value of the property &quot;<code>name</code>&quot;. Properties are defined using 
+  the <code>&lt;property&gt;</code> element anywhere in a build script:
+  <pre>   &lt;property name=&quot;aname&quot; value=&quot;avalue&quot; /&gt;
+</pre>
+  <p>or passing the <code>-Dname=value</code> command line option to want.exe.
+  </li>
+  <li>Any appearance of a macro of the form <code>={expre}</code> evaluates
+  <code>expre</code> as a mathematical expression. </li>
+  <li>Any appearance of a macro of the form&nbsp; <code>@{path}</code> treats
+  <code>path</code> as an want path (forward slashes) and converts it to a 
+  system path. </li>
+  <li>Any appearance of a macro of the form <code>?{inifile:section:key|default}</code> 
+  reads the value of the <code>key</code> key, in section <code>section</code>, 
+  of the .ini file <code>inifile</code>. If the key is not found, then the 
+  optional <code>default</code> is used for the value. </li>
+</ol>
+<p>These rules apply to properties: </p>
+<ul>
+  <li>Properties are write-once. Subsequent definitions of the same property are 
+  ignored. This allows properties defined on the command line or passed to child 
+  invocations of WANT through the <code>&lt;want&gt;</code> task to override property 
+  definitions in the build script. In other words, the&nbsp; build script may 
+  say that:
+  <pre>   &lt;property name=&quot;debug&quot; value=&quot;false&quot; /&gt;
+</pre>
+  <p>but a&nbsp; <code>-Ddebug=true</code> on the command line will override 
+  that. </li>
+  <li>Properties are defined in the nearest enclosing element, and&nbsp; are 
+  visible to all child elements. This means, for example, that you can define 
+  the same property with different values in different targets. Still, the above 
+  rule applies first, so a child element cannot override the value of a property 
+  defined in a parent element, so the value of a property defined at the <code>
+  &lt;project&gt;</code> level takes precedence over any definitions of the same 
+  property in targets, tasks, and other elements. </li>
+</ul>
+<h2>Defining the Task's action </h2>
+<p>All that's left to do now is to define the task actions in terms of the 
+property/attribute values. Note that failure to complete the task should be 
+notified by calling the <code>TTask.TaskFailure(Msg)</code> method: </p>
+<blockquote>
+  <pre>procedure TLoggerTask.Execute;
+var
+  LogFile :System.Text;
+begin
+<b>Log(SysUtils.Format('writing log info to &quot;%s&quot;', [_file]));
+  AboutToScratchPath(_file);
+</b>  System.Assign(LogFile, <b>ToSystemPath(_file)</b>);
+  try
+<b> if FileExists(ToSystemPath(_file)) then
+      System.Append(LogFile)
+    else
+      System.Rewrite(LogFile);
+    try
+      Writeln(LogFile, DateTimeToStr(Now));
+    finally
+      System.Close(LogFile);
+    end;
+</b>  except
+    TaskFailure('could not open log file');
+  end;
+end;
+</pre>
+</blockquote>
+<p>Note the following in the above code: </p>
+<ul>
+  <li>Want scripts treat file paths in a platform independent way, so paths 
+  obtained from a script must be translated to platform dependent ones by 
+  calling the <code>ToSystemPath(Path)</code> method. </li>
+  <li>As a safety measure, tasks should call the <code>
+  TTask.AboutToScratchPath(Path)</code> method before changing any system file. 
+  The <code>AboutToScratchPath</code> method verifies the location of the passed 
+  path and raises an exception if the file resides outside of the Want project's 
+  base directory. </li>
+  <li>The Execute method starts by calling the <code>TTask.Log(Msg)</code> 
+  method to provide some feedback to the user. </li>
+</ul>
+<h2>Nested Task Elements </h2>
+<p>Now we want to give our <code>&lt;log&gt;</code> task a nested <code>&lt;info&gt;</code> 
+element that contains the text that the task will log. Scripts that use the
+<code>&lt;log&gt;</code> task would look like this: </p>
+<pre>    &lt;log file=&quot;${logs}/main.log&quot; format=&quot;brief&quot; &gt;
+<b>   &lt;info code=&quot;66&quot; &gt;
+        The logger is working.
+      &lt;/info&gt;
+</b>    &lt;/log&gt;
+</pre>
+<p>To define nested XML elements for a task: </p>
+<ol>
+  <li>Define a class that descends from <code>TScriptElement</code> for each 
+  kind of nested element. </li>
+  <li>For each kind of nested element, Define a published <code>CreateXYZ</code> 
+  function in the task class, where &quot;<code>XYZ</code>&quot; is the XML tag of the 
+  nested element (in our example, the method will be called <code>
+  TLoggerTask.CreateInfo</code>). </li>
+</ol>
+<p>The rules that Want uses for synthesizing an XML tag out of the names of 
+nested elements classes are like the ones used for tasks, except that the &quot;<code>Element</code>&quot; 
+suffix is removed instead of the &quot;<code>Task</code>&quot; one. </p>
+<p>Instances of classes that descend from <code>TScriptElement</code> and have a 
+valid owner passed to their constructor are automatically managed by Want, so 
+you don't need to delete them (call <code>Free</code> on them). Valid owners are 
+instances of <code>TTask</code> and its descendants, and instances of classes 
+that descend from <code>TScriptElement</code> and have themselves a valid owner.
+</p>
+<p>Here's the complete logger example: </p>
+<blockquote>
+  <pre>unit LoggerTask;
+interface
+uses
+  SysUtils,
+  Classes,
+  WantClasses;
+
+type
+  TLogFormat = (brief, normal, detailed);
+
+<b>TInfoElement = class(TScriptElement)
+  protected
+    FCode :Integer;
+    FText :string;
+  published
+    property code :Integer read FCode write FCode;
+    property text :string  read FText write FText;
+  end;
+</b>
+  TLoggerTask = class(TTask)
+  protected
+    FFile   :string;
+    FFormat :TLogFormat;
+    FInfos  :TList;
+  public
+<b>  constructor Create(owner :TScriptElement);
+</b><b>destructor Destroy; override;</b>
+    class function TagName :string; override;
+    procedure Execute; override;
+  published
+<b> function CreateInfo :TInfoElement;
+</b>
+    property _file  :string     read FFile   write FFile;
+    property format :TLogFormat read FFormat write FFormat;
+  end;
+
+implementation
+
+class function TLoggerTask.TagName :string;
+begin
+  Result := 'log';
+end;
+
+<b>constructor TLoggerTask.Create(owner :TScriptElement);
+begin
+  inherited Create(Owner);
+  FInfos := TList.Create;
+end;
+
+destructor TLoggerTask.Destroy;
+begin
+  // no need to free the TInfoElements themselves
+  FInfos.Free;
+  inherited Destroy;
+end;</b>
+
+<b>function TLoggerTask.CreateInfo :TInfoElement;
+begin
+  Result := TInfoElement.Create(Self);
+  FInfos.Add(Result);
+end;
+</b>
+
+procedure TLoggerTask.Init;
+begin
+  inherited Init;
+  RequireAttribute('file'); 
+end;
+
+procedure TLoggerTask.Execute;
+var
+  LogFile: System.Text;
+  i:       Integer;
+begin
+  Log(SysUtils.Format('writing log info to &quot;%s&quot;', [_file]));
+  AboutToScratchPath(_file);
+  System.Assign(LogFile, ToSystemPath(_file));
+  try
+    if FileExists(ToSystemPath(_file)) then
+      System.Append(LogFile)
+    else
+      System.Rewrite(LogFile);
+    try
+<b>     for i := 0 to FInfos.Count-1 do
+      begin
+        with TInfoElement(FInfos[i]) do
+          Writeln( LogFile, 
+                   SysUtils.Format( '%20s %12s %s',
+                                     [
+                                     FormatDateTime('yyyy/mm/dd  hh:nn:ss', Now),
+                                     '['+code+']',
+                                     text
+                                     ]));
+      end;
+</b>    finally
+      System.Close(LogFile);
+    end;
+  except
+<b>   TaskFailure('error writing log');</b>
+  end;
+end;
+
+initialization
+  RegisterTask(TLoggerTask);
+end.
+
+&lt;project name=&quot;myproject&quot; default=&quot;main&quot; &gt;
+  &lt;target name=&quot;main&quot; &gt;
+    &lt;log file=&quot;${logs}/main.log&quot; format=&quot;brief&quot; &gt;
+<b>   &lt;info code=&quot;66&quot; &gt;
+        The logger is working.
+      &lt;/info&gt;
+</b>    &lt;/log&gt;
+  &lt;/target&gt;
+&lt;/project&gt;
+</pre>
+</blockquote>
+<p>In the above code, note the follwing: </p>
+<ul>
+  <li>The rules for mapping attributes to properties, and elements to <code>
+  CreateXYZ</code> methods, apply recursively to nested elements (nested 
+  elements can have attributes and other nested elements). </li>
+  <li>Want automatically assigns any character data (CDATA) in an XML element to 
+  the '<b>text</b>' property of the element, if the element&nbsp; defines one. 
+  In the above example, the text &quot;The logger is working.&quot; is assigned to the
+  <code>text</code> property of the corresponding&nbsp; <code>TInfoElement</code> 
+  instance. </li>
+  <li>The example adds nested elements to a list for later retrieval. To allow 
+  for only one appearance of the nested element in build scripts, make the <code>
+  CreateXYZ</code> method assign the created element to an instance variable, 
+  and raise an exception if the element has already been created. </li>
+  <li>Unlike TTask descendants, nested element classes do not need to be 
+  registered. </li>
+</ul>
+<h2>The Element Registry </h2>
+<p>WANT uses an Element Registry to know which XML elements are available and 
+how they can be nested. Instead of writing CreateElement methods for nested 
+elements, you can use the registry to inform WANT of the intended element use. 
+For example, the TDelphiCompile task has several sub-elements which are 
+registered using the registry: </p>
+<pre> RegisterTasks( [TDelphiCompileTask, TResourceCompileTask]);
+ RegisterElements(TDelphiCompileTask, [
+                                      TDefineElement ,
+                                      TUsePackageElement,
+                                      TWarningElement
+                                      ]);
+</pre>
+<p>The Element Registry allows developers to extend the syntax of WANT XML 
+scripts without having to change any of the core WANT classes. </p>
+<p align="center">~o~ </p>
+<div align="center">
+  <pre class="copyright">Copyright © 2001,2003 Juancarlo Añez, Caracas, Venezuela.
+All rights reserved.
+</pre>
+</div>
+</div>
+
+</body>
+
+</html>

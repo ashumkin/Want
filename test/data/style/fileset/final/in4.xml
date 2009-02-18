@@ -1,0 +1,8 @@
+<project name="singlefile" default="test" >
+
+
+  <target name="test" >
+    <style in="in.xml" out="out.xml" style="..\identity.xml"/>
+  </target>
+
+</project>

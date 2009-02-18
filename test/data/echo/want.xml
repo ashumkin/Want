@@ -1,0 +1,8 @@
+<project name="test_conditionals" default="test" >
+
+  <target name="test" >
+    <property name="app.name" value="WANT"  />
+    <echo input="template.txt" file="final.txt" />
+  </target>
+
+</project>

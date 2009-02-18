@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+
+<html>
+  <head>
+    <meta name="generator" content="Microsoft FrontPage 4.0">
+
+    <title>Want Notes</title>
+    <link rel="stylesheet" type="text/css" href=
+    "../../doc/style.css">
+  </head>
+
+  <body>
+    <h1>Want TODO</h1>
+
+    <p><i>Juanco A&ntilde;ez</i></p>
+
+    <h2>Paths</h2>
+
+    <ul>
+      <li>Currently, a task that deals with files must call AboutToScratchPath
+        to check that files outside the current directory branch will not be
+        deleted or overwritten. This puts the burden on the task writer, and
+        makes mistakes more likely. Instead, do the following:
+        <ul>
+          <li>Finish porting WANT to the new interface-based JalPaths.</li>
+          <li>Provide a restricted implementation of NewPath that will not
+            overwrite/delete files outside a given directory branch.</li>
+          <li>Make WantClasses classes use the restricted implementation.</li>
+          <li>Implement commonly needed stuff like: opening a stream for
+            reading/writing, the same for files, and text files: NewPath(./src/file).GetWriteStream,
+            NewPath(./src/file).Reset(F)/Rewrite(F), NewPath(...).GetStrings :TStrings;</li>
+        </ul>
+        <p>After that, all task writers have to do is JalPaths for file
+        manipulation.</li>
+    </ul>
+
+    <h2>Core Classes</h2>
+
+    <ul>
+      <li><b>DONE! </b>Must parse all elements and store value of _all_ attributes 
+      to support GUI editing.
+      Conditional attributes currently make the parser skip elements.
+      <li>Make Want capable of analyzing a task/element and
+      outputing its XML syntax.</li>
+
+      <li>Implement loadable task/element modules.</li>
+
+      <li><b>DONE! </b>Factor out XML parsing into its own unit. This will reduce
+      the set of core classes that loadable modules must link in
+      </li>
+    </ul>
+
+    <h2>Build Scripts</h2>
+
+    <ul>
+      <li><b>DONE!</b> To avoid any confusion with Ant's build
+      scripts, which are named "build.xml", Want's build scripts
+      should be named "want.xml", "make.xml", or anything
+      different.</li>
+    </ul>
+
+    <h2>FileSets</h2>
+
+    <ul>
+      <li><b>DONE!</b> Turn on the ability for file tasks (touch,
+      delete, copy, move) to specify internal &lt;fileset&gt;
+      elements.</li>
+
+      <li>
+        <b>WILL NOT DO!</b> Implement this (from the Ant docs): 
+
+        <p>There is one "shorthand", if a pattern ends with '/' or
+        '\', then '**' is appended. E.g. "mypackage/test/" is
+        interpreted as were it "mypackage/test/**".</p>
+      </li>
+
+      <li><b>WILL NOT DO!</b> Implement this: filesets with no
+      &lt;include&gt; elements have an implicit include of
+      "basedir/**".</li>
+
+      <li>
+        <b>DONE!</b> Implement this:<br>
+         
+
+        <blockquote>
+<pre>
+&lt;patternset id=&quot;non.test.sources&quot; &gt;
+  &lt;include name=&quot;**/*.java&quot; /&gt;
+  &lt;exclude name=&quot;**/*Test*&quot; /&gt;
+&lt;/patternset&gt;
+</pre>
+        </blockquote>
+
+        <p>This set can be referred to via <code>&lt;patternset
+        refid="non.test.sources" /&gt;</code> by tasks that support
+        this feature or by FileSets.</p>
+
+        <p>Note that patternsets hold the patterns but do not have
+        a basedir. Filesets have an implicit patternset.</p>
+      </li>
+    </ul>
+
+    <h2>Properties</h2>
+
+    <ul>
+      <li>Decide on the set of built-in properties to support and
+      add them.</li>
+
+      <li><b>DONE!</b> Consider making properties local to
+      elements, but inheritable to sub-elements. This would add
+      flexibility, and will eliminate the fiddling with properties
+      in TWantTask if the subproject's owner was set to the
+      TWantTask instance. In other words, properties would have
+      the expected scope.</li>
+    </ul>
+
+    <h2>Attributes</h2>
+
+    <ul>
+      <li><b>DONE!</b> Make boolean attributes accept values of
+      "yes" and "no".</li>
+    </ul>
+
+    <h2>Targets</h2>
+
+    <ul>
+      <li><b>DONE!</b>Add a "description" attribute/property to
+      targets. Ant has one.</li>
+
+      <li><b>DONE!</b>Log the description when the target is
+      entered.</li>
+
+      <li><b>DONE!</b>Add a "description" attribute to tasks too.
+      Tasks can optionall log it, or they can call inherited
+      Execute to do it.</li>
+    </ul>
+
+    <h2>Tasks</h2>
+
+    <ul>
+      <li>Implement htmlhelp task. Use this registry key:<br>
+      HKEY_CURRENT_USER\Software\Microsoft\HTML Help Workshop\InstallDir
+      </li>
+      <li><b>DONE!</b> Expose the "basedir" property in the
+      &lt;exec&gt;&nbsp; task.</li>
+
+      <li>For testing purposes, it would be useful to define a
+      TCheckProperty task:</li>
+    </ul>
+<pre>
+  &lt;checkproperty name=&quot;aname&quot; expectedvalue=&quot;avalue&quot; /&gt;
+</pre>
+
+    <ul>
+      <li>Overload RegisterElement/RegisterTask, and have the
+      overloaded version take a Name parameter. This allows for
+      task aliasing (tasks that have more than one
+      name/xmltag).</li>
+
+      <li><b>DONE!</b> Implement the &lt;tstamp&gt; task.</li>
+
+      <li>Implement the &lt;available&gt; task.</li>
+
+      <li>Implement the &lt;uptodate&gt; task.</li>
+
+      <li>Implement the &lt;fail&gt; task.</li>
+
+      <li>To be consistent with Ant, make&nbsp; ETaskException
+      descend from EBuildException and use accross the board.
+      Refactor exception classes in general.</li>
+
+      <li>
+        <b>WILL NOT DO!</b>According to Ant's docs, the setting of
+        attributes/properties is done <b>after</b> the file is
+        parsed and all XML elements (and sub-elements) have been
+        created. In Want, this would require an additional
+        examination of the MiniDOM just before a task is executed.
+        Tasks (elements in general) can keep a reference to their
+        MiniDOM node for this. 
+
+        <p>Sequence:</p>
+
+        <ol>
+          <li>Call ParseXML recursively on all elements
+          created.</li>
+
+          <li>On the DoExecute method, call a SetAttributes first,
+          so elements retrieve their attributes from the recorded
+          MiniDOM node. SetAttributes calls Init (currently
+          Validate) on the element (The MiniDOM node can be
+          released at this point).</li>
+
+          <li>Do 2. on the task's children.</li>
+
+          <li>Execute the task.</li>
+        </ol>
+
+        <p>It seems complicated, but it allows for lazy (last
+        minute) evaluation of properties.</p>
+      </li>
+    </ul>
+
+    <p align="center">~o~</p>
+  </body>
+</html>
+

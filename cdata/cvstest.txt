@@ -1,0 +1,5 @@
+This file is for testing the CVS functionality in WANT.
+1
+2
+3
+4

@@ -1,0 +1,13 @@
+<!-- This is a test Want script -->
+<project name="simple_gzip_test"
+         basedir="."
+         default="test" >
+
+  <target name="test" >
+    <gzip   zipfile="${basedir}/afile.txt.gz" src="afile.txt" />
+    <gunzip zipfile="${basedir}/afile.txt.gz" />
+    <gunzip zipfile="${basedir}/afile2.txt.gz" />
+    <delete file="${basedir}/afile.txt.gz" />
+  </target>
+
+</project>

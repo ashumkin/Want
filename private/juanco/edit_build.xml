@@ -1,0 +1,9 @@
+
+
+    <edit file="input.txt" output="optional.txt">
+	   <goto line="20"/>
+		<delete line="3" toline="5" />
+		<copy line="8" toline="9" copyto="$" />
+
+		<find pattern="[a-z][a-z]*" />
+	 </edit>

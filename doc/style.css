@@ -1,0 +1,39 @@
+body {margin-left:32; margin-right:16;font-family:"helvetica,Arial,Sans Serif";}
+p    {margin-top:4; margin-bottom:8 }
+h2   {margin-top: 32; margin-bottom:8;}
+h3   {margin-top:16;margin-bottom: 0; }
+
+code {font-size: 100%; }
+
+ul,
+ol   {margin-top :8; margin-bottom: 16; }
+li   {margin-bottom: 4; margin-top: 0; }
+pre,
+blockquote {margin-left:16; font-size:90%;}
+pre.copyright {
+ justify:center; 
+ font-size:70%;
+}
+
+pre.xml {
+  background:#CCFFCC; 
+  color:black; 
+  padding=8;  
+  font-weight:medium; 
+}
+
+span.meta {
+  color=darkgreen;
+  font-weight:bold; 
+}
+
+table {
+  margin-left:16; 
+  margin-top:16; 
+  margin-bottom:16; 
+}
+
+img {
+  border-width:8;
+  border-color:black;
+}

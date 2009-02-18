@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<project test="String" name="singlefile" default="test">
+<target test="String" name="test">
+<style test="String" in="in.xml" out="out.xml" style="..\identity.xml">
+</style>
+</target>
+</project>

@@ -1,0 +1,86 @@
+<!doctype html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="es-ve">
+<meta name="generator" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Juanco - Want History</title>
+<link rel="stylesheet" type="text/css" href="../style/suigeneris.css">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+
+<!--#include file="../software/navbar.html" --><hr>
+<h1>Want History </h1>
+<p>On the Spring of 2001 several <a href="http://www.suigeneris.org/dunit/">
+DUnit</a> developers, including me, were complaining about the unreliability of 
+the Make build tool on all platforms. We've just had some problems building
+<a href="http://www.suigeneris.org/dunit/">DUnit</a> with Make. </p>
+<p>We discussed long about how a build tool should be like, and several of us 
+tough that it should be like <a href="http://jakarta.apache.org/ant/index.html">
+Ant</a>, the tool used in the <a href="http://jakarta.apache.org">Apache-Jakarta</a> 
+project. The problem with Ant itself was that we thought it was too 
+Java-centered to be useful in a Delphi project. </p>
+<p>A group of us decided to create our own tool, and thus end our sufferings 
+with Make. After a short discussion, we decided that its name would be Dante, 
+and we went on to work. </p>
+<h3>Start </h3>
+<p>Chris Morris (chrismo) set up a Source Forge project for Dante and got 
+authorization from his employer to contribute some useful source code. I built a 
+basic framework for buildng projects and implemented script persistence using 
+Delphi's DFM format (the one used for forms). We had our first working prototype 
+by day two. </p>
+<h3>Week One </h3>
+<p>Within a week I had incorporated my SAX/XML&nbsp; <span lang="en-us">classes 
+from the JAL library </span>and Dante was able to read scripts in XML, much like 
+the ones used by <a href="http://jakarta.apache.org/ant/index.html">Ant</a>. 
+That week Chris wrote basic &lt;exec&gt; and &lt;dcc&gt; (Delphi compile) tasks for Dante. I 
+took it from there, added exe output redirection to &lt;exec&gt;, filled the voids in 
+&lt;dcc&gt;, and Dante became able to build itself. </p>
+<h3>Week Two </h3>
+<p>By the end of week two I had developed a file path library that could handle 
+Ant-like wildcards in a (hopefully) platform independent way. The library let me 
+implement <span lang="en-us">&lt;copy&gt;</span>, <span lang="en-us">&lt;m</span>ove<span lang="en-us">&gt;</span>,
+<span lang="en-us">&lt;d</span>elete<span lang="en-us">&gt;</span>, and
+<span lang="en-us">&lt;t</span>ouch<span lang="en-us">&gt;</span> tasks that worked 
+very much like Ant's. I added
+<a href="http://www.nomssi.de/paszlib/paszlib.html">Nomssi Nzali's port</a> of
+<a href="http://www.gzip.org/zlib/">ZLib 1.1.2</a> to the mix, and implemented 
+the Zip task with it. </p>
+<h3>Week Three </h3>
+<p>By week three Chris had incorporated a thorough set of unit and external 
+tests using the <a href="http://www.suigeneris.org/dunit/">DUnit</a> testing 
+framework, and the few bugs present were jumping out the door. Chris's design 
+enabled us to create external tests without writing a single line of code. </p>
+<p>That week Mike Taylor (mtaylor) started providing feedback on refactorings 
+that would make the source code more efficient and clearer. </p>
+<p>By the end of the week Dante was able to build DUnit using a
+<a href="dunit_want.xml">fairly complex build script</a>. </p>
+<h3>Week Four </h3>
+<p>On week four, I broke out of the Dante developers group, and continued 
+developing the tool by myself under the name &quot;Want&quot; (the reasons for the breakup 
+remain a mystery). I refactored the core classes and stripped them of 
+dependencies to the particular XML parser, and wrote a DUnit task that is able 
+to run DUnit test cases compiled as DLLs. </p>
+<h3>Week Five </h3>
+<p>By week five Want was the official build tool for DUnit. I was using Want for 
+all my new projects, and gradually porting old (mostly Make) projects to Want.
+</p>
+<h3>Today </h3>
+<p>Want is under constant use and constant development. <span lang="en-us">The 
+project has moved to <a href="https://sourceforge.net/projects/want/">Source 
+Forge</a> and project administration is now in the hands of Ignacio (Nacho) 
+Ortega &lt;nacho at siapi dot es&gt;. Nacho, Mike Johnson &lt;csmajohnson at hotmail dot 
+com&gt; and other developers are making improvements to the tools and new releases 
+are on the way.</span></p>
+<hr>
+<!--#include file="../software/navbar.html" -->
+<!--#include file="../copyright.html" -->
+<pre>$Id: history.html 656 2003-03-10 01:01:57Z juanco $
+</pre>
+
+</body>
+
+</html>

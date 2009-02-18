@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta name="generator" content="HTML Tidy, see www.w3.org">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>
+      &lt;tstamp&gt; element - Want User Manual
+    </title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+  </head>
+  <body>
+    <h1>
+      &lt;<a name="tstamp">tstamp</a>&gt; Element
+    </h1>
+    <h2>
+      Format
+    </h2>
+<pre class="xml">
+&lt;tstamp&gt;
+  <span class=
+"meta">{</span> &lt;format property="a_name" pattern="a_date_time_format /&gt; <span
+ class="meta">}</span>
+&lt;/tstamp&gt;
+</pre>
+    <h2>
+      Description
+    </h2>
+    <p>
+      Sets time related properties in the enclosing&nbsp; element. Like
+      in other elements that set&nbsp; properties, the properties set
+      by <code>&lt;tstamp&gt;</code> are set on the immediate enclosing
+      element, and that they are set at parse time.
+    </p>
+    <p>
+      Note that, unlike Ant's <code>&lt;tstamp&gt;</code> which is a
+      task, Want's <code>&lt;tstamp&gt;</code> is an element that can
+      be used anywhere in the build script. Note also that property
+      names are lowercase, and that more properties are set than those
+      set in Ant.
+    </p>
+    <p>
+      The properties set are:
+    </p>
+    <table border="1" cellpadding="2" cellspacing="0" summary=
+    "Properties set by the &lt;tstamp&gt; element">
+      <tr>
+        <th valign="top" align="left">
+          property
+        </th>
+        <th valign="top" align="left">
+          format
+        </th>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          dstamp
+        </td>
+        <td valign="top" align="left">
+          yyyymmdd
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          tstamp
+        </td>
+        <td valign="top" align="left">
+          hhnn
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          today
+        </td>
+        <td valign="top" align="left">
+          mmm ddd d yyyy
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          year
+        </td>
+        <td valign="top" align="left">
+          &nbsp;yyyy
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          month
+        </td>
+        <td valign="top" align="left">
+          &nbsp;mm
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          day
+        </td>
+        <td valign="top" align="left">
+          &nbsp;dd
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          hour
+        </td>
+        <td valign="top" align="left">
+          &nbsp;hh
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          minute
+        </td>
+        <td valign="top" align="left">
+          &nbsp;nn
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          second
+        </td>
+        <td valign="top" align="left">
+          &nbsp;ss
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" align="left">
+          ticks
+        </td>
+        <td valign="top" align="left">
+          8 digits
+        </td>
+      </tr>
+    </table>
+    <p>
+      All the formats, except the one for the <code>ticks</code>
+      property, are interpreted by Delphi's <code>
+      SysUtils.FormatDateTime()</code> routine. The <code>ticks</code>
+      property holds the number of milliseconds since midnight, and is
+      formatted to eight zero-padded positions.
+    </p>
+    <p>
+      The properties can be used in the buildfile, for instance, to
+      create timestamped filenames or used to replace placeholder tags
+      inside documents to indicate, for example, the release date. The
+      best place for this element is somewhere among your global property
+      definitions.
+    </p>
+    <h2>
+      Parameters
+    </h2>
+    <table border="1" cellpadding="2" cellspacing="0" summary=
+    "&lt;tstamp&gt; attributes">
+      <tr>
+        <td valign="top">
+          <b>Attribute</b> 
+        </td>
+        <td valign="top">
+          <b>Description</b> 
+        </td>
+        <td align="center" valign="top">
+          <b>Required</b> 
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          No parameters
+        </td>
+      </tr>
+    </table>
+    <h2>
+      Nested Elements
+    </h2>
+    The tstamp task supports a format nested element which allows a
+    property to be given the current date and time in a given format.
+    The date/time patterns are as defined in the Delphi <code>
+    SysUtils.FormatDateTime()</code> routine. 
+    <table width="60%" border="1" cellpadding="2" cellspacing="0"
+    summary="&lt;tstamp&gt;&lt;format&gt; attributes">
+      <tr>
+        <td valign="top">
+          <b>Attribute</b> 
+        </td>
+        <td valign="top">
+          <b>Description</b> 
+        </td>
+        <td align="center" valign="top">
+          <b>Required</b> 
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          property
+        </td>
+        <td valign="top">
+          The property which is to receive the date/time string in the
+          given pattern
+        </td>
+        <td align="center" valign="top">
+          Yes
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          pattern
+        </td>
+        <td valign="top">
+          The date/time pattern to be used. The values are defined by
+          the Java SimpleDateFormat class
+        </td>
+        <td align="center" valign="top">
+          Yes
+        </td>
+      </tr>
+    </table>
+    <h2>
+      Examples
+    </h2>
+    <p>
+      Set the standard time properties on the owner according to the
+      formats above
+    </p>
+<pre class="xml">
+&lt;tstamp/&gt;
+</pre>
+    <p>
+      As for the above example, set the standard properties and also
+      set the property "TODAY_UK" with the date/time pattern "d mmm
+      yyyy"
+    </p>
+<pre class="xml">
+  &lt;tstamp&gt;
+    &lt;format property="TODAY_UK" pattern="d mmm yyyy"&gt;
+  &lt;/tstamp&gt;
+</pre>
+    <hr>
+    <div align="center">
+      <center>
+<pre class="copyright">
+Copyright &copy; 2001 Juancarlo A&ntilde;ez, Caracas, Venezuela.
+All rights Reserved.
+</pre>
+      </center>
+    </div>
+  </body>
+</html>
+

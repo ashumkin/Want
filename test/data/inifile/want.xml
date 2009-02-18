@@ -1,0 +1,15 @@
+<project name="test_conditionals" default="test" >
+
+   <property name="aprop" value="?{test.ini:section.1:key1}" />
+
+  <target name="test" >
+    <property name="defprop" value="?{test.ini:SECTION.2:key2|adefault}" />
+    <ini file="test.ini" >
+      <write section="SECTION.2"  key="Key2" value="${aprop}.${aprop}" />
+    </ini>
+    <ini file="test2.ini" >
+       <write section="SECTION.1" key="Key1" value="${aprop}.${aprop}.2" />
+    </ini>
+  </target>
+
+</project>

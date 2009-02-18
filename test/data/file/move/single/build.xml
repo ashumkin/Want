@@ -1,0 +1,14 @@
+<!-- This is a test Want script -->
+<project name="move_test"
+         basedir="."
+         default="test" >
+
+  <target name="test" >
+    <move todir="${basedir}/dirb" >
+      <fileset dir="${basedir}/dira" >
+        <include name="sample.txt" />
+      </fileset>
+    </move>
+  </target>
+
+</project>
