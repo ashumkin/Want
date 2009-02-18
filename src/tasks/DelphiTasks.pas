@@ -494,22 +494,29 @@ end;
 class function TCustomDelphiTask.RootForVersion(version: string; UseCBuilder: boolean): string;
 var
   RegRoot : string;
+  Dch: Char;
 begin
-  if Pos('.', version) = 0 then begin
-    version := version + '.0';
+  Dch := DecimalSeparator;
+  try
+    if Pos('.', version) = 0 then begin
+      version := version + '.0';
+    end;
+    if ( UseCBuilder ) then begin
+      RegRoot := CBuilderRegRoot;
+    end
+    else begin
+      DecimalSeparator := '.';
+      if StrToFloatDef(version, 0) > 8 then
+      begin
+        RegRoot := BDSRegRoot;
+        version := Format('%.1f', [StrToFloatDef(version, 0) - 6]);
+      end else
+        RegRoot := DelphiRegRoot;
+    end;
+    Result := Format('%s\%s', [RegRoot, version]);
+  finally
+    DecimalSeparator := Dch;
   end;
-  if ( UseCBuilder ) then begin
-    RegRoot := CBuilderRegRoot;
-  end
-  else begin
-    if StrToIntDef(StrLeft(version, pos('.', version) -1), 0) > 8 then
-    begin
-      RegRoot := BDSRegRoot;
-      version := '3.0'; // will this change for Delphi 10 or even before?
-    end else
-      RegRoot := DelphiRegRoot;
-  end;
-  Result := Format('%s\%s', [RegRoot, version]);
 end;
 
 procedure TCustomDelphiTask.HandleOutputLine(Line: string);
