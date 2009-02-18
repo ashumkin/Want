@@ -38,6 +38,9 @@ uses
   {$IFDEF VER150}
   Variants,
   {$ENDIF}
+  {$IFDEF VER180}
+  Variants,
+  {$ENDIF}
 
   JCLStrings,
 
