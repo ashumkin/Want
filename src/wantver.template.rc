@@ -1,0 +1,43 @@
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION ${comma.version}
+PRODUCTVERSION ${comma.version} 
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x4L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904B0"
+        BEGIN
+            VALUE "FileDescription", "WANT - A build Management Tool 4\0"
+            VALUE "FileVersion", "${version}\0"
+            VALUE "InternalName", "WANT\0"
+            VALUE "LegalCopyright", "Copyright \251 2001 Juancarlo Añez, Caracas, Venezuela.\0"
+            VALUE "ProductName", "WANT\0"
+            VALUE "ProductVersion","${version}\0"
+        END
+    END
+
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "041904E3"
+        BEGIN
+            VALUE "CompanyName", "Alexey Shumkin\0"
+            VALUE "FileDescription", "WANT. Alexey Shumkin mod\0"
+            VALUE "FileVersion", "${version}\0"
+            VALUE "InternalName", "want.exe\0"
+            VALUE "LegalCopyright", "Copyright \251 2009, Alexey Shumkin\0"
+            VALUE "OriginalFilename", "want.exe\0"
+            VALUE "ProductName", "WANT\0"
+            VALUE "ProductVersion", "${version}\0"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0419 0x04E3
+    END
+    
+END
