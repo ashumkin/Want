@@ -164,13 +164,14 @@ type
   private
     FRegistryPath: string;
     procedure ReadVars;
+    procedure ReadEnvVars;
     function GetVars(Index: Integer): TEnvironmentVar;
-    procedure MutualReplace;
+    procedure ExpandVariables;
 
     property RegistryPath: string read FRegistryPath;
   protected
     function Add(const AName, APath: string): Integer;
-    function Replace(const pString: string): string;
+    function Expand(const pString: string): string;
   public
     constructor Create(const pRegistryPath: string);
     property Vars[Index: Integer]: TEnvironmentVar read GetVars;
@@ -1180,7 +1181,7 @@ begin
             PS[p] := Trim(PS[p]);
             if PS[p] <> '' then
             begin
-              PS[p] := EnvironmentVars.Replace(PS[p]);
+              PS[p] := EnvironmentVars.Expand(PS[p]);
               FUnitPaths.Includes.Insert(0, PS[p]);
               FResourcePaths.Includes.Insert(0, PS[p]);
               FIncludePaths.Includes.Insert(0, PS[p]);
@@ -1470,7 +1471,8 @@ begin
   inherited Create;
   FRegistryPath := pRegistryPath;
   ReadVars;
-  MutualReplace;
+  ReadEnvVars;
+  ExpandVariables;
 end;
 
 function TEnvironmentVarList.GetVars(Index: Integer): TEnvironmentVar;
@@ -1478,12 +1480,27 @@ begin
   Result := TEnvironmentVar(Items[Index]);
 end;
 
-procedure TEnvironmentVarList.MutualReplace;
+procedure TEnvironmentVarList.ExpandVariables;
 var
   i: Integer;
 begin
   for i := 0 to Count - 1 do
-    Vars[i].Path := Replace(Vars[i].Path);
+    Vars[i].Path := Expand(Vars[i].Path);
+end;
+
+procedure TEnvironmentVarList.ReadEnvVars;
+var
+  TSL: TStringList;
+  i: Integer;
+begin
+  TSL := TStringList.Create;
+  try
+    GetEnvironmentVars(TSL);
+    for i := 0 to TSL.Count - 1 do
+      Add(TSL.Names[i], TSl.ValueFromIndex[i]);
+  finally
+    FreeAndNil(TSL);
+  end;
 end;
 
 procedure TEnvironmentVarList.ReadVars;
@@ -1511,7 +1528,7 @@ begin
 
 end;
 
-function TEnvironmentVarList.Replace(const pString: string): string;
+function TEnvironmentVarList.Expand(const pString: string): string;
 var
   i: Integer;
 begin
@@ -1528,7 +1545,8 @@ constructor TDelphiEnvironmentVarList.Create(const pRegistryPath,
 begin
   inherited Create(pRegistryPath);
   Add('DELPHI', pDelphiPath);
-  MutualReplace;
+  Add('BDS', pDelphiPath);
+  ExpandVariables;
 end;
 
 initialization

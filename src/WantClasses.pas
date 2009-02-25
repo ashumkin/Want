@@ -203,7 +203,8 @@ type
     function  SetupChild(ChildName :string; Atts :TStrings):TScriptElement; virtual;
     procedure Configure(recurse :boolean = true); virtual;
 
-    procedure SetProperty(Name, Value: string; overwrite :boolean = false); virtual;
+    procedure SetProperty(Name, Value: string; overwrite :boolean = false;
+      pToLog: boolean = False); virtual;
     function  PropertyDefined(Name: string): boolean;    virtual;
     function  PropertyValue(Name: string): string;       virtual;
     function  EnvironmentValue(Name: string): string;    virtual;
@@ -917,13 +918,24 @@ begin
   FProperties.Assign(Value);
 end;
 
-procedure TScriptElement.SetProperty(Name, Value: string; overwrite :boolean);
+procedure TScriptElement.SetProperty(Name, Value: string; overwrite :boolean = False;
+  pToLog: boolean = False);
 begin
   if Name = '' then
     WantError('property name missing');
   if Value = '' then
     Value := #0;
-  if not PropertyDefined(Name) then
+  if pToLog then
+    if Assigned(Owner) then
+      Log(vlDebug, 'Set property %s.%s', [Owner.Name, Name])
+    else
+      Log(vlDebug, 'Set property %s', [Name]);
+  if (Name[1] = '#') and Assigned(Owner)then
+  begin
+    Name := Copy(Name, 2, Length(Name));
+    Self.Project.SetProperty(Name, Value, overwrite);
+  end
+  else if not PropertyDefined(Name) then
     Properties.Values[Name] := Value
   else if overwrite then
   begin
@@ -1410,7 +1422,7 @@ procedure TProject.Init;
 begin
   inherited;
   if require <> '' then
-    if CompareVersions(WantVersion, require) < 0 then
+    if CompareVersions(WantVersion, require, True) < 0 then
       WantError(Format('Required version of WANT is not less then %s. The current is %s',
         [require, WantVersion]));
 end;

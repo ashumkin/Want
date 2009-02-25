@@ -34,8 +34,9 @@ unit XmlPropertyTasks;
 interface
 
 uses
-    WantClasses,
-    JalMiniDOM;
+  Classes,
+  WantClasses,
+  JalMiniDOM;
 
 type
   TXmlPropertyTask = class(TTask)
@@ -46,13 +47,20 @@ type
       FPrefix              :string;
       FKeepRoot            :boolean;
       FValidate            :boolean;
+      FFileText : TStringStream;
+      FIdAttr: string;
+    Foverwrite: boolean;
 
       procedure ParseError(AMsg: string; ALine: integer=0; ACol: Integer=0);
       function  GeneratePropertyName(AParentTagPath: string;
                                      AName: string;
                                      AIsAttribute : boolean) : string;
+      function IsUTF8File: boolean;
+      function ReadFile: boolean;
+      function FindID(pNode: IElement): string;
     public
       constructor Create(Owner : TScriptElement); override;
+      destructor Destroy; override;
 
       procedure Init;    override;
       procedure Execute; override;
@@ -63,14 +71,18 @@ type
       property prefix             :string  read FPrefix             write FPrefix;
       property keeproot           :boolean read FKeepRoot           write FKeepRoot;
       property validate           :boolean read FValidate           write FValidate;
+      property idAttr : string read FidAttr write FIdAttr;
+      property overwrite: boolean read Foverwrite write Foverwrite;
   end;
 
 implementation
 
 uses
   SysUtils,
+  Windows,
   JalSAX,
   JalCollections,
+  JALStrings,
   WantResources,
   WildPaths;
 
@@ -88,6 +100,13 @@ begin
   FKeepRoot           := True;
   FValidate           := False;
   FCollapseAttributes := False;
+  FFileText := TStringStream.Create('');
+end;
+
+destructor TXmlPropertyTask.Destroy;
+begin
+  FreeAndNil(FFileText);
+  inherited;
 end;
 
 procedure TXmlPropertyTask.Execute;
@@ -99,7 +118,8 @@ begin
 
   FFile := ToAbsolutePath(FFile);
   try
-    Dom := JALMiniDOM.ParseToDom(ToSystemPath(FFile), True);
+    ReadFile;
+    Dom := JALMiniDOM.ParseToDom(FFileText, True);
     FProcessingRoot := true;
     ParseXML('', Dom.Root);
   except
@@ -111,6 +131,20 @@ begin
       raise;
     end;
   end;
+end;
+
+function TXmlPropertyTask.FindID(pNode: IElement): string;
+var
+  i: Integer;
+  TA: TStringArray;
+begin
+  Result := '';
+  TA := StringToArray(idAttr, ',', ttBoth);
+  for i := Low(TA) to High(TA) do
+    if Assigned(pNode.attribute(TA[i])) then
+      Result := pNode.attributeValue(TA[i]);
+  if Result = ''  then
+    Result := pNode.name;
 end;
 
 function TXmlPropertyTask.GeneratePropertyName(AParentTagPath: string;
@@ -135,6 +169,20 @@ begin
   RequireAttribute('file');
 end;
 
+function TXmlPropertyTask.IsUTF8File: boolean;
+type
+  TBOMRec = packed array[1..3] of byte;
+const
+  _BOM : TBOMRec = ($EF, $BB, $BF);
+var 
+  s: TBOMRec;
+begin
+  FFileText.Position := 0;
+  FFileText.Read(s, 3);
+  Result := CompareMem(@s, @_BOM, SizeOf(s));
+  FFileText.Position := 0;
+end;
+
 procedure TXmlPropertyTask.ParseError(AMsg :string; ALine, ACol :Integer);
 begin
   raise EWantParseException.Create(AMsg, ALine, ACol) at CallerAddr;
@@ -143,24 +191,29 @@ end;
 procedure TXmlPropertyTask.ParseXML(ATagPath: string; ANode: IElement);
 var
    bAttrName    :string;
+   bAttrValue    :string;
    FTagPath     :string;
    bIter        :IIterator;
    bAtrIter     :IIterator;
    bAttr        :IAttribute;
    bText        :JALMiniDOM.ITextNode;
    bChild       :JALMiniDOM.IElement;
+   bAttrID: string;
+   b: boolean;
 begin
   inherited;
   if not (FProcessingRoot and (not FKeepRoot)) then
   begin
-    FTagPath := GeneratePropertyName(ATagPath, ANode.name, False);
+    bAttrID := FindID(aNode);
+    b := bAttrID = '';
+    FTagPath := GeneratePropertyName(ATagPath, bAttrID, False);
     if not FProcessingRoot then
     begin
       bIter := ANode.children.Iterator;
       while bIter.HasNext do
       begin
-        if 0 = (bIter.Next as INode).QueryInterface(ITextNode, bText)  then
-          Project.SetProperty(FPrefix+FTagPath, TrimRight(bText.text));
+        if 0 = (bIter.Next as INode).QueryInterface(ITextNode, bText) then
+          Project.SetProperty(FPrefix + FTagPath, TrimRight(bText.text), False, True);
       end;
     end;
 
@@ -169,8 +222,10 @@ begin
     begin
       if 0 = (bAtrIter.Next as IAttribute).QueryInterface(IAttribute, bAttr)  then
       begin
-        bAttrName := GeneratePropertyName(FTagPath, bAttr.name, true);
-        Project.SetProperty(FPrefix+bAttrName, bAttr.value);
+        bAttrName := bAttr.name;
+        bAttrValue := bAttr.value;
+        bAttrName := GeneratePropertyName(FTagPath, bAttrName, true);
+        Project.SetProperty(FPrefix+bAttrName, bAttrValue, False, True);
       end;
     end;
   end;
@@ -181,6 +236,29 @@ begin
   begin
     if 0 = (bIter.Next as INode).QueryInterface(IElement, bChild)  then
       ParseXML(FTagPath, bChild)
+  end;
+end;
+
+function TXmlPropertyTask.ReadFile: boolean;
+var
+  TFS: TFileStream;
+  s: string;
+begin
+  TFS := TFileStream.Create(ToSystemPath(FFile), fmOpenRead);
+  try
+    FFileText.CopyFrom(TFS, TFS.Size);
+    if IsUTF8File then
+    begin
+      s := Copy(FFileText.DataString, 4, FFileText.Size);
+      s := UTF8Decode(s);
+      FFileText.Position := 0;
+      FFileText.WriteString(s);
+      FFileText.Size := Length(s);
+    end;
+    FFileText.Position := 0;
+    Result := True;
+  finally
+    FreeAndNil(TFS);
   end;
 end;
 
