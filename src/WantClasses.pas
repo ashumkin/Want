@@ -1529,7 +1529,8 @@ begin
   try
     ChangeDir(BasePath);
     Configure;
-    Execute;
+    if Enabled then
+      Execute;
   finally
     ChangeDir(LastDir);
   end;
