@@ -353,6 +353,22 @@ type
     property output: string read FOutput write FOutput;
   end;
 
+  TGOResourceCompileTask = class(TResourceCompileTask)
+  protected
+    class function ToolName :string; override;
+
+  public
+    class function TagName: string; override;
+  end;
+
+  TRCResourceCompileTask = class(TResourceCompileTask)
+  protected
+    class function ToolName :string; override;
+
+  public
+    class function TagName: string; override;
+  end;
+
   TOptionElement = class(TScriptElement)
   protected
     function dcc: TDelphiCompileTask;
@@ -468,7 +484,7 @@ begin
     FDelphiDir    := Directory;
     FToolPath     := ToolPath;
     DecimalSeparator := '.';
-    FVersionNumber := StrToFloat(Version);
+    FVersionNumber := StrToFloatDef(Version, -1);
     GetFormatSettings();
   end;
   if FToolPath = '' then
@@ -1334,10 +1350,10 @@ function TResourceCompileTask.BuildArguments: string;
 begin
   Result := inherited BuildArguments;
 
-  Result := Result + ' -r ' + ToSystemPath(_file);
-
   if output <> '' then
-    Result := Result + ' -fo' + ToSystemPath(output);
+    Result := Result + ' /fo ' + ToSystemPath(output);
+
+  Result := Result + ' /r ' + ToSystemPath(_file);
 end;
 
 constructor TResourceCompileTask.Create(Owner: TScriptElement);
@@ -1366,6 +1382,30 @@ end;
 class function TResourceCompileTask.ToolName: string;
 begin
   Result := 'bin\brcc32.exe';
+end;
+
+{ TGOResourceCompileTask }
+
+class function TGOResourceCompileTask.TagName: string;
+begin
+  Result := 'gorc';
+end;
+
+class function TGOResourceCompileTask.ToolName: string;
+begin
+  Result := 'bin\gorc.exe';
+end;
+
+{ TRCResourceCompileTask }
+
+class function TRCResourceCompileTask.TagName: string;
+begin
+  Result := 'rc';
+end;
+
+class function TRCResourceCompileTask.ToolName: string;
+begin
+  Result := 'bin\rc.exe';
 end;
 
 { TDefineElement }
@@ -1550,7 +1590,8 @@ begin
 end;
 
 initialization
-  RegisterTasks( [TDelphiCompileTask, TResourceCompileTask]);
+  RegisterTasks( [TDelphiCompileTask, TResourceCompileTask,
+    TGOResourceCompileTask, TRCResourceCompileTask]);
   RegisterElements(TDelphiCompileTask, [
                          TDefineElement ,
                          TUsePackageElement,
