@@ -250,7 +250,7 @@ type
 implementation
 
 uses
-  OTRPerlRE,
+  PerlRE,
   JclStrings,
   SysUtils, StrUtils;
 
@@ -411,7 +411,7 @@ begin
   begin
     if GetAttribute('regexp') <> '' then
     begin
-      if OTRPerlRE.Match(FRegExp, FSL[i]) then
+      if PerlRE.Match(FRegExp, FSL[i]) then
       begin
         Result := Result + FSL[i] + #13#10;
         continue;
@@ -422,7 +422,7 @@ begin
     begin
       if (Children[j] is TLineContainsRegexpRegexpElement) then 
       begin
-        if OTRPerlRE.Match((Children[j] as TLineContainsRegexpRegexpElement).pattern, fSL[i]) then
+        if PerlRE.Match((Children[j] as TLineContainsRegexpRegexpElement).pattern, fSL[i]) then
         begin
           Result := Result + FSL[i] + #13#10;
           break;  // break from inside for loop to next line in SL

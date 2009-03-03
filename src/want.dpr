@@ -26,13 +26,14 @@
 program want;
 
 {$R 'usage.res' 'usage.rc'}
+{%File 'usage.txt'}
 
 uses
   ShareMem,
   SysUtils,
   SysConst,
   WIN32 in 'win32\WIN32.pas',
-  crt32 in 'win32\CRT32.pas',
+  CRT32 in 'win32\CRT32.pas',
   ConsoleListener in 'win32\ConsoleListener.pas',
   Win32Implementations in 'win32\Win32Implementations.pas',
   Resources in 'win32\Resources.pas',

@@ -1,7 +1,7 @@
 (****************************************************************************
  * WANT - A build management tool.                                          *
  * Copyright (c) 2001-2003 Juancarlo Anez, Caracas, Venezuela.              *
- * Copyright (c) 2008 OTR-2000                                              *
+ * Copyright (c) 2008 Zapped                                                *
  * All rights reserved.                                                     *
  *                                                                          *
  * This library is free software; you can redistribute it and/or            *
@@ -23,7 +23,7 @@
 
     @author Шумкин А. К.
 }
-unit OTRPerlRE;
+unit PerlRE;
 
 interface
 uses

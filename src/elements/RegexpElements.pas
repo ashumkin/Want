@@ -28,7 +28,7 @@ unit RegexpElements;
 interface
 uses
   SysUtils,
-  OTRPerlRE,
+  PerlRE,
   WantClasses;
 
 type
@@ -88,7 +88,7 @@ end;
 function TRegexpTask.Substitute(Pattern, Subst, Text : string): string;
 begin
   Log(vlDebug, 'Replacing /%s/ with /%s/', [Pattern, Subst]);
-  Result := OTRPerlRE.Replace(Pattern, Subst, Text, True);
+  Result := PerlRE.Replace(Pattern, Subst, Text, True);
   if ToUpper then
     Result := UpperCase(Result)
   else if ToLower then

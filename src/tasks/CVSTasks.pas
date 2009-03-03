@@ -81,7 +81,7 @@ uses
   JclSysInfo,
   JclFileUtils,
 
-  OTRPerlRE,
+  PerlRE,
 
   WildPaths,
   ExecTasks,

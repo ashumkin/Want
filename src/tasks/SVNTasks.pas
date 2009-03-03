@@ -77,7 +77,7 @@ uses
   JclShell,
   JclStrings,
 
-  OTRPerlRE,
+  PerlRE,
 
   IniFiles, {Hashed stringlist}
   Contnrs, {TObjectList}
@@ -785,8 +785,8 @@ begin
   inherited;
   FStatuses.Clear;
   for i := 0 to FExecOutput.Count - 1 do
-    if OTRPerlRE.regex.ExMatch(StatusParseRE, FExecOutput.Strings[i]) then
-      FStatuses.Values[OTRPerlRE.regex.SubExp[2]] := OTRPerlRE.regex.SubExp[1];
+    if PerlRE.regex.ExMatch(StatusParseRE, FExecOutput.Strings[i]) then
+      FStatuses.Values[PerlRE.regex.SubExp[2]] := PerlRE.regex.SubExp[1];
   FilterPaths;
 end;
 
@@ -834,7 +834,7 @@ var
   s: string;
 begin
   s := Copy(Path, Length(tags) + 1, Length(Path));
-  Result := OTRPerlRE.Match(Folders, s);
+  Result := PerlRE.Match(Folders, s);
 end;
 
 function TSVNDiffTask.FilterPathsByNames(const Path,
@@ -843,7 +843,7 @@ var
   s: string;
 begin
   s := Copy(Path, Length(tags) + 1, Length(Path));
-  Result := OTRPerlRE.Match(Names, s);
+  Result := PerlRE.Match(Names, s);
 end;
 
 function TSVNDiffTask.FilterPathsByStatus(const Path,

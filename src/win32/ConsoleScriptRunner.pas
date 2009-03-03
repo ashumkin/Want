@@ -50,7 +50,7 @@ type
   protected
     FBuildFile   :string;
     FTargets     :TStringArray;
-    FOTRSwitch   :boolean;
+    FDoNotStopOnVersion   :boolean;
 
     procedure ParseCommandLine(Project :TProject); overload; virtual;
     function  ParseArgument(Project: TProject; var N :Integer;
@@ -178,14 +178,16 @@ begin
     Usage;
     Halt(2);
   end
-  else if AnsiSameText(Switch, 'otr') then
-    FOTRSwitch := True
+  else if AnsiSameText(Switch, 'dsv')
+      or AnsiSameText(Switch, 'dont-stop-version')
+      or AnsiSameText(Switch, '-dont-stop-version') then
+    FDoNotStopOnVersion := True
   else if (Switch = 'v')
     or (Switch = 'version')
     or (Switch = '-version') then
   begin
     WriteLn(Copyright);
-    if not FOTRSwitch then
+    if not FDoNotStopOnVersion then
       Halt(2);
   end
   else if (Switch = 'L') then

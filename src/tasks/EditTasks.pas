@@ -33,7 +33,7 @@ uses
   JclSysUtils,
   JclStrings,
 
-  OTRPerlRE,
+  PerlRE,
 
   WildPaths,
   WantClasses;
@@ -297,7 +297,7 @@ begin
   for i := 0 to ChildCount-1 do
   begin
     if (Children[i] is TCustomEditElement)
-    and (Children[i].Enabled) then
+        and (Children[i].Enabled) then
       TCustomEditElement(Children[i]).Perform(Self);
   end;
 end;
@@ -437,7 +437,7 @@ begin
     for l := Max(0, f) to Min(Buffer.Count-1, t) do
     begin
       Dot := l;
-      if (Pattern = '') or (Pos(Pattern, Buffer[l]) <> 0) then
+      if (Pattern = '') or (AnsiPos(Pattern, Buffer[l]) <> 0) then
         Dot := Self.Perform(Editor.Buffer, l, l);
     end
   end;
@@ -469,7 +469,7 @@ begin
   Found := False;
   for l := Max(0, FromLine) to Min(Buffer.Count-1, ToLine) do
   begin
-    if (pattern = '') or (Pos(pattern, Buffer[l]) <> 0) then
+    if (pattern = '') or (AnsiPos(pattern, Buffer[l]) <> 0) then
     begin
       Result := inherited Perform(Buffer, l, l);
       Found := true;
@@ -665,7 +665,7 @@ end;
 
 function TSubstElement.Perform(Buffer: TStrings; Line: Integer): Integer;
 begin
-  Buffer[Line] := OTRPerlRE.Replace(pattern, subst, Buffer[Line], global);
+  Buffer[Line] := PerlRE.Replace(pattern, subst, Buffer[Line], global);
   Result := inherited Perform(Buffer, Line);
 end;
 

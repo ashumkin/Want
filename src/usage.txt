@@ -10,7 +10,6 @@ Options:
   -verbose               Be extra verbose.
   -debug                 Print debugging information.
   -nocolor               Do not use color in console output.
-  -v[ersion], --version  Shows version.
+  -v[ersion], --version  Shows version and stops.
   -ansi                  Converts output from ANSI to OEM (readable on console)
-  -otr                   Switches on OTR-style:
-    -v is ignored
+  -dsv                   Do not stop on switch -v (must be defined BEFORE -v)

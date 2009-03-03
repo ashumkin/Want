@@ -38,7 +38,7 @@ uses
 
   JalPaths,
 
-  OTRPerlRE,
+  PerlRE,
   uConsole,
 
   WildPaths,
@@ -411,7 +411,7 @@ procedure TCustomExecTask.HandleOutputLine(Line: string);
     Result := false;
     for i := 0 to F.Count-1 do
     begin
-      if OTRPerlRE.regex.ExMatch(F[i], Line) then
+      if PerlRE.regex.ExMatch(F[i], Line) then
       begin
         Result := True;
         break
@@ -557,7 +557,7 @@ end;
 function TArgumentsList.GetStringsUnquoted(Index: Integer): string;
 begin
   Result := inherited Get(Index);
-  Result := OTRPerlRE.Replace('^(")(.+)\1$', '\2', Result);
+  Result := PerlRE.Replace('^(")(.+)\1$', '\2', Result);
 end;
 
 initialization

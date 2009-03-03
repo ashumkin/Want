@@ -58,7 +58,7 @@ uses
   {Local}
   JalStrings,
 
-  OTRPerlRE,
+  PerlRE,
 
   WantUtils,
   WantClasses,
@@ -538,9 +538,9 @@ end;
 
 procedure TCustomDelphiTask.HandleOutputLine(Line: string);
 begin
- //if not OTRPerlRE.regex.Match('^(.*\([0-9]+\)) *([A-Z][a-z]+:.*$)', Msg) then
+ //if not PerlRE.regex.Match('^(.*\([0-9]+\)) *([A-Z][a-z]+:.*$)', Msg) then
  if (Pos(':', Line) <> 0)
- and OTRPerlRE.regex.ExMatch('^(.*)(\([0-9]+\)) *([HWEF][a-z]+:.*)$', Line) then
+   and PerlRE.regex.ExMatch('^(.*)(\([0-9]+\)) *([HWEF][a-z]+:.*)$', Line) then
  begin
    with regex do
      Line := ToRelativePath(ToPath(SubExp[1])) + ' ' + SubExp[2] + #10 + SubExp[3];
