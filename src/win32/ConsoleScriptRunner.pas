@@ -205,6 +205,9 @@ begin
     Listener.Level := vlVerbose
   else if Switch = 'ansi' then
     Listener.ANSI := True
+  else if (Switch = 'is')
+      or (Switch = '-ignore-scratch') then
+    Listener.IgnoreScratch := True
   else if Switch = 'debug' then
   begin
     Listener.Level := vlDebug;

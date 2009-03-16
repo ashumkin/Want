@@ -119,10 +119,13 @@ type
   TCreateElementMethod = function: TScriptElement of object;
 
   TBuildListener = class
+  private
   protected
     FLevel        :TLogLevel;
     FANSI: boolean;
+    FIgnoreScratch: boolean;
   public
+    constructor Create; 
     procedure Log(Level: TLogLevel; Msg: string = '');              virtual; abstract;
     procedure BuildFileLoaded(Project :TProject; FileName :string); virtual; abstract;
 
@@ -142,6 +145,8 @@ type
 
     property Level :TLogLevel read FLevel write FLevel;
     property ANSI: boolean read FANSI write FANSI;
+    property IgnoreScratch: boolean read FIgnoreScratch write FIgnoreScratch;
+  published
   end;
 
 
@@ -800,9 +805,9 @@ end;
 
 procedure TScriptElement.AboutToScratchPath(const Path: TPath);
 begin
-  if  PathExists(Path)
-  and (Pos(LowerCase(ToAbsolutePath(BasePath)), LowerCase(ToAbsolutePath(Path))) <> 1)
-  then
+  if not Project.Listener.IgnoreScratch
+      and PathExists(Path)
+      and (Pos(LowerCase(ToAbsolutePath(BasePath)), LowerCase(ToAbsolutePath(Path))) <> 1) then
     WantError(Format('Will not scratch %s outside of %s',
                          [ToSystemPath(Path), ToSystemPath(BasePath)]
                          ));
@@ -1615,6 +1620,15 @@ begin
   if bANSI then
     sMsg := ConvertAnsiToOem(sMsg);
   Write(sMsg);
+end;
+
+{ TBuildListener }
+
+constructor TBuildListener.Create;
+begin
+  inherited;
+  FANSI := False;
+  FIgnoreScratch := False;
 end;
 
 initialization

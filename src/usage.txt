@@ -13,3 +13,5 @@ Options:
   -v[ersion], --version  Shows version and stops.
   -ansi                  Converts output from ANSI to OEM (readable on console)
   -dsv                   Do not stop on switch -v (must be defined BEFORE -v)
+  -is,
+        --ignore-scratch Ignore scratch verify
