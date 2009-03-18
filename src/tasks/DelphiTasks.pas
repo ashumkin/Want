@@ -183,7 +183,10 @@ type
   end;
 
   TDelphiCompileTask = class(TCustomDelphiTask)
+  private
+    function GetIsAlterCfg: boolean;
   protected
+    FAlterCfg: TPath;
     FExesPath: TPath;
     FDCUPath : TPath;
     FBPLPath : TPath;
@@ -250,6 +253,9 @@ type
           optionFlag : string;pathsToOutput : TPaths) : string;
 
     function PathOpt(Opt :string; Path :TPath) :string;
+
+    property IsAlterCfg: boolean read GetIsAlterCfg;
+  published
   public
     constructor Create(Owner: TScriptElement); override;
     destructor  Destroy; override;
@@ -331,6 +337,7 @@ type
     property uselibrarypath :boolean read FUseLibraryPath write FUseLibraryPath default false;
 
     property source         :TPath read FSource write FSource;
+    property altercfg       : TPath read FAlterCfg write FAlterCfg;
   end;
 
   TResourceCompileTask = class(TCustomDelphiTask)
@@ -679,6 +686,11 @@ begin
   end;
 end;
 
+function TDelphiCompileTask.GetIsAlterCfg: boolean;
+begin
+  Result := FAlterCfg <> '';
+end;
+
 class function TDelphiCompileTask.TagName: string;
 begin
   Result := 'dcc';
@@ -752,10 +764,25 @@ begin
                    );
             end;
           end;
+          if IsAlterCfg then
+          begin
+            Log(vlVerbose, 'altercfg=%s', [altercfg]);
+            if not PathIsFile(altercfg) then
+              TaskError(Format('File "%s" not found', [altercfg]));
+            try
+              WildPaths.CopyFile(altercfg, cfg + '.cfg');
+            except
+              on E: Exception do
+                TaskError(E.Message);
+            end;
+          end;
         end;
       end;
     except
-      Log(vlWarnings, 'Could not rename configuration file: %s', [cfg]);
+      on E: ETaskError do
+        raise
+      else
+        Log(vlWarnings, 'Could not rename configuration file: %s', [cfg]);
     end;
   end
   else
