@@ -52,6 +52,7 @@ uses
   SysUtils,
   Math,
   Classes,
+  StrUtils,
 
   JclFileUtils,
 
@@ -337,6 +338,8 @@ begin
         Result := Result + '/' + Parts[i];
     end;
   end;
+  if (Pos('//', Result) > 1) then
+    Result := AnsiReplaceText(Result, '//', '/');
   Assert(Pos('//', Result) <= 1);
 end;
 
