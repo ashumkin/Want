@@ -40,39 +40,42 @@ uses
 
 type
   TXmlPropertyTask = class(TTask)
-    private
-      FProcessingRoot      :boolean;
-      FFile                :string;
-      FCollapseAttributes  :boolean;
-      FPrefix              :string;
-      FKeepRoot            :boolean;
-      FValidate            :boolean;
-      FFileText : TStringStream;
-      FIdAttr: string;
+  private
+    FProcessingRoot      :boolean;
+    FFile                :string;
+    FCollapseAttributes  :boolean;
+    FPrefix              :string;
+    FKeepRoot            :boolean;
+    FValidate            :boolean;
+    FFileText : TStringStream;
+    FIdAttr: string;
     Foverwrite: boolean;
+    FNameDelimiter: string;
 
-      procedure ParseError(AMsg: string; ALine: integer=0; ACol: Integer=0);
-      function  GeneratePropertyName(AParentTagPath: string;
-                                     AName: string;
-                                     AIsAttribute : boolean) : string;
-      function IsUTF8File: boolean;
-      function ReadFile: boolean;
-      function FindID(pNode: IElement): string;
-    public
-      constructor Create(Owner : TScriptElement); override;
-      destructor Destroy; override;
+    procedure ParseError(AMsg: string; ALine: integer=0; ACol: Integer=0);
+    function  GeneratePropertyName(AParentTagPath: string;
+                                   AName: string;
+                                   AIsAttribute : boolean) : string;
+    function IsUTF8File: boolean;
+    function ReadFile: boolean;
+    function FindID(pNode: IElement): string;
+    function GetNameDelimiter: string;
+  public
+    constructor Create(Owner : TScriptElement); override;
+    destructor Destroy; override;
 
-      procedure Init;    override;
-      procedure Execute; override;
-      procedure ParseXML(ATagPath: string; ANode: IElement);
-    published
-      property _file              :string  read FFile               write FFile;
-      property collapseattributes :boolean read FCollapseAttributes write FCollapseAttributes;
-      property prefix             :string  read FPrefix             write FPrefix;
-      property keeproot           :boolean read FKeepRoot           write FKeepRoot;
-      property validate           :boolean read FValidate           write FValidate;
-      property idAttr : string read FidAttr write FIdAttr;
-      property overwrite: boolean read Foverwrite write Foverwrite;
+    procedure Init;    override;
+    procedure Execute; override;
+    procedure ParseXML(ATagPath: string; ANode: IElement);
+  published
+    property _file              :string  read FFile               write FFile;
+    property collapseattributes :boolean read FCollapseAttributes write FCollapseAttributes;
+    property prefix             :string  read FPrefix             write FPrefix;
+    property keeproot           :boolean read FKeepRoot           write FKeepRoot;
+    property validate           :boolean read FValidate           write FValidate;
+    property idAttr : string read FidAttr write FIdAttr;
+    property overwrite: boolean read Foverwrite write Foverwrite;
+    property NameDelimiter: string read GetNameDelimiter write FNameDelimiter;
   end;
 
 implementation
@@ -157,10 +160,17 @@ begin
   if AIsAttribute and (not FCollapseAttributes) then
     Result := Result + '('
   else if AParentTagPath <> '' then
-    Result := Result + '.';
+    Result := Result + NameDelimiter;
   Result := Result + AName;
   if AIsAttribute and (not FCollapseAttributes) then
     Result := Result + ')';
+end;
+
+function TXmlPropertyTask.GetNameDelimiter: string;
+begin
+  Result := FNameDelimiter;
+  if Result = '' then
+    Result := '.';
 end;
 
 procedure TXmlPropertyTask.Init;

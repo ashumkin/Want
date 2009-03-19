@@ -68,6 +68,7 @@ type
     property _file :string read FFile   write FFile;
     property text  :string read FText   write FText;
   end;
+  
   TEditor = TEditTask;
 
   TCustomEditElement = class(TScriptElement)
@@ -220,6 +221,18 @@ type
     function Perform(Buffer :TStrings; Line :Integer):Integer; override;
   end;
 
+  TSetPropertyElement = class(TEditElement)
+  protected
+    Fname: string;
+    Foverwrite: boolean;
+    function Perform(Buffer :TStrings; Line :Integer) :Integer;  override;
+    procedure Init; override;
+  public
+  published
+    property name: string read Fname write Fname;
+    property overwrite: boolean read Foverwrite write Foverwrite;
+  end;
+
 implementation
 
 { TEditTask }
@@ -295,11 +308,9 @@ var
 begin
   SetText(FText);
   for i := 0 to ChildCount-1 do
-  begin
     if (Children[i] is TCustomEditElement)
         and (Children[i].Enabled) then
       TCustomEditElement(Children[i]).Perform(Self);
-  end;
 end;
 
 procedure TEditTask.Execute;
@@ -324,11 +335,11 @@ begin
       try
         for f := Low(Files) to High(Files) do
         begin
-           FCurrentFile := Files[f];
-           Log(vlVerbose, '%s', [FCurrentFile]);
-           Buffer.Clear;
-           Buffer.LoadFromFile(ToSystemPath(FCurrentFile));
-           Perform
+          FCurrentFile := Files[f];
+          Log(vlVerbose, '%s', [FCurrentFile]);
+          Buffer.Clear;
+          Buffer.LoadFromFile(ToSystemPath(FCurrentFile));
+          Perform
         end;
       finally
         FCurrentFile := '';
@@ -392,8 +403,8 @@ begin
   Result := inherited Perform(Buffer, FromLine, ToLine);
   for i := 0 to ChildCount-1 do
   begin
-    if  (Children[i] is TEditElement)
-    and (Children[i].Enabled) then
+    if (Children[i] is TEditElement)
+        and (Children[i].Enabled) then
       Result := TEditElement(Children[i]).Perform(Buffer, FromLine, ToLine);
   end;
 end;
@@ -654,9 +665,6 @@ end;
 
 { TSubstElement }
 
-
-{ TSubstElement }
-
 procedure TSubstElement.Init;
 begin
   inherited Init;
@@ -692,6 +700,19 @@ begin
   Result := inherited Perform(Buffer, Line);
 end;
 
+{ TSetPropertyElement }
+
+procedure TSetPropertyElement.Init;
+begin
+  inherited;
+  RequireAttribute('name');
+end;
+
+function TSetPropertyElement.Perform(Buffer: TStrings; Line: Integer): Integer;
+begin
+  SetProperty(name, Buffer.Text, overwrite);
+end;
+
 initialization
   RegisterTask(TEditTask);
   RegisterElements( TEditTask, [
@@ -705,7 +726,8 @@ initialization
                         TReadElement,
                         TWriteElement,
                         TInsertElement,
-                        TAppendElement
+                        TAppendElement,
+                        TSetPropertyElement
                         ]);
   RegisterElements( TGlobalElement, [
                         TGotoElement,
