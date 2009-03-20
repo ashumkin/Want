@@ -66,17 +66,23 @@ type
     FPrefix       :string;
 
     FFragments    :TStrings;
+    FSecondListener: TConsoleListener;
 
-    procedure LogPrefix( Prefix :string; Level :TLogLevel);  virtual;
-    procedure LogMessage(Prefix, Msg :string; Level :TLogLevel);  virtual;
+    procedure LogPrefix(const Prefix: string; Level: TLogLevel);  virtual;
+    procedure LogMessage(const Prefix, Msg: string; Level: TLogLevel);  virtual;
 
     procedure LogLine(Msg: string; Level: TLogLevel = vlNormal); override;
 
     procedure DeleteTaskPrefix(Task :TTask);
+    procedure SetLogFile(const Value: string); override;
+    procedure CreateSecondListener; virtual;
+    procedure LogToSecondListener(Level: TLogLevel; const Msg, Prefix: string); virtual;
   public
     constructor Create;
     destructor  Destroy; override;
 
+    procedure Log(Level: TLogLevel; Msg: string = '');              override;
+    
     procedure BuildFileLoaded(Project :TProject; FileName :string); override;
 
     procedure BuildStarted;                        override;
@@ -100,6 +106,8 @@ type
 
 implementation
 
+uses FileListener;
+
 { TConsoleListener }
 
 constructor TConsoleListener.Create;
@@ -109,14 +117,29 @@ begin
   FRightMargin := DEFAULT_RIGTH_MARGIN;
 
   FFragments := TStringList.Create;
+  FSecondListener := nil;
 end;
 
 
 
+procedure TConsoleListener.CreateSecondListener;
+begin
+  inherited;
+  if not Assigned(FSecondListener) then
+    FSecondListener := TFileListener.Create(Self, FLogFile);
+end;
+
 destructor TConsoleListener.Destroy;
 begin
-  FFragments.Free;
+  FreeAndNil(FFragments);
+  FreeAndNil(FSecondListener);
   inherited Destroy;
+end;
+
+procedure TConsoleListener.Log(Level: TLogLevel; Msg: string);
+begin
+  inherited;
+  LogToSecondListener(Level, Msg, FPrefix);
 end;
 
 procedure TConsoleListener.LogLine(Msg: string; Level: TLogLevel);
@@ -140,13 +163,13 @@ begin
   end;
 end;
 
-procedure TConsoleListener.LogMessage(Prefix, Msg :string; Level: TLogLevel);
+procedure TConsoleListener.LogMessage(const Prefix, Msg: string; Level: TLogLevel);
 begin
   LogPrefix(Prefix, Level);
   if UseColor then
     CRT32.TextColor(MsgColorMap[Level]);
   try
-    WriteToconsole(Msg, ANSI);
+    WriteToConsole(Msg, ANSI);
     ClrEOL;
     WriteLn;
   finally
@@ -158,9 +181,10 @@ begin
   end;
 end;
 
-procedure TConsoleListener.LogPrefix(Prefix :string; Level: TLogLevel);
+procedure TConsoleListener.LogPrefix(const Prefix: string; Level: TLogLevel);
 begin
-  if UseColor then CRT32.TextColor(PrefixColorMap[Level]);
+  if UseColor then
+    CRT32.TextColor(PrefixColorMap[Level]);
   try
     Write(Prefix);
     ClrEOL;
@@ -171,6 +195,15 @@ begin
       ClrEOL;
     end;
   end;
+end;
+
+procedure TConsoleListener.LogToSecondListener(Level: TLogLevel; const Msg,
+  Prefix: string);
+begin
+  if not Assigned(FSecondListener) then
+    Exit;
+  FSecondListener.FPrefix := Prefix;
+  FSecondListener.Log(Level, Msg);
 end;
 
 procedure TConsoleListener.DeleteTaskPrefix(Task: TTask);
@@ -198,6 +231,12 @@ procedure TConsoleListener.ProjectStarted(Project: TProject);
 begin
   inherited ProjectStarted(Project);
   Log(vlNormal, Project.Description);
+end;
+
+procedure TConsoleListener.SetLogFile(const Value: string);
+begin
+  inherited;
+  CreateSecondListener;
 end;
 
 procedure TConsoleListener.ProjectFinished(Project: TProject);

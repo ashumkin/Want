@@ -385,9 +385,9 @@ begin
 
     Log(vlDebug, Format('Looking for "%s in "%s"', [BuildFile, Dir]));
     while not PathIsFile(Result)
-    and SearchUp
-    and (Dir <> '')
-    and (Dir <> SuperPath(Dir))
+      and SearchUp
+      and (Dir <> '')
+      and (Dir <> SuperPath(Dir))
     do
     begin
       if PathIsDir(Dir) then

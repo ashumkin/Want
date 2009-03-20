@@ -34,7 +34,6 @@ uses
   SysConst,
   WIN32 in 'win32\WIN32.pas',
   CRT32 in 'win32\CRT32.pas',
-  ConsoleListener in 'win32\ConsoleListener.pas',
   Win32Implementations in 'win32\Win32Implementations.pas',
   Resources in 'win32\Resources.pas',
   EditTasks in 'tasks\EditTasks.pas',
@@ -69,7 +68,9 @@ uses
   CVSTasks in 'tasks\CVSTasks.pas',
   GZipTasks in 'tasks\GZipTasks.pas',
   HashTasks in 'tasks\HashTasks.pas',
-  SVNTasks in 'tasks\SVNTasks.pas';
+  SVNTasks in 'tasks\SVNTasks.pas',
+  ConsoleListener in 'win32\ConsoleListener.pas',
+  FileListener in 'win32\FileListener.pas';
 
 {$APPTYPE CONSOLE}
 

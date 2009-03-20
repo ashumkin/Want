@@ -710,6 +710,7 @@ end;
 
 function TSetPropertyElement.Perform(Buffer: TStrings; Line: Integer): Integer;
 begin
+  Result := 0;
   SetProperty(name, Buffer.Text, overwrite);
 end;
 

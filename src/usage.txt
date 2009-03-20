@@ -15,3 +15,4 @@ Options:
   -dsv                   Do not stop on switch -v (must be defined BEFORE -v)
   -is,
         --ignore-scratch Ignore scratch verify
+  -log <file>            Also write debug-log to the <file>                  

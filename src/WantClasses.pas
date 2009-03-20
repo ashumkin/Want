@@ -124,8 +124,11 @@ type
     FLevel        :TLogLevel;
     FANSI: boolean;
     FIgnoreScratch: boolean;
+    FLogFile: string;
+    function GetLogFile: string; virtual; 
+    procedure SetLogFile(const Value: string); virtual; 
   public
-    constructor Create; 
+    constructor Create;
     procedure Log(Level: TLogLevel; Msg: string = '');              virtual; abstract;
     procedure BuildFileLoaded(Project :TProject; FileName :string); virtual; abstract;
 
@@ -146,6 +149,7 @@ type
     property Level :TLogLevel read FLevel write FLevel;
     property ANSI: boolean read FANSI write FANSI;
     property IgnoreScratch: boolean read FIgnoreScratch write FIgnoreScratch;
+    property LogFile: string read GetLogFile write SetLogFile;
   published
   end;
 
@@ -1613,8 +1617,6 @@ begin
   FValue := Value;
 end;
 
-{ TBuildListener }
-
 procedure WriteToConsole(sMsg: string; bANSI: boolean);
 begin
   if bANSI then
@@ -1629,6 +1631,16 @@ begin
   inherited;
   FANSI := False;
   FIgnoreScratch := False;
+end;
+
+function TBuildListener.GetLogFile: string;
+begin
+  Result := FLogFile;
+end;
+
+procedure TBuildListener.SetLogFile(const Value: string);
+begin
+  FLogFile := Value;
 end;
 
 initialization

@@ -167,6 +167,13 @@ var
   PropName:  string;
   PropValue: string;
   EqPos:     Integer;
+  function GetNextParam: string;
+  begin
+    Result := '';
+    Inc(N);
+    if N < CommandLine.Count then
+      result := CommandLine[N];
+  end;
 begin
   Result := True;
   if (Switch = 'h')
@@ -197,10 +204,7 @@ begin
   end
   else if (Switch = 'buildfile')
     or (Switch = 'b') then
-  begin
-    Inc(N);
-    FBuildFile := ToPath(CommandLine.Strings[N]);
-  end
+    FBuildFile := ToPath(GetNextParam())
   else if Switch = 'verbose' then
     Listener.Level := vlVerbose
   else if Switch = 'ansi' then
@@ -213,7 +217,9 @@ begin
     Listener.Level := vlDebug;
     Log(vlDebug, 'Parsing commandline');
   end
-  else if (Switch = 'quiet') 
+  else if Switch = 'log' then
+    Listener.LogFile := ToPath(Trim(GetNextParam()))
+  else if (Switch = 'quiet')
       or (Switch = 'q')
       or (Switch = 'warnings') then
     Listener.Level := vlQuiet
