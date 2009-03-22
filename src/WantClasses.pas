@@ -809,7 +809,7 @@ end;
 
 procedure TScriptElement.AboutToScratchPath(const Path: TPath);
 begin
-  if not Project.Listener.IgnoreScratch
+  if (not Assigned(Project.Listener) or not Project.Listener.IgnoreScratch)
       and PathExists(Path)
       and (Pos(LowerCase(ToAbsolutePath(BasePath)), LowerCase(ToAbsolutePath(Path))) <> 1) then
     WantError(Format('Will not scratch %s outside of %s',

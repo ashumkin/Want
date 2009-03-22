@@ -200,22 +200,20 @@ end;
 
 procedure TXmlPropertyTask.ParseXML(ATagPath: string; ANode: IElement);
 var
-   bAttrName    :string;
-   bAttrValue    :string;
-   FTagPath     :string;
-   bIter        :IIterator;
-   bAtrIter     :IIterator;
-   bAttr        :IAttribute;
-   bText        :JALMiniDOM.ITextNode;
-   bChild       :JALMiniDOM.IElement;
-   bAttrID: string;
-   b: boolean;
+  bAttrName: string;
+  bAttrValue: string;
+  FTagPath: string;
+  bIter: IIterator;
+  bAtrIter: IIterator;
+  bAttr: IAttribute;
+  bText: JALMiniDOM.ITextNode;
+  bChild: JALMiniDOM.IElement;
+  bAttrID: string;
 begin
   inherited;
   if not (FProcessingRoot and (not FKeepRoot)) then
   begin
     bAttrID := FindID(aNode);
-    b := bAttrID = '';
     FTagPath := GeneratePropertyName(ATagPath, bAttrID, False);
     if not FProcessingRoot then
     begin

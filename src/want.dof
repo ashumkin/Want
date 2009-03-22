@@ -100,11 +100,11 @@ Conditionals=USE_JEDI_JCL;DUNIT_DLL
 DebugSourceDirs=
 UsePackages=0
 [Parameters]
-RunParams=-debug -ansi compile-only
+RunParams=test -debug
 HostApplication=
 Launcher=
 UseLauncher=0
-DebugCWD=d:\Work\shumkin.alexey\тля\trunk\Install\
+DebugCWD=
 [Language]
 ActiveLang=
 ProjectLang=
