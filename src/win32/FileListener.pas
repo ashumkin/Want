@@ -75,7 +75,8 @@ end;
 
 destructor TFileListener.Destroy;
 begin
-  CloseFile(FFileHandle);
+  if FIsFileOpened then
+    CloseFile(FFileHandle);
   inherited;
 end;
 
