@@ -127,6 +127,7 @@ begin
   try
     Project.Listener := Listener;
     ParseCommandLine(Project);
+    Log(vlDebug, 'WANT started at ' + FormatDateTime('yyyy-dd-mm hh:nn:ss', Now));
     if FBuildFile = '' then
       FBuildFile := FindBuildFile(True);
     LoadProject(Project, FBuildFile);
@@ -218,7 +219,7 @@ begin
     Log(vlDebug, 'Parsing commandline');
   end
   else if Switch = 'log' then
-    Listener.LogFile := ToPath(Trim(GetNextParam()))
+    Listener.LogFile := ToSystemPath(ToPath(Trim(GetNextParam())))
   else if (Switch = 'quiet')
       or (Switch = 'q')
       or (Switch = 'warnings') then

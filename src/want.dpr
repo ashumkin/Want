@@ -68,6 +68,7 @@ uses
   CVSTasks in 'tasks\CVSTasks.pas',
   GZipTasks in 'tasks\GZipTasks.pas',
   HashTasks in 'tasks\HashTasks.pas',
+  EncodeDecodeTasks in 'tasks\EncodeDecodeTasks.pas',
   SVNTasks in 'tasks\SVNTasks.pas',
   ConsoleListener in 'win32\ConsoleListener.pas',
   FileListener in 'win32\FileListener.pas';

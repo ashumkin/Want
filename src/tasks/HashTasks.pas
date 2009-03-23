@@ -40,19 +40,18 @@ uses
 
 type
   ECRCException = class(Exception);
-  TAlgorithms = (atCRC32, atMD4, atMD5, atSHA1, atSHA256, atSHA512, atTiger);
+  THashAlgorithms = (atCRC32, atMD4, atMD5, atSHA1, atSHA256, atSHA512, atTiger);
 
   THashTask = class(TTask)
   private
     procedure SetAlgorithm(const Value: string);
     function GetAlgorithm: string;
   protected
-    FAlgorithm: TAlgorithms;
+    FAlgorithm: THashAlgorithms;
     FHashStr  : string;
     FHash     : Cardinal;
     FText    : string;
     FFile    : TPath;
-    FAppend  : boolean;
     FLevel   : TLogLevel;
     FOverwrite: boolean;
     FProperty: string;
@@ -67,7 +66,6 @@ type
   published
     property _text    : string    read FText    write FText;
     property _file    : TPath     read FFile    write FFile;
-//    property level    : TLogLevel read FLevel   write FLevel default vlNormal;
     property _property: string    read FProperty write FProperty;
     property alg      : string read GetAlgorithm write SetAlgorithm;
     property algorithm: string read GetAlgorithm write SetAlgorithm;
@@ -79,12 +77,11 @@ implementation
 
 uses TypInfo;
 
-{ TEchoTask }
+{ THashTask }
 
 constructor THashTask.Create(Owner: TScriptElement);
 begin
   inherited Create(Owner);
-//  Level := vlNormal;
   FAlgorithm := atCRC32;
 end;
 
@@ -150,7 +147,7 @@ end;
 
 function THashTask.GetAlgorithm: string;
 begin
-  Result := StringReplace(GetEnumName(TypeInfo(TAlgorithms), ord(FAlgorithm)),
+  Result := StringReplace(GetEnumName(TypeInfo(THashAlgorithms), ord(FAlgorithm)),
     'at', '', [rfIgnoreCase]);
 end;
 
@@ -164,12 +161,12 @@ procedure THashTask.SetAlgorithm(const Value: string);
 var
   i: Integer;
 begin
-  i := GetEnumValue(TypeInfo(TAlgorithms),
+  i := GetEnumValue(TypeInfo(THashAlgorithms),
     'at' + StringReplace(Value, '-', '', [rfReplaceAll]));
   if i < 0 then
     raise ECRCException.CreateFmt('Algorithm %s is not implemented', [Value])
   else
-    FAlgorithm := TAlgorithms(i);
+    FAlgorithm := THashAlgorithms(i);
 end;
 
 initialization
