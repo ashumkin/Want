@@ -130,6 +130,7 @@ procedure TWantTask.Execute;
 var
   FRunner :TScriptRunner;
   i: Integer;
+  sp: TSubProjectOutputPropertyElement;
 begin
   ChangeDir(BasePath);
   Log(vlDebug, 'dir=%s(%s)', [dir, ToAbsolutePath(dir)]);
@@ -159,15 +160,16 @@ begin
       for i := 0 to ChildCount - 1 do
         if Children[i] is TSubProjectOutputPropertyElement then
         begin
-          Log(vlVerbose, 'Get subproject property "%s" = "%s" to "%s"',
-            [TSubProjectOutputPropertyElement(Children[i]).from,
-             FSubProject.PropertyValue(
-               TSubProjectOutputPropertyElement(Children[i]).from),
-             TSubProjectOutputPropertyElement(Children[i])._property
-            ]);
-          SetProperty(TSubProjectOutputPropertyElement(Children[i])._property,
-            FSubProject.PropertyValue(
-              TSubProjectOutputPropertyElement(Children[i]).from), True);
+          sp := TSubProjectOutputPropertyElement(Children[i]);
+          if sp.Enabled then
+          begin
+            Log(vlVerbose, 'Get subproject property "%s" = "%s" to "%s"',
+              [sp.from,
+               FSubProject.PropertyValue(sp.from),
+               sp._property
+              ]);
+            SetProperty(sp._property, FSubProject.PropertyValue(sp.from), True);
+          end;
         end;
     finally
 //      FSubProject.Parent := Self;
