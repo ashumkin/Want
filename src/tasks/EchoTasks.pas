@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA *
  ****************************************************************************)
 {
-    @brief 
+    @brief
 
     @author Juancarlo Añez
 }
@@ -35,11 +35,20 @@ uses
 
   WantUtils,
   WantClasses,
-  WildPaths;
+  WildPaths,
+
+  uEncoder;
 
 type
   TEchoTask = class(TTask)
+  private
+    procedure Setiencoding(const Value: string);
+    function Getiencoding: string;
+    function Getoencoding: string;
+    procedure Setoencoding(const Value: string);
   protected
+    Fiencoding: TEncoding;
+    Foencoding: TEncoding;
     FMessage :string;
     FText    :string;
     FFile    :TPath;
@@ -47,6 +56,7 @@ type
     FLevel   :TLogLevel;
     FInput   :TPath;
 
+    function Convert(pStr: string; from: boolean): string;
   public
     constructor Create(Owner :TScriptElement); override;
 
@@ -60,16 +70,36 @@ type
     property append   :boolean   read FAppend  write FAppend;
     property level    :TLogLevel read FLevel   write FLevel default vlNormal;
     property input    :TPath     read FInput   write FInput;
+    property iencoding: string read Getiencoding write Setiencoding;
+    property oencoding: string read Getoencoding write Setoencoding;
   end;
 
 implementation
 
 { TEchoTask }
 
+function TEchoTask.Convert(pStr: string; from: boolean): string;
+var
+  TE: TEncoder;
+begin
+  TE := TEncoder.Create;
+  try
+    if from then
+      TE.InputEncoding := Fiencoding
+    else
+      TE.OutputEncoding := Foencoding;
+    Result := TE.DoConvertText(pStr);
+  finally
+    FreeAndNil(TE);
+  end;
+end;
+
 constructor TEchoTask.Create(Owner: TScriptElement);
 begin
   inherited Create(Owner);
   Level := vlNormal;
+  Fiencoding := eANSI;
+  Foencoding := eANSI;
 end;
 
 procedure TEchoTask.Execute;
@@ -94,8 +124,8 @@ begin
 
     sysfile := ToSystemPath(_file);
     if append and PathIsFile(_file) then
-      msg := FileToString(sysfile) + msg;
-    StringToFile(sysfile, msg);
+      msg := Convert(FileToString(sysfile), True) + msg;
+    StringToFile(sysfile, Convert(msg, False));
   end;
 end;
 
@@ -147,7 +177,7 @@ begin
       if not FileExists(ToSystemPath(input)) then
         TaskFailure(Format('file "%s" not found', [ToSystemPath(input)]));
       try
-        Result := Result + FileToString( ToSystemPath(input) );
+        Result := Result + Convert(FileToString( ToSystemPath(input) ), True);
       except
         on e :Exception do
           TaskFailure(Format('%s: %s', [input, e.Message]));
@@ -158,6 +188,31 @@ begin
   end;
 end;
 
+function TEchoTask.Getiencoding: string;
+begin
+  Result := GetEncodingStr(Fiencoding);
+end;
+
+function TEchoTask.Getoencoding: string;
+begin
+  Result := GetEncodingStr(Foencoding);
+end;
+
+procedure TEchoTask.Setiencoding(const Value: string);
+begin
+  Fiencoding := GetEncodingFromStr(Value);
+  if not (Fiencoding in Encodings) then
+    TaskError(Format('Invalid encoding "%s"', [Value]));
+end;
+
+procedure TEchoTask.Setoencoding(const Value: string);
+begin
+  Foencoding := GetEncodingFromStr(Value);
+  if not (Foencoding in Encodings) then
+    TaskError(Format('Invalid encoding "%s"', [Value]));
+end;
+
 initialization
- RegisterTask(TEchoTask);
+  RegisterTask(TEchoTask);
+
 end.

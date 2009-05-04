@@ -36,10 +36,15 @@ uses
   PerlRE,
 
   WildPaths,
-  WantClasses;
+  WantClasses,
+
+  uEncoder;
 
 type
   TEditTask = class(TTask)
+  private
+    function Getencoding: string;
+    procedure Setencoding(const Value: string);
   protected
     FBuffer   :TStrings;
     FText     :string;
@@ -48,6 +53,7 @@ type
     FFile     :string;
     FLastPat  :string;
     FCurrentFile :string;
+    Fencoding: TEncoding;
 
     procedure SetDot(Value :Integer);
 
@@ -59,6 +65,8 @@ type
     function ParseLine(Line :string) :Integer;
 
     procedure Perform;
+    function Convert(pStr: string; from: boolean): string;
+    procedure ConvertBuffer; 
   public
     constructor Create(Owner :TScriptElement); override;
     destructor Destroy; override;
@@ -67,6 +75,7 @@ type
   published
     property _file :string read FFile   write FFile;
     property text  :string read FText   write FText;
+    property encoding: string read Getencoding write Setencoding;
   end;
   
   TEditor = TEditTask;
@@ -237,6 +246,27 @@ implementation
 
 { TEditTask }
 
+function TEditTask.Convert(pStr: string; from: boolean): string;
+var
+  TE: TEncoder;
+begin
+  TE := TEncoder.Create;
+  try
+    if from then
+      TE.InputEncoding := Fencoding
+    else
+      TE.OutputEncoding := Fencoding;
+    Result := TE.DoConvertText(pStr);
+  finally
+    FreeAndNil(TE);
+  end;
+end;
+
+procedure TEditTask.ConvertBuffer;
+begin
+  Buffer.Text := Convert(Buffer.Text, True);
+end;
+
 constructor TEditTask.Create(Owner: TScriptElement);
 begin
   inherited Create(Owner);
@@ -302,9 +332,16 @@ begin
 end;
 
 
+procedure TEditTask.Setencoding(const Value: string);
+begin
+  Fencoding := GetEncodingFromStr(Value);
+  if not (Fencoding in Encodings) then
+    TaskError(Format('Invalid encoding "%s"', [Value]));
+end;
+
 procedure TEditTask.Perform;
 var
-  i     :Integer;
+  i: Integer;
 begin
   SetText(FText);
   for i := 0 to ChildCount-1 do
@@ -339,6 +376,7 @@ begin
           Log(vlVerbose, '%s', [FCurrentFile]);
           Buffer.Clear;
           Buffer.LoadFromFile(ToSystemPath(FCurrentFile));
+          ConvertBuffer;
           Perform
         end;
       finally
@@ -347,6 +385,11 @@ begin
   end;
 end;
 
+
+function TEditTask.Getencoding: string;
+begin
+  Result := GetEncodingStr(Fencoding);
+end;
 
 { TCustomEditElement }
 
