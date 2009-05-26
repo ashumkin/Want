@@ -69,8 +69,8 @@ See http://www.suigeneris.org/want/ for details.
     <include  name="${lib}/jcl/source/common" />
     <include  name="${lib}/jcl/source/windows" />
     <include  name="${lib}/perlre-1.1" />
-    <include  name="${lib}/dunit-7.2.1" />
-    <include  name="${lib}/dunit-7.2.1/src" />
+    <include  name="${lib}/dunit" />
+    <include  name="${lib}/dunit/src" />
     <include  name="${lib}/dcpcrypt2" />
     <include  name="${lib}/dcpcrypt2/Hashes" />
     <include  name="${lib}/RegExpr/Source" />

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <PersonalityInfo>
+    <Option>
+      <Option Name="Personality">Default.Personality</Option>
+      <Option Name="ProjectType"></Option>
+      <Option Name="Version">1.0</Option>
+      <Option Name="GUID">{88871E86-774B-4B12-A14C-5AED5446AE0C}</Option>
+    </Option>
+  </PersonalityInfo>
+  <Default.Personality>
+    
+    
+    
+    <Projects>
+      <Projects Name="want.exe">want.bdsproj</Projects>
+      <Projects Name="WantAcceptTestLib.dll">..\test\WantAcceptTestLib.bdsproj</Projects>
+      <Projects Name="WantTestLib.dll">..\test\WantTestLib.bdsproj</Projects>
+      <Projects Name="WantTests.exe">..\test\WantTests.bdsproj</Projects>
+      <Projects Name="Targets">want.exe WantAcceptTestLib.dll WantTestLib.dll WantTests.exe</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+</BorlandProject>
