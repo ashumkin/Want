@@ -254,6 +254,7 @@ var
 begin
   TFS := TFileStream.Create(ToSystemPath(FFile), fmOpenRead);
   try
+    FFileText.Position := 0;
     FFileText.CopyFrom(TFS, TFS.Size);
     if IsUTF8File then
     begin
