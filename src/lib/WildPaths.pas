@@ -120,7 +120,9 @@ procedure ToSystemPaths(Paths: TStrings; const BasePath: TPath = ''); overload;
 
 function StringsToPaths(S: TStrings):TPaths;
 function SplitPath(Path: TPath): TPaths;
-function JoinPaths(Paths: TPaths): TPath;
+function JoinPaths(Paths: TPaths): TPath; overload;
+
+function JoinPaths(Paths1, Paths2: TPaths): TPaths; overload;
 
 function  MovePath(Path, FromBase: TPath; ToBase: TPath = ''): TPath;
 function  MovePaths(const Paths: TPaths; const FromBase: TPath; const ToBase: TPath = ''): TPaths;
@@ -524,6 +526,18 @@ begin
   end;
 end;
 
+function JoinPaths(Paths1, Paths2: TPaths): TPaths;
+var
+  i: Integer;
+  L: Integer;
+begin
+  Result := Paths1;
+  L := Length(Result);
+  SetLength(Result, L + Length(Paths2));
+  for i := Low(Paths2) to High(Paths2) do
+    Result[L + i] := Paths2[i]; 
+end;
+
 function StringsToPaths(S: TStrings): TPaths;
 var
   i: Integer;
@@ -760,7 +774,7 @@ begin
     Matches := FindPaths(Patterns[Index], NewBase, IncludeAttr, ExcludeAttr);
     for i := Low(Matches) to High(Matches) do
     begin
-      NewFile := PathConcat(NewBase, Matches[i]);
+      NewFile := Matches[i];//PathConcat(NewBase, Matches[i]);
       if Files.IndexOf(NewFile) < 0 then
       begin
         Files.Add(NewFile);

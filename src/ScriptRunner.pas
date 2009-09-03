@@ -267,7 +267,7 @@ var
   i :Integer;
   p :Integer;
   LastDir :TPath;
-  PathList :TPaths;
+  PathList, PL :TPaths;
 begin
   if not Target.Enabled then
     EXIT;
@@ -285,7 +285,11 @@ begin
     if Target.ForEachList then
       PathList := SplitListToPaths(Target.ForEach)
     else
-      PathList := WildPaths.Wild(Target.ForEach);
+    begin
+      PL := SplitListToPaths(Target.ForEach);
+      for i := Low(PL) to High(PL) do
+        PathList := JoinPaths(PathList, WildPaths.Wild(PL[i]));
+    end;
     if Length(PathList) = 0 then
     begin
       SetLength(PathList, 1);

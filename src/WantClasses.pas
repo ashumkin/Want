@@ -220,6 +220,7 @@ type
     function  ExpressionValue(Expre: string): string;    virtual;
     function  INIValue(Expre: string): string;           virtual;
     function  PathValue(Expre: string): string;          virtual;
+    function  PathRelValue(Expre: string): string;          virtual;
     function  Evaluate(Value: string): string;           virtual;
 
     procedure SetProperties(Value: TStrings);
@@ -1026,6 +1027,11 @@ begin
     end;
 end;
 
+function TScriptElement.PathRelValue(Expre: string): string;
+begin
+  Result := WildPaths.ToSystemPath(ToRelativePath(Expre));
+end;
+
 function TScriptElement.PathValue(Expre: string): string;
 begin
   Result := ToSystemPath(ToPath(Expre));
@@ -1069,6 +1075,8 @@ begin
           Result := Expand(MacroStart, Result, INIValue);
       '@':
           Result := Expand(MacroStart, Result, PathValue);
+      '*':
+          Result := Expand(MacroStart, Result, PathRelValue);
     end;
     MacroStart := StrSearch('{', Result, MacroStart+2)-1;
   end;
