@@ -210,7 +210,7 @@ var
   fp : FILEptr;
   OldFileMode : byte;
 begin
-  //fp := NIL; // juanco 2001.03.28
+  fp := NIL;
   OldFileMode := FileMode;
 
   GetMem(fp, SizeOf(file));
@@ -304,10 +304,8 @@ begin
   {$i-}
   case mode of
     SEEK_SET : system.Seek(fp^, recPos);
-    //SEEK_CUR : system.Seek(fp^, FilePos(fp^)+recPos); // juanco 2001.03.28
-    //SEEK_END : system.Seek(fp^, FileSize(fp^)-1-recPos); { ?? check }
-    SEEK_CUR : system.Seek(fp^, uLong(FilePos(fp^))+recPos);
-    SEEK_END : system.Seek(fp^, uLong(FileSize(fp^))-1-recPos); { ?? check }
+    SEEK_CUR : system.Seek(fp^, FilePos(fp^)+recPos);
+    SEEK_END : system.Seek(fp^, FileSize(fp^)-1-recPos); { ?? check }
   end;
   fseek := IOresult; { = 0 for success }
 end;

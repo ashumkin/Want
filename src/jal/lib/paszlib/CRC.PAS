@@ -1,6 +1,4 @@
-{$WARNINGS OFF}
 Unit Crc;
-
 {
   crc32.c -- compute the CRC-32 of a data stream
   Copyright (C) 1995-1998 Mark Adler
@@ -8,6 +6,9 @@ Unit Crc;
   Pascal tranlastion
   Copyright (C) 1998 by Jacques Nomssi Nzali
   For conditions of distribution and use, see copyright notice in readme.txt
+  
+  Modifiied 02/2003 by Sergey A. Galin for Delphi 6+ and Kylix compatibility.
+  See README in directory above for more information.  
 }
 
 interface
@@ -15,7 +16,7 @@ interface
 {$I zconf.inc}
 
 uses
-  zutil, zlib;
+  ZUtil, gZlib;
 
 
 function crc32(crc : uLong; buf : pBytef; len : uInt) : uLong;
@@ -117,7 +118,7 @@ end;
 
 {local}
 const
-  crc_table : array[0..256-1] of uLongf = (
+  crc_table : array[0..255] of uLongf = (
   $00000000, $77073096, $ee0e612c, $990951ba, $076dc419,
   $706af48f, $e963a535, $9e6495a3, $0edb8832, $79dcb8a4,
   $e0d5e91e, $97d2d988, $09b64c2b, $7eb17cbd, $e7b82d07,
@@ -189,7 +190,7 @@ end;
 
 function crc32 (crc : uLong; buf : pBytef; len : uInt): uLong;
 begin
-  if (buf = nil) then
+  if (buf = Z_NULL) then
     crc32 := Long(0)
   else
   begin

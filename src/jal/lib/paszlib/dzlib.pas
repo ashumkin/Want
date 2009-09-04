@@ -10,9 +10,12 @@
 
 unit dzlib;
 
+{$WARN UNSAFE_TYPE OFF}
+{$WARN UNSAFE_CODE OFF}
+
 interface
 
-uses zlib, Sysutils, Classes;
+uses gzlib, Sysutils, Classes;
 
 {$IFDEF VER80}
   {$DEFINE Delphi16}

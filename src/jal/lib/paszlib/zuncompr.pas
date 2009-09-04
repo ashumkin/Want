@@ -1,11 +1,13 @@
 Unit zUnCompr;
-
 { uncompr.c -- decompress a memory buffer
   Copyright (C) 1995-1998 Jean-loup Gailly.
 
   Pascal tranlastion
   Copyright (C) 1998 by Jacques Nomssi Nzali
   For conditions of distribution and use, see copyright notice in readme.txt
+
+  Modifiied 02/2003 by Sergey A. Galin for Delphi 6+ and Kylix compatibility.
+  See README in directory above for more information.  
 }
 
 interface
@@ -13,7 +15,7 @@ interface
 {$I zconf.inc}
 
 uses
-  zutil, zlib, zInflate;
+  zutil, gzlib, zInflate;
 
 { ===========================================================================
      Decompresses the source buffer into the destination buffer.  sourceLen is

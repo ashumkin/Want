@@ -28,7 +28,7 @@ uses
   WinDos, strings,
   {$endif}
   zutil,
-  zlib, ziputils,
+  gzlib, ziputils,
   unzip;
 
 const
@@ -241,12 +241,12 @@ begin
     WriteLn(file_info.uncompressed_size:7, '  ',
           string_method:6, ' ',
           file_info.compressed_size:7, ' ',
-	  ratio:3,'%  ',  LeadingZero(uLong(file_info.tmu_date.tm_mon)+1),'-',
+    ratio:3,'%  ',  LeadingZero(uLong(file_info.tmu_date.tm_mon)+1),'-',
           LeadingZero(uLong(file_info.tmu_date.tm_mday)):2,'-',
-	  LeadingZero(uLong(file_info.tmu_date.tm_year mod 100)):2,'  ',
-	  LeadingZero(uLong(file_info.tmu_date.tm_hour)),':',
+    LeadingZero(uLong(file_info.tmu_date.tm_year mod 100)):2,'  ',
+    LeadingZero(uLong(file_info.tmu_date.tm_hour)),':',
           LeadingZero(uLong(file_info.tmu_date.tm_min)),'  ',
-	  HexToStr(uLong(file_info.crc)),'  ',
+    HexToStr(uLong(file_info.crc)),'  ',
           filename_inzip);
 
     if ((i+1)<gi.number_entry) then
@@ -348,15 +348,15 @@ begin
       if (ftestexist <> NIL) then
       begin
         fclose(ftestexist);
-	repeat
-	  Write('The file ',write_filename,
+  repeat
+    Write('The file ',write_filename,
             ' exist. Overwrite ? [y]es, [n]o, [A]ll: ');
-	  ReadLn(answer);
+    ReadLn(answer);
 
-	  rep := answer[1] ;
-	  if ((rep>='a') and (rep<='z')) then
-	    Dec(rep, $20);
-	until (rep = 'Y') or (rep = 'N') or (rep = 'A');
+    rep := answer[1] ;
+    if ((rep>='a') and (rep<='z')) then
+      Dec(rep, $20);
+  until (rep = 'Y') or (rep = 'N') or (rep = 'A');
       end;
 
       if (rep = 'N') then
@@ -391,32 +391,32 @@ begin
 
       repeat
         err := unzReadCurrentFile(uf,buf,size_buf);
-	if (err<0) then
-	begin
-	  WriteLn('error ',err,' with zipfile in unzReadCurrentFile');
-	  break;
-	end;
-	if (err>0) then
+  if (err<0) then
+  begin
+    WriteLn('error ',err,' with zipfile in unzReadCurrentFile');
+    break;
+  end;
+  if (err>0) then
         begin
-	  if (fwrite(buf,err,1,fout) <> 1) then
-	  begin
-	    WriteLn('error in writing extracted file');
+    if (fwrite(buf,err,1,fout) <> 1) then
+    begin
+      WriteLn('error in writing extracted file');
             err := UNZ_ERRNO;
-	    break;
-	  end;
+      break;
+    end;
         end;
       until (err=0);
       fclose(fout);
       if (err=0) then
         change_file_date(write_filename,file_info.dosDate,
-	   file_info.tmu_date);
+     file_info.tmu_date);
     end;
 
     if (err=UNZ_OK) then
     begin
       err := unzCloseCurrentFile (uf);
       if (err <> UNZ_OK) then
-	WriteLn('error ',err,' with zipfile in unzCloseCurrentFile')
+  WriteLn('error ',err,' with zipfile in unzCloseCurrentFile')
       else
         unzCloseCurrentFile(uf); { don't lose the error }
     end;
@@ -451,7 +451,7 @@ begin
       err := unzGoToNextFile(uf);
       if (err <> UNZ_OK) then
       begin
-	WriteLn('error ',err,' with zipfile in unzGoToNextFile');
+  WriteLn('error ',err,' with zipfile in unzGoToNextFile');
         break;
       end;
     end;
@@ -572,7 +572,7 @@ begin
     begin
       if (filename_to_extract = NIL) then
       begin
-	main := do_extract(uf,opt_do_extract_withoutpath,opt_overwrite);
+  main := do_extract(uf,opt_do_extract_withoutpath,opt_overwrite);
         exit;
       end
       else

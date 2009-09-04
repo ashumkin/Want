@@ -1,4 +1,3 @@
-{$WRITEABLECONST ON}
 Unit InfTrees;
 
 { inftrees.h -- header to use inftrees.c
@@ -12,6 +11,9 @@ Unit InfTrees;
   Pascal tranlastion
   Copyright (C) 1998 by Jacques Nomssi Nzali
   For conditions of distribution and use, see copyright notice in readme.txt
+  
+  Modifiied 02/2003 by Sergey A. Galin for Delphi 6+ and Kylix compatibility.
+  See README in directory above for more information.  
 }
 
 Interface
@@ -19,7 +21,7 @@ Interface
 {$I zconf.inc}
 
 uses
-  zutil, zlib;
+  zutil, gzlib;
 
 
 { Maximum size of dynamic tree.  The maximum found in a long but non-
@@ -166,7 +168,7 @@ Var
   i : uInt;  {register}         { counter, current code }
   j : uInt;  {register}         { counter }
   k : Int;   {register}         { number of bits in current code }
-  l : int;			{ bits per table (returned in m) }
+  l : int;      { bits per table (returned in m) }
   mask : uInt;                  { (1 shl w) - 1, to avoid cc -O bug on HP }
   p : ^uIntf; {register}        { pointer into c[], b[], or v[] }
   q : pInflate_huft;            { points to current table }
@@ -556,8 +558,9 @@ end;
 { build fixed tables only once--keep them here }
 {$IFNDEF BUILDFIXED}
 { locals }
-const
+var
   fixed_built : Boolean = false;
+const  
   FIXEDH = 544;      { number of hufts used by fixed tables }
 var
   fixed_mem : array[0..FIXEDH-1] of inflate_huft;

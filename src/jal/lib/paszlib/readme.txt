@@ -1,3 +1,7 @@
+
+This version of PASZLIB was modified by Sergey A. Galin, 02/2003. See the
+README in directory above for details.
+
 _____________________________________________________________________________
 
 PASZLIB 1.0                                                   May 11th, 1998

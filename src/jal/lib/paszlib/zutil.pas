@@ -1,8 +1,10 @@
 Unit ZUtil;
-
 {
   Copyright (C) 1998 by Jacques Nomssi Nzali
   For conditions of distribution and use, see copyright notice in readme.txt
+  
+  Modifiied 02/2003 by Sergey A. Galin for Delphi 6+ and Kylix compatibility.
+  See README in directory above for more information.  
 }
 
 interface
@@ -15,32 +17,13 @@ type
   {Byte   = usigned char;  8 bits}
   Bytef  = byte;
   charf  = byte;
-
-{$IFDEF FPC}
-  int    = longint;
-{$ELSE}
   int    = integer;
-{$ENDIF}
-
   intf   = int;
-{$IFDEF MSDOS}
-  uInt   = Word;
-{$ELSE}
-  {$IFDEF FPC}
-    uInt   = longint;     { 16 bits or more }
-    {$INFO Cardinal}
-  {$ELSE}
-    uInt   = cardinal;     { 16 bits or more }
-  {$ENDIF}
-{$ENDIF}
+  uInt   = cardinal;     { 16 bits or more }
   uIntf  = uInt;
 
   Long   = longint;
-{$ifdef Delphi5}  
   uLong  = Cardinal;
-{$else}
-  uLong  = LongInt;      { 32 bits or more }
-{$endif}
   uLongf = uLong;
 
   voidp  = pointer;
@@ -484,8 +467,6 @@ begin
   zcalloc := p;
 end;
 
-// end. // juanco 2001.03.28
-
 
 { edited from a SWAG posting:
 
@@ -542,5 +523,8 @@ When 'HeapPtr' and 'FreeList' have the same value, the free list is empty.
 
 
 }
-end. // juanco 2001.03.28
+
+end.
+
+
 

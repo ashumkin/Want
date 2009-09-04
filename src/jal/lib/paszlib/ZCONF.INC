@@ -1,36 +1,28 @@
 { -------------------------------------------------------------------- }
 
+{  
+  Modifiied 02/2003 by Sergey A. Galin for Delphi 6+ and Kylix compatibility.
+  See README in directory above for more information. 
+}  
+
+
+{$DEFINE X32}
+{$DEFINE Delphi32}
+{$DEFINE Delphi}
+{$DEFINE Kylix}
+
+{$WARN UNSAFE_CODE OFF}
+{$WARN UNSAFE_TYPE OFF}
+
 {$DEFINE MAX_MATCH_IS_258}
 
-{ Compile with -DMAXSEG_64K if the alloc function cannot allocate more
-  than 64k bytes at a time (needed on systems with 16-bit int). }
-
-{- $DEFINE MAXSEG_64K}
-{$IFDEF VER70}
-  {$DEFINE MAXSEG_64K}
-{$ENDIF}
-{$IFNDEF WIN32}
+{$IFNDEF X32}
   {$DEFINE UNALIGNED_OK}  { requires SizeOf(ush) = 2 ! }
 {$ENDIF}
 
 {$UNDEF DYNAMIC_CRC_TABLE}
 {$UNDEF FASTEST}
-{$define patch112}        { apply patch from the zlib home page }
+{$DEFINE patch112}        { apply patch from the zlib home page }
 { -------------------------------------------------------------------- }
-{$IFDEF WIN32}
-  {$DEFINE Delphi32}
-  {$DEFINE Delphi5}  { keep compiler quiet }
-{$ENDIF}
 
-{$IFDEF DPMI}
-  {$DEFINE MSDOS}
-{$ENDIF}
 
-{$IFDEF FPC}
- {$DEFINE Use32}
- {$UNDEF DPMI}
- {$UNDEF MSDOS}
- {$UNDEF UNALIGNED_OK}  { requires SizeOf(ush) = 2 ! }
- {$UNDEF MAXSEG_64K}
- {$UNDEF Delphi32}
-{$ENDIF}

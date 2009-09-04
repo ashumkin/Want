@@ -25,7 +25,7 @@ uses
   {$else}
   WinDos, strings,
   {$endif}
-  zutil, zlib, ziputils, zip;
+  zutil, gzlib, ziputils, zip;
 
 const
   WRITEBUFFERSIZE = Z_BUFSIZE;
@@ -189,15 +189,15 @@ begin
       begin
         p := @argstr[1+1];       {const char *p=argv[i]+1;}
 
-	while (p^<>#0) do
-	begin
-	  c := p^;
+  while (p^<>#0) do
+  begin
+    c := p^;
           Inc(p);
-	  if (c='o') or (c='O') then
-	    opt_overwrite := 1;
+    if (c='o') or (c='O') then
+      opt_overwrite := 1;
           if (c>='0') and (c<='9') then
             opt_compress_level := Byte(c)-Byte('0');
-	end;
+  end;
       end
       else
         if (zipfilenamearg = 0) then
@@ -235,13 +235,13 @@ begin
       if (check_exist_file(filename_try)<>0) then
       begin
         repeat
-	  WriteLn('The file ',filename_try,
+    WriteLn('The file ',filename_try,
             ' exist. Overwrite ? [y]es, [n]o : ');
-	  ReadLn(answer);
-	  rep := answer[1] ;
-	  if (rep>='a') and (rep<='z') then
-	    Dec(rep, $20);
-	until (rep='Y') or (rep='N');
+    ReadLn(answer);
+    rep := answer[1] ;
+    if (rep>='a') and (rep<='z') then
+      Dec(rep, $20);
+  until (rep='Y') or (rep='N');
         if (rep='N') then
           zipok := 0;
       end;

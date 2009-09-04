@@ -26,7 +26,7 @@ interface
 
 uses
   zutil,
-  zLib,
+  gzLib,
   ziputils;
 
 
@@ -106,7 +106,7 @@ function unzOpen (const path : PChar) : unzFile;
   If the zipfile cannot be opened (file don't exist or in not valid), the
   return value is NIL.
   Else, the return value is a unzFile Handle, usable with other function
-	   of this unzip package.
+     of this unzip package.
 }
 
 function unzClose (afile : unzFile) : int;
@@ -126,7 +126,7 @@ function unzGetGlobalInfo (afile : unzFile;
 
 function unzGetGlobalComment (afile : unzFile;
                               szComment : PChar;
-			      uSizeBuf : uLong) : int;
+            uSizeBuf : uLong) : int;
 
 { Get the global comment string of the ZipFile, in the szComment buffer.
   uSizeBuf is the size of the szComment buffer.
@@ -149,7 +149,7 @@ function unzGoToNextFile(afile : unzFile) : int;
 
 function unzLocateFile(afile : unzFile;
                        const szFileName : PChar;
-		       iCaseSensitivity : int) : int; { ZEXPORT }
+           iCaseSensitivity : int) : int; { ZEXPORT }
 
 { Try locate the file szFileName in the zipfile.
   For the iCaseSensitivity signification, see unzStringFileNameCompare
@@ -161,20 +161,20 @@ function unzLocateFile(afile : unzFile;
 
 function unzGetCurrentFileInfo(afile : unzFile;
                                pfile_info : unz_file_info_ptr;
-			       szFileName : PChar;
-			       fileNameBufferSize : uLong;
-			       extraField : voidp;
-			       extraFieldBufferSize : uLong;
-			       szComment : PChar;
-			       commentBufferSize : uLong) : int; { ZEXPORT }
+             szFileName : PChar;
+             fileNameBufferSize : uLong;
+             extraField : voidp;
+             extraFieldBufferSize : uLong;
+             szComment : PChar;
+             commentBufferSize : uLong) : int; { ZEXPORT }
 
 { Get Info about the current file
   if pfile_info<>NIL, the pfile_info^ structure will contain somes
   info about the current file
   if szFileName<>NIL, the filemane string will be copied in szFileName
-			(fileNameBufferSize is the size of the buffer)
+      (fileNameBufferSize is the size of the buffer)
   if extraField<>NIL, the extra field information will be copied in
-    extraField	(extraFieldBufferSize is the size of the buffer).
+    extraField  (extraFieldBufferSize is the size of the buffer).
     This is the Central-header version of the extra field
   if szComment<>NIL, the comment string of the file will be copied in
     szComment (commentBufferSize is the size of the buffer) }
@@ -199,7 +199,7 @@ function unzCloseCurrentFile(afile : unzFile) : int; { ZEXPORT }
 
 function unzReadCurrentFile(afile : unzFile;
                             buf : voidp;
-			    len : unsigned) : int; { ZEXPORT }
+          len : unsigned) : int; { ZEXPORT }
 
 { Read bytes from the current file (opened by unzOpenCurrentFile)
   buf contain buffer where data must be copied
@@ -229,9 +229,9 @@ function unzGetLocalExtrafield (afile : unzFile;
   if buf=NIL, it return the size of the local extra field
 
   if buf<>NIL, len is the size of the buffer, the extra header is copied in
-	buf.
+  buf.
   the return value is the number of bytes copied in buf, or (if <0)
-	the error code }
+  the error code }
 
 
 { ----------------------------------------------------------------- }
@@ -310,7 +310,7 @@ type
    cur_file_info : unz_file_info; { public info about the current file in zip}
    cur_file_info_internal : unz_file_info_internal; { private info about it}
    pfile_in_zip_read : file_in_zip_read_info_s_ptr; { structure about the current
-	                                    file if we are decompressing it }
+                                      file if we are decompressing it }
   end;
   unz_s_ptr = ^unz_s;
 
@@ -550,7 +550,7 @@ end;
   If the zipfile cannot be opened (file don't exist or in not valid), the
   return value is NIL.
   Else, the return value is a unzFile Handle, usable with other function
-	   of this unzip package.
+     of this unzip package.
 }
 
 function unzOpen (const path : PChar) : unzFile; { ZEXPORT }
@@ -565,7 +565,7 @@ var
   number_disk_with_CD : uLong; { number the the disk with central dir,
                         used for spaning ZIP, unsupported, always 0 }
   number_entry_CD : uLong; { total number of entries in the central dir
-	                               (same than number_entry on nospan) }
+                                 (same than number_entry on nospan) }
 
   err : int;
 begin
@@ -612,8 +612,8 @@ begin
     err := UNZ_ERRNO;
 
   if ((number_entry_CD <> us.gi.number_entry) or
-		(number_disk_with_CD <> 0) or
-		(number_disk <> 0)) then
+    (number_disk_with_CD <> 0) or
+    (number_disk <> 0)) then
     err := UNZ_BADZIPFILE;
 
   { size of the central directory }
@@ -621,7 +621,7 @@ begin
     err := UNZ_ERRNO;
 
   { offset of start of central directory with respect to the
-	      starting disk number }
+        starting disk number }
   if (unzlocal_getLong(fin,us.offset_central_dir)<>UNZ_OK) then
     err := UNZ_ERRNO;
 
@@ -716,15 +716,15 @@ end;
 
 { Get Info about the current file in the zipfile, with internal only info }
 function unzlocal_GetCurrentFileInfoInternal (
-	afile : unzFile;
-	pfile_info : unz_file_info_ptr;
-	pfile_info_internal : unz_file_info_internal_ptr;
-	szFileName : PChar;
-	fileNameBufferSize : uLong;
-	extraField : voidp;
-	extraFieldBufferSize : uLong;
-	szComment : PChar;
-	commentBufferSize : uLong ) : int;
+  afile : unzFile;
+  pfile_info : unz_file_info_ptr;
+  pfile_info_internal : unz_file_info_internal_ptr;
+  szFileName : PChar;
+  fileNameBufferSize : uLong;
+  extraField : voidp;
+  extraFieldBufferSize : uLong;
+  szComment : PChar;
+  commentBufferSize : uLong ) : int;
   var
     s : unz_s_ptr;
     file_info : unz_file_info;
@@ -754,7 +754,7 @@ function unzlocal_GetCurrentFileInfoInternal (
         err := UNZ_ERRNO
       else
         if (uMagic<> CENTRALHEADERMAGIC) then
-	  err := UNZ_BADZIPFILE;
+    err := UNZ_BADZIPFILE;
 
     if (unzlocal_getShort(s^.afile, file_info.version) <> UNZ_OK) then
       err := UNZ_ERRNO;
@@ -809,7 +809,7 @@ function unzlocal_GetCurrentFileInfoInternal (
       if (file_info.size_filename<fileNameBufferSize) then
       begin
         (szFileName+file_info.size_filename)^:=#0;
-	uSizeRead := file_info.size_filename;
+  uSizeRead := file_info.size_filename;
       end
       else
         uSizeRead := fileNameBufferSize;
@@ -817,7 +817,7 @@ function unzlocal_GetCurrentFileInfoInternal (
       if (file_info.size_filename>0) and (fileNameBufferSize>0) then
       begin
         if fread(szFileName, uInt(uSizeRead),1,s^.afile)<>1 then
-	  err := UNZ_ERRNO;
+    err := UNZ_ERRNO;
       end;
       Dec(lSeek, uSizeRead);
     end;
@@ -832,9 +832,9 @@ function unzlocal_GetCurrentFileInfoInternal (
       if (lSeek<>0) then
       begin
         if (fseek(s^.afile,lSeek,SEEK_CUR)=0) then
-	  lSeek := 0
-	else
-	  err := UNZ_ERRNO;
+    lSeek := 0
+  else
+    err := UNZ_ERRNO;
       end;
 
       if ((file_info.size_file_extra>0) and (extraFieldBufferSize>0)) then
@@ -852,7 +852,7 @@ function unzlocal_GetCurrentFileInfoInternal (
       if (file_info.size_file_comment<commentBufferSize) then
       begin
         (szComment+file_info.size_file_comment)^ := #0;
-	uSizeRead := file_info.size_file_comment;
+  uSizeRead := file_info.size_file_comment;
       end
       else
         uSizeRead := commentBufferSize;
@@ -860,21 +860,20 @@ function unzlocal_GetCurrentFileInfoInternal (
       if (lSeek<>0) then
       begin
         if (fseek(s^.afile,lSeek,SEEK_CUR)=0) then
-	  lSeek := 0
-	else
-	  err := UNZ_ERRNO;
+    lSeek := 0
+  else
+    err := UNZ_ERRNO;
       end;
       if ((file_info.size_file_comment>0) and (commentBufferSize>0)) then
       begin
         if fread(szComment, uInt(uSizeRead),1,s^.afile)<>1 then
-	  err := UNZ_ERRNO;
+    err := UNZ_ERRNO;
       end;
       Inc(lSeek, file_info.size_file_comment - uSizeRead);
     end
     else
       Inc(lSeek, file_info.size_file_comment);
 
-    if lSeek <> lSeek then assert(false); // juanco 2001.03.29
     if ((err=UNZ_OK) and (pfile_info<>NIL)) then
       pfile_info^ := file_info;
 
@@ -891,20 +890,20 @@ function unzlocal_GetCurrentFileInfoInternal (
 
 function unzGetCurrentFileInfo(afile : unzFile;
                                pfile_info : unz_file_info_ptr;
-			       szFileName : PChar;
-			       fileNameBufferSize : uLong;
-			       extraField : voidp;
-			       extraFieldBufferSize : uLong;
-			       szComment : PChar;
-			       commentBufferSize : uLong) : int; { ZEXPORT }
+             szFileName : PChar;
+             fileNameBufferSize : uLong;
+             extraField : voidp;
+             extraFieldBufferSize : uLong;
+             szComment : PChar;
+             commentBufferSize : uLong) : int; { ZEXPORT }
 
 { Get Info about the current file
   if pfile_info<>NIL, the pfile_info^ structure will contain somes
   info about the current file
   if szFileName<>NIL, the filemane string will be copied in szFileName
-			(fileNameBufferSize is the size of the buffer)
+      (fileNameBufferSize is the size of the buffer)
   if extraField<>NIL, the extra field information will be copied in
-    extraField	(extraFieldBufferSize is the size of the buffer).
+    extraField  (extraFieldBufferSize is the size of the buffer).
     This is the Central-header version of the extra field
   if szComment<>NIL, the comment string of the file will be copied in
     szComment (commentBufferSize is the size of the buffer) }
@@ -933,7 +932,7 @@ begin
   s^.pos_in_central_dir := s^.offset_central_dir;
   s^.num_file := 0;
   err := unzlocal_GetCurrentFileInfoInternal(afile, @s^.cur_file_info,
-		@s^.cur_file_info_internal, NIL,0,NIL,0,NIL,0);
+    @s^.cur_file_info_internal, NIL,0,NIL,0,NIL,0);
   s^.current_file_ok := (err = UNZ_OK);
   unzGoToFirstFile := err;
 end;
@@ -970,7 +969,7 @@ begin
     s^.cur_file_info.size_file_extra + s^.cur_file_info.size_file_comment);
   Inc(s^.num_file);
   err := unzlocal_GetCurrentFileInfoInternal(afile, @s^.cur_file_info,
-	   @s^.cur_file_info_internal, NIL,0,NIL,0,NIL,0);
+     @s^.cur_file_info_internal, NIL,0,NIL,0,NIL,0);
   s^.current_file_ok := (err = UNZ_OK);
   unzGoToNextFile := err;
 end;
@@ -985,7 +984,7 @@ end;
 
 function unzLocateFile(afile : unzFile;
                        const szFileName : PChar;
-		       iCaseSensitivity : int) : int; { ZEXPORT }
+           iCaseSensitivity : int) : int; { ZEXPORT }
 var
   s : unz_s_ptr;
   err : int;
@@ -1045,8 +1044,8 @@ end;
 function unzlocal_CheckCurrentFileCoherencyHeader (
                 s : unz_s_ptr;
                 var piSizeVar : uInt;
-		var poffset_local_extrafield : uLong;
-		var psize_local_extrafield : uInt) : int;
+    var poffset_local_extrafield : uLong;
+    var psize_local_extrafield : uInt) : int;
 var
   uMagic,uData,uFlags : uLong;
   size_filename : uLong;
@@ -1175,7 +1174,7 @@ begin
   end;
 
   pfile_in_zip_read_info := file_in_zip_read_info_s_ptr(
-	ALLOC(sizeof(file_in_zip_read_info_s)) );
+  ALLOC(sizeof(file_in_zip_read_info_s)) );
   if (pfile_in_zip_read_info=NIL) then
   begin
     unzOpenCurrentFile := UNZ_INTERNALERROR;
@@ -1199,7 +1198,6 @@ begin
   if ((s^.cur_file_info.compression_method<>0) and
       (s^.cur_file_info.compression_method<>Z_DEFLATED)) then
     err := UNZ_BADZIPFILE;
-  if err <> err then assert(false); // juanco 2001.03.29
   Store := s^.cur_file_info.compression_method = 0;
 
   pfile_in_zip_read_info^.crc32_wait := s^.cur_file_info.crc;
@@ -1253,7 +1251,7 @@ end;
 
 function unzReadCurrentFile(afile : unzFile;
                             buf : voidp;
-			    len : unsigned) : int; { ZEXPORT }
+          len : unsigned) : int; { ZEXPORT }
 
 var
   err : int;
@@ -1313,23 +1311,23 @@ begin
     begin
       uReadThis := UNZ_BUFSIZE;
       if (pfile_in_zip_read_info^.rest_read_compressed<uReadThis) then
-	uReadThis := uInt(pfile_in_zip_read_info^.rest_read_compressed);
+  uReadThis := uInt(pfile_in_zip_read_info^.rest_read_compressed);
       if (uReadThis = 0) then
       begin
-	unzReadCurrentFile := UNZ_EOF;
+  unzReadCurrentFile := UNZ_EOF;
         exit;
       end;
       if (fseek(pfile_in_zip_read_info^.afile,
           pfile_in_zip_read_info^.pos_in_zipfile +
           pfile_in_zip_read_info^.byte_before_the_zipfile,SEEK_SET)<>0) then
       begin
-	unzReadCurrentFile := UNZ_ERRNO;
+  unzReadCurrentFile := UNZ_ERRNO;
         exit;
       end;
       if fread(pfile_in_zip_read_info^.read_buffer, uReadThis, 1,
              pfile_in_zip_read_info^.afile)<>1 then
       begin
-	unzReadCurrentFile := UNZ_ERRNO;
+  unzReadCurrentFile := UNZ_ERRNO;
         exit;
       end;
       Inc(pfile_in_zip_read_info^.pos_in_zipfile, uReadThis);
@@ -1354,7 +1352,7 @@ begin
           pzByteArray(pfile_in_zip_read_info^.stream.next_in)^[i];
 
       pfile_in_zip_read_info^.crc32 := crc32(pfile_in_zip_read_info^.crc32,
-	  pfile_in_zip_read_info^.stream.next_out, uDoCopy);
+    pfile_in_zip_read_info^.stream.next_out, uDoCopy);
       Dec(pfile_in_zip_read_info^.rest_read_uncompressed, uDoCopy);
       Dec(pfile_in_zip_read_info^.stream.avail_in, uDoCopy);
       Dec(pfile_in_zip_read_info^.stream.avail_out, uDoCopy);
@@ -1372,8 +1370,8 @@ begin
 
       {
       if ((pfile_in_zip_read_info^.rest_read_uncompressed =
-	   pfile_in_zip_read_info^.stream.avail_out) and
-	  (pfile_in_zip_read_info^.rest_read_compressed = 0)) then
+     pfile_in_zip_read_info^.stream.avail_out) and
+    (pfile_in_zip_read_info^.rest_read_compressed = 0)) then
         flush := Z_FINISH;
       }
       err := inflate(pfile_in_zip_read_info^.stream,flush);
@@ -1471,9 +1469,9 @@ end;
   if buf=NIL, it return the size of the local extra field
 
   if buf<>NIL, len is the size of the buffer, the extra header is copied in
-	buf.
+  buf.
   the return value is the number of bytes copied in buf, or (if <0)
-	the error code }
+  the error code }
 
 function unzGetLocalExtrafield (afile : unzFile;
                                 buf : voidp;
@@ -1521,7 +1519,7 @@ begin
 
   if (fseek(pfile_in_zip_read_info^.afile,
             pfile_in_zip_read_info^.offset_local_extrafield +
-	    pfile_in_zip_read_info^.pos_local_extrafield,SEEK_SET)<>0) then
+      pfile_in_zip_read_info^.pos_local_extrafield,SEEK_SET)<>0) then
   begin
     unzGetLocalExtrafield := UNZ_ERRNO;
     exit;
@@ -1589,7 +1587,7 @@ end;
 
 function unzGetGlobalComment (afile : unzFile;
                               szComment : PChar;
-			      uSizeBuf : uLong) : int; { ZEXPORT }
+            uSizeBuf : uLong) : int; { ZEXPORT }
 
 var
   s : unz_s_ptr;

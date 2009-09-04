@@ -37,7 +37,7 @@ uses
   JalStrings,
   JalProxyStreams,
 
-  ZLib;
+  gZLib;
 
 const
   rcs_id :string = '$Id: JALGZipStreams.pas 725 2003-06-05 03:39:01Z barnson $';

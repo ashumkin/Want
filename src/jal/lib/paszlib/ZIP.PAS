@@ -26,7 +26,7 @@ interface
 
 uses
   zutil,
-  zLib,
+  gzLib,
   ziputils;
 
 const
@@ -69,15 +69,15 @@ function zipOpen (const pathname : PChar;  append : int) : zipFile; {ZEXPORT}
   of this zip package. }
 
 function zipOpenNewFileInZip(afile : zipFile;
-            		     {const} filename : PChar;
-	                     const zipfi : zip_fileinfo_ptr;
-	                     const extrafield_local : voidp;
-	                     size_extrafield_local : uInt;
-	                     const extrafield_global : voidp;
-	                     size_extrafield_global : uInt;
-	                     const comment : PChar;
-	                     method : int;
-	                     level : int): int; {ZEXPORT}
+                     {const} filename : PChar;
+                       const zipfi : zip_fileinfo_ptr;
+                       const extrafield_local : voidp;
+                       size_extrafield_local : uInt;
+                       const extrafield_global : voidp;
+                       size_extrafield_global : uInt;
+                       const comment : PChar;
+                       method : int;
+                       level : int): int; {ZEXPORT}
 { Open a file in the ZIP for writing.
   filename : the filename in zip (if NIL, '-' without quote will be used
   zipfi^ contain supplemental information
@@ -90,8 +90,8 @@ function zipOpenNewFileInZip(afile : zipFile;
   level contain the level of compression (can be Z_DEFAULT_COMPRESSION) }
 
 function zipWriteInFileInZip (afile : zipFile;
-	                      const buf : voidp;
-	                      len : unsigned) :  int; {ZEXPORT}
+                        const buf : voidp;
+                        len : unsigned) :  int; {ZEXPORT}
 { Write data in the zipfile }
 
 function zipCloseFileInZip (afile : zipFile): int; {ZEXPORT}
@@ -407,7 +407,7 @@ var
   i : uInt;
   err : int;
 begin
-  // err := ZIP_OK; // juanco 2001.03.28
+  err := ZIP_OK;
   if (afile = NIL) then
   begin
     zipOpenNewFileInZip := ZIP_PARAMERROR;
@@ -685,10 +685,7 @@ begin
     if (zi^.ci.stream.avail_out = 0) then
     begin
       if fwrite(@zi^.ci.buffered_data,uInt(zi^.ci.pos_in_buffered_data),1,zi^.filezip) <>1 then
-      begin // juanco 2001.03.28
         err := ZIP_ERRNO;
-        break; // juanco 2001.03.28
-      end; // juanco 2001.03.28
       zi^.ci.pos_in_buffered_data := 0;
       zi^.ci.stream.avail_out := uInt(Z_BUFSIZE);
       zi^.ci.stream.next_out := pBytef(@zi^.ci.buffered_data);
@@ -814,7 +811,7 @@ begin
     err := ziplocal_putValue(zi^.filezip, uLong(size_centraldir),4);
 
   if (err=ZIP_OK) then { offset of start of central directory with respect to the
-	                        starting disk number }
+                          starting disk number }
     err := ziplocal_putValue(zi^.filezip, uLong(centraldir_pos_inzip) ,4);
 
   if (err=ZIP_OK) then { zipfile comment length }
