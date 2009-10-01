@@ -32,6 +32,7 @@ uses
   Math,
 
   JclStrings,
+  JclUnicode,
 
   WantUtils,
   WantClasses,
@@ -55,8 +56,10 @@ type
     FAppend  :boolean;
     FLevel   :TLogLevel;
     FInput   :TPath;
+    FDontConvertText: boolean;
 
     function Convert(pStr: string; from: boolean): string;
+    function FileToString(const FileName: string): AnsiString;
   public
     constructor Create(Owner :TScriptElement); override;
 
@@ -82,15 +85,22 @@ function TEchoTask.Convert(pStr: string; from: boolean): string;
 var
   TE: TEncoder;
 begin
-  TE := TEncoder.Create;
+  Result := pStr;
   try
-    if from then
-      TE.InputEncoding := Fiencoding
-    else
-      TE.OutputEncoding := Foencoding;
-    Result := TE.DoConvertText(pStr);
+    if FDontConvertText then
+      Exit; // must set FDontConvertText = False on Exit
+    TE := TEncoder.Create;
+    try
+      if from then
+        TE.InputEncoding := Fiencoding
+      else
+        TE.OutputEncoding := Foencoding;
+        Result := TE.DoConvertText(Result);
+    finally
+      FreeAndNil(TE);
+    end;
   finally
-    FreeAndNil(TE);
+    FDontConvertText := False;
   end;
 end;
 
@@ -100,6 +110,7 @@ begin
   Level := vlNormal;
   Fiencoding := eANSI;
   Foencoding := eANSI;
+  FDontConvertText := False;
 end;
 
 procedure TEchoTask.Execute;
@@ -129,6 +140,24 @@ begin
   end;
 end;
 
+
+function TEchoTask.FileToString(const FileName: string): AnsiString;
+var
+  TWS: TWideStringList;
+begin
+  TWS := TWideStringList.Create;
+  try
+    TWS.LoadFromFile(FileName);
+    // if we expect text in Unicode
+    // and automatically detected it
+    // then do not convert it as it is already converted while loading
+    FDontConvertText := (Fiencoding = eUTF8)
+      and (TWS.SaveFormat <> sfAnsi);
+    Result := TWS.Text;
+  finally
+    FreeAndNil(TWS);
+  end;
+end;
 
 function TEchoTask.FormatText: string;
 var
