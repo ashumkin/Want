@@ -58,7 +58,11 @@ type
       pForceQuote: boolean = False);
     procedure AddOption(const pOption: string;
       const pValue: string = '';
-      pForceQuote: boolean = False);
+      pForceQuote: boolean = False); overload;
+    procedure AddOption(const pOption: string;
+      const pFmt: string;
+      pValue: array of const;
+      pForceQuote: boolean = False); overload;
     property StringsUnquoted[Index: Integer]: string read GetStringsUnquoted;
   end;
 
@@ -197,17 +201,16 @@ function AddOption(AOption: string;
   AForceQuote: boolean = False): string;
 begin
   Result := AOption;
-  if AValue <> '' then
-  begin
-    if ((Pos(' ', AValue) > 0)
-        or AForceQuote)
-        // check whether AValue is already quoted
-        and  (Pos('"', AValue) <> 1)
-          and (PosEx('"', AValue, Length(AValue) - 1) <> Length(AValue)) then
-        Result := Result + '"' + AValue + '"'
-    else
-      Result := Result + AValue;
-  end;
+  if AValue = '' then
+    Exit;
+  if ((Pos(' ', AValue) > 0)
+      or AForceQuote)
+      // check whether AValue is already quoted
+      and  (Pos('"', AValue) <> 1)
+        and (PosEx('"', AValue, Length(AValue) - 1) <> Length(AValue)) then
+      Result := Result + '"' + AValue + '"'
+  else
+    Result := Result + AValue;
 end;
 
 { TExecTask }
@@ -545,7 +548,13 @@ procedure TArgumentsList.AddOption(const pOption: string;
   const pValue: string = '';
   pForceQuote: boolean = False);
 begin
-  Add(ExecTasks.AddOption(pOption, pValue, pForceQuote));
+  AddOption(pOption, pValue, [], pForceQuote);
+end;
+
+procedure TArgumentsList.AddOption(const pOption, pFmt: string;
+  pValue: array of const; pForceQuote: boolean);
+begin
+  Add(ExecTasks.AddOption(pOption, Format(pFmt, pValue), pForceQuote));
 end;
 
 procedure TArgumentsList.AddValue(const pValue: string;

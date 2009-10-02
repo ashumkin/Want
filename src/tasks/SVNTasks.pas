@@ -134,7 +134,6 @@ type
     FConvertSVNOutput: boolean;
     FIncrementalOutput: boolean;
     Frevision: string;
-    function GetRepo: TPath; virtual;
     function ExTURLD(const Value: string): string;
     function InTURLD(const Value: string): string;
     function EncodeURL(Value: string): string;
@@ -142,10 +141,6 @@ type
     function GetRepoPath(const pRepo, pPath: string): string;
     function MoveURL(const pPath, pFromBase: string;
       const pToBase: string = ''): string;
-    function Getbranches: TPath; virtual;
-    function Gettags: TPath; virtual;
-    function Gettrunk: TPath; virtual;
-    procedure DoRevision;
   protected
     function BuildArguments: string; override;
 
@@ -153,11 +148,17 @@ type
     procedure BuildArgumentsCommand; virtual;
     procedure BuildArgumentsSpecific; virtual;
     procedure DoFirstArgument; virtual;
+    procedure DoRevision; virtual;
     procedure DoNextArguments; virtual;
     procedure HandleOutputLine(Line :string); override;
     function DoConvertOutputLineHandle(const Line: string): string; virtual;
     function ConvertOutputLineHandle(const Line: string): string;
     procedure DoParseOutput; virtual;
+    function Getrevision: string; virtual;
+    function Getbranches: TPath; virtual;
+    function Gettags: TPath; virtual;
+    function Gettrunk: TPath; virtual;
+    function GetRepo: TPath; virtual;
   public
     constructor Create(Owner: TScriptElement); override;
     destructor Destroy; override;
@@ -173,7 +174,7 @@ type
     property command: string read FCommand write FCommand;
     property dest: string read FDest write FDest;
     property repo: TPath read GetRepo write Frepo;
-    property revision: string read Frevision write Frevision;
+    property revision: string read Getrevision write Frevision;
     property tags: TPath read Gettags write Ftags;
     property trunk: TPath read Gettrunk write Ftrunk;
   published
@@ -206,9 +207,9 @@ type
     Flast: Integer;
     FLastRevision: string;
     Ffullpath: boolean;
-    function GetRepo: TPath; override;
     procedure SetLastRevision(const Value: string);
   protected
+    function GetRepo: TPath; override;
     procedure DoParseOutput; override;
   public
     constructor Create(Owner: TScriptElement); override;
@@ -229,7 +230,7 @@ type
     property tags;
   end;
 
-  // class for getting info about SVN-files
+  // internal class for getting info about SVN-files
   TSVNInfoTask = class(TCustomSVNTask)
   private
     FFiles: TStringList;
@@ -246,6 +247,7 @@ type
     procedure Execute; override;
     procedure Execute_(Incremental: boolean);
     function AddItem(const pItem: string): Integer;
+    procedure SetItem(const pItem: string);
 
     property CurrentItemIndex: Integer read FCurrentItemIndex write FCurrentItemIndex;
     property ItemsCount: Integer read GetItemsCount;
@@ -411,6 +413,44 @@ type
     property all: boolean read Fall write Fall;
   end;
 
+  // class for retrieving log messages from SVN
+  TSVNLogTask = class(TCustomSVNTask)
+  private
+    FLastRevisionTask: TSVNLastRevisionTask;
+    FInfo: TSVNInfoTask;
+    Flimit: Integer;
+    Fxml: boolean;
+    Fxls: string;
+  protected
+    function Getrevision: string; override;
+    procedure DoNextArguments; override;
+    function GetRepo: TPath; override;
+    function Gettags: TPath; override;
+    function DoGetRevisions: boolean;
+  public
+    constructor Create(Owner: TScriptElement); override;
+    destructor Destroy; override;
+    
+    procedure Execute; override;
+    procedure Init; override;
+  published
+    property failonerror;
+    property Arguments;
+    property ArgumentList stored False;
+
+    property quiet;
+    property branches;
+    property dest;
+    property filter;
+    property limit: Integer read Flimit write Flimit;
+    property output;
+    property repo;
+    property revision;
+    property tags;
+    property trunk;
+    property xml: boolean read Fxml write Fxml;
+  end;
+  
 const
   URLDelimiter = '/';
   // regexp for parsing "svn diff --summarize" output
@@ -586,6 +626,11 @@ begin
     Result := pRepo;
 end;
 
+function TCustomSVNTask.Getrevision: string;
+begin
+  Result := Frevision;
+end;
+
 function TCustomSVNTask.EncodeURL(Value: string): string;
 // function implementation copied from the unit IdURI
 // class function TIdURI.PathEncode
@@ -634,10 +679,10 @@ end;
 
 procedure TCustomSVNTask.DoRevision;
 begin
-  if Frevision <> '' then
+  if revision <> '' then
   begin
-    Log(vlVerbose, 'Revision=%s', [Frevision]);
-    ArgumentList.AddOption('-r ', Frevision);
+    Log(vlVerbose, 'Revision=%s', [revision]);
+    ArgumentList.AddOption('-r ', revision);
   end;
 end;
 
@@ -996,7 +1041,7 @@ end;
 
 function TSVNInfoTask.AddItem(const pItem: string): Integer;
 begin
-  Result := FFiles.Add(pItem); 
+  Result := FFiles.Add(pItem);
 end;
 
 constructor TSVNInfoTask.Create(Owner: TScriptElement);
@@ -1062,6 +1107,7 @@ begin
     FExecOutput.Insert(0, '<info>');
     FExecOutput.Add('</info>');
   end;
+  FreeAndNil(FInfo);
   FInfo := TSVNInfoInfo.CreateByContext(FExecOutput.Text);
 end;
 
@@ -1075,6 +1121,12 @@ begin
   Result := 0;
   if Assigned(FInfo) then
     Result := FInfo.Count;
+end;
+
+procedure TSVNInfoTask.SetItem(const pItem: string);
+begin
+  FFiles.Clear;
+  AddItem(pItem);
 end;
 
 { TSVNGetFile }
@@ -1228,9 +1280,7 @@ end;
 
 procedure TSVNCommitTask.PrepareNonVersioned;
 var
-//  tSt: TSVNStatusTask;
   tAddF: TSVNAddTask;
-//  i: Integer;
 begin
   try
     tAddF := TSVNAddTask.Create(Self);
@@ -1239,16 +1289,8 @@ begin
     tAddF.IncludeFiles.AddPatternSet(FIncludeFiles);
     tAddF.IncludeFiles.AddDefaultPatterns;
     tAddF.Execute;
-{
-    TSt := TSVNStatusTask.Create(Self);
-    TSt.dest := dest;
-    TSt.Execute;
-    for i := 0 to TSt.ItemsUnVersionedCount - 1 do
-      ArgumentList.AddValue(TSt.ItemsUnVersioned[i].Path);
-}
   finally
     FreeAndNil(tAddF);
-//    FreeAndNil(TSt);
   end;
 end;
 
@@ -1279,6 +1321,7 @@ procedure TSVNStatusTask.DoParseOutput;
 var
   i: Integer;
 begin
+  FreeAndNil(FStatus);
   FStatus := TSVNInfoStatus.CreateByContext(FExecOutput.Text);
 end;
 
@@ -1380,8 +1423,96 @@ begin
   FIncludeFiles.BaseDir := dest;
 end;
 
+{ TSVNLogTask }
+
+constructor TSVNLogTask.Create(Owner: TScriptElement);
+begin
+  inherited;
+  command := 'log';
+  FLastRevisionTask := TSVNLastRevisionTask.Create(Self);
+  FInfo := TSVNInfoTask.Create(Self);
+  Flimit := 0;
+end;
+
+destructor TSVNLogTask.Destroy;
+begin
+  FreeAndNil(FInfo);
+  FreeAndNil(FLastRevisionTask);
+  inherited;
+end;
+
+function TSVNLogTask.DoGetRevisions: boolean;
+begin
+//  FLastRevisionTask.repo := repo;
+  FLastRevisionTask.tags := tags;
+  FLastRevisionTask.fullpath := True;
+  FLastRevisionTask.Execute;
+
+  FInfo.SetItem(FLastRevisionTask.LastRevision);
+  FInfo.Execute_(False);
+  Frevision := FInfo.Items[0].CommitRevision;
+  Log(vlVerbose, 'Last tag revision = ' + Frevision);
+  
+  FInfo.SetItem(repo);
+  FInfo.Execute_(False);
+  Log(vlVerbose, 'repo revision = ' + FInfo.Items[0].CommitRevision);
+  Frevision := FInfo.Items[0].CommitRevision + ':' + Frevision;
+end;
+
+procedure TSVNLogTask.DoNextArguments;
+begin
+  if xml then
+  begin
+    Log(vlDebug, 'xml output is on');
+    ArgumentList.AddValue('--xml');
+  end;
+  if limit > 0 then
+  begin
+    Log(vlDebug, 'limit = %d', [limit]);
+    ArgumentList.AddOption('--limit=', IntToStr(limit));
+  end;
+  inherited;
+end;
+
+procedure TSVNLogTask.Execute;
+begin
+  Log(vlNormal, 'Getting log');
+  DoGetRevisions;
+  inherited;
+end;
+
+function TSVNLogTask.GetRepo: TPath;
+begin
+  Result := FRepo;
+  if Result <> '.' then
+    Exit;
+  // get real URL of WC
+  FInfo.SetItem(Frepo);
+  FInfo.Execute_(False);
+  if FInfo.ItemsCount > 0 then
+    Result := FInfo.Items[0].URL;
+end;
+
+function TSVNLogTask.Getrevision: string;
+begin
+  Result := Frevision; 
+end;
+
+function TSVNLogTask.Gettags: TPath;
+begin
+  Result := inherited Gettags;
+end;
+
+procedure TSVNLogTask.Init;
+begin
+  inherited;
+  RequireAttribute('repo');
+  if limit < 0 then
+    WantError('<limit> parameter must be greater than 0');
+end;
+
 initialization
   RegisterTasks([TSVNTask, TSVNAuthTask, TSVNDiffTask, TSVNLastRevisionTask,
-    TSVNCommitTask]);
+    TSVNCommitTask, TSVNLogTask]);
   RegisterElements(TSVNLastRevisionTask, [TSubPropertyElement]);
 end.

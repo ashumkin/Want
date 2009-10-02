@@ -28,6 +28,7 @@ interface
 uses
   SysUtils,
   Classes,
+  StrUtils,
   Math,
 
   JclSysUtils,
@@ -37,14 +38,12 @@ uses
 
   WildPaths,
   WantClasses,
+  FileEditLoadTasks,
 
   uEncoder;
 
 type
-  TEditTask = class(TTask)
-  private
-    function Getencoding: string;
-    procedure Setencoding(const Value: string);
+  TEditTask = class(TFileEditLoadTask)
   protected
     FBuffer   :TStrings;
     FText     :string;
@@ -53,7 +52,6 @@ type
     FFile     :string;
     FLastPat  :string;
     FCurrentFile :string;
-    Fencoding: TEncoding;
 
     procedure SetDot(Value :Integer);
 
@@ -65,8 +63,7 @@ type
     function ParseLine(Line :string) :Integer;
 
     procedure Perform;
-    function Convert(pStr: string; from: boolean): string;
-    procedure ConvertBuffer; 
+    procedure ConvertBuffer;
   public
     constructor Create(Owner :TScriptElement); override;
     destructor Destroy; override;
@@ -75,7 +72,7 @@ type
   published
     property _file :string read FFile   write FFile;
     property text  :string read FText   write FText;
-    property encoding: string read Getencoding write Setencoding;
+    property encoding;
   end;
   
   TEditor = TEditTask;
@@ -134,18 +131,21 @@ type
 
   TPatternElement = class(TRangeElement)
   protected
+    Fregexp: boolean;
+    Finvert: boolean;
     FPattern :string;
+    function Match(const line: string): boolean; virtual;
   published
     property pattern :string read FPattern write FPattern;
+    property regexp: boolean read Fregexp write Fregexp;
+    property invert: boolean read Finvert write Finvert;
   end;
 
-  TSearchElement = class(TRangeElement)
+  TSearchElement = class(TPatternElement)
   protected
-    FPattern :string;
     procedure Perform(Editor :TEditor); override;
     function  Perform(Buffer :TStrings; FromLine, ToLine :Integer):Integer; override;
   published
-    property pattern :string read FPattern write FPattern;
   end;
 
   TSubstElement = class(TEditElement)
@@ -246,22 +246,6 @@ implementation
 
 { TEditTask }
 
-function TEditTask.Convert(pStr: string; from: boolean): string;
-var
-  TE: TEncoder;
-begin
-  TE := TEncoder.Create;
-  try
-    if from then
-      TE.InputEncoding := Fencoding
-    else
-      TE.OutputEncoding := Fencoding;
-    Result := TE.DoConvertText(pStr);
-  finally
-    FreeAndNil(TE);
-  end;
-end;
-
 procedure TEditTask.ConvertBuffer;
 begin
   Buffer.Text := Convert(Buffer.Text, True);
@@ -332,13 +316,6 @@ begin
 end;
 
 
-procedure TEditTask.Setencoding(const Value: string);
-begin
-  Fencoding := GetEncodingFromStr(Value);
-  if not (Fencoding in Encodings) then
-    TaskError(Format('Invalid encoding "%s"', [Value]));
-end;
-
 procedure TEditTask.Perform;
 var
   i: Integer;
@@ -383,12 +360,6 @@ begin
         FCurrentFile := '';
       end;
   end;
-end;
-
-
-function TEditTask.Getencoding: string;
-begin
-  Result := GetEncodingStr(Fencoding);
 end;
 
 { TCustomEditElement }
@@ -488,11 +459,14 @@ begin
 
   with Editor do
   begin
-    for l := Max(0, f) to Min(Buffer.Count-1, t) do
+    l := Max(0, f);
+//    for l := Max(0, f) to Min(Buffer.Count-1, t) do
+    while l <= Min(Buffer.Count-1, t) do
     begin
       Dot := l;
-      if (Pattern = '') or (AnsiPos(Pattern, Buffer[l]) <> 0) then
+      if Match(Buffer[l]) then
         Dot := Self.Perform(Editor.Buffer, l, l);
+      inc(l);
     end
   end;
 end;
@@ -506,7 +480,7 @@ begin
   else if pattern <> '' then
     Editor.FLastPat := pattern;
 
-  Log(vlVerbose, '%s /%s/', [TagName, pattern]);
+  Log(vlVerbose, '%s /%s/%s', [TagName, pattern, IfThen(regexp, ' regexp')]);
 
   if _to = '' then
     _to := '$';
@@ -523,7 +497,7 @@ begin
   Found := False;
   for l := Max(0, FromLine) to Min(Buffer.Count-1, ToLine) do
   begin
-    if (pattern = '') or (AnsiPos(pattern, Buffer[l]) <> 0) then
+    if Match(Buffer[l]) then
     begin
       Result := inherited Perform(Buffer, l, l);
       Found := true;
@@ -755,6 +729,17 @@ function TSetPropertyElement.Perform(Buffer: TStrings; Line: Integer): Integer;
 begin
   Result := 0;
   SetProperty(name, Buffer.Text, overwrite);
+end;
+
+{ TPatternElement }
+
+function TPatternElement.Match(const line: string): boolean;
+begin
+  Result := (pattern = '')
+    or (invert xor (
+      (not regexp and (AnsiPos(pattern, line) <> 0))
+      or (regexp and PerlRE.Match(pattern, line))
+    ));
 end;
 
 initialization

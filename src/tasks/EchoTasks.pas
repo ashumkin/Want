@@ -37,11 +37,12 @@ uses
   WantUtils,
   WantClasses,
   WildPaths,
+  FileEditLoadTasks,
 
   uEncoder;
 
 type
-  TEchoTask = class(TTask)
+  TEchoTask = class(TFileEditLoadTask)
   private
     procedure Setiencoding(const Value: string);
     function Getiencoding: string;
@@ -58,7 +59,7 @@ type
     FInput   :TPath;
     FDontConvertText: boolean;
 
-    function Convert(pStr: string; from: boolean): string;
+    function Convert(pStr: string; from: boolean): string; override;
     function FileToString(const FileName: string): AnsiString;
   public
     constructor Create(Owner :TScriptElement); override;
@@ -82,23 +83,12 @@ implementation
 { TEchoTask }
 
 function TEchoTask.Convert(pStr: string; from: boolean): string;
-var
-  TE: TEncoder;
 begin
   Result := pStr;
   try
     if FDontConvertText then
       Exit; // must set FDontConvertText = False on Exit
-    TE := TEncoder.Create;
-    try
-      if from then
-        TE.InputEncoding := Fiencoding
-      else
-        TE.OutputEncoding := Foencoding;
-        Result := TE.DoConvertText(Result);
-    finally
-      FreeAndNil(TE);
-    end;
+    Result := ConvertFromTo(pStr, Fiencoding, Foencoding);
   finally
     FDontConvertText := False;
   end;

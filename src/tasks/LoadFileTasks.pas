@@ -31,10 +31,11 @@ interface
 uses
   SysUtils,
   Classes,
-  WantClasses;
+  WantClasses,
+  FileEditLoadTasks;
 
 type
-  TLoadFileTask = class(TTask)
+  TLoadFileTask = class(TFileEditLoadTask)
   private
     FFailOnError :boolean;
     FProperty    :string;
@@ -47,11 +48,6 @@ type
   published
     property srcfile   :string read FSrcfile  write FSrcfile;
     property _property :string read FProperty write FProperty;
-    {  property encoding is not supported until Synapse or other
-       third-party library with character set transltion will be
-       included in WANT
-    }
-    // property encoding : string read fencoding write fencoding;
     property failonerror: boolean read FFailOnError write FFailOnError;
   end;
 

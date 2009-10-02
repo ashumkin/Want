@@ -36,6 +36,7 @@ uses
   WantTasks,
   DUnitTasks,
   EditTasks,
+  FileEditLoadTasks,
   LoggerTask,
   IniFileTasks,
   CVSTasks,
