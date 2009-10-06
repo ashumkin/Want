@@ -62,6 +62,7 @@ interface
 
 uses
   SysUtils,
+  StrUtils,
   SysConst,
   Classes,
 {$IFNDEF VER130}
@@ -76,6 +77,7 @@ uses
   JclFileUtils,
   JclShell,
   JclStrings,
+  uURI,
 
   PerlRE,
 
@@ -134,13 +136,6 @@ type
     FConvertSVNOutput: boolean;
     FIncrementalOutput: boolean;
     Frevision: string;
-    function ExTURLD(const Value: string): string;
-    function InTURLD(const Value: string): string;
-    function EncodeURL(Value: string): string;
-    function DecodeURL(Value: string): string;
-    function GetRepoPath(const pRepo, pPath: string): string;
-    function MoveURL(const pPath, pFromBase: string;
-      const pToBase: string = ''): string;
   protected
     function BuildArguments: string; override;
 
@@ -154,16 +149,27 @@ type
     function DoConvertOutputLineHandle(const Line: string): string; virtual;
     function ConvertOutputLineHandle(const Line: string): string;
     procedure DoParseOutput; virtual;
+
+    function ExTURLD(const Value: string): string;
+    function InTURLD(const Value: string): string;
+    function MoveURL(const pPath, pFromBase: string;
+      const pToBase: string = ''): string;
+
+    function GetRepoPath(const pRepo, pPath: string): string; virtual;
     function Getrevision: string; virtual;
     function Getbranches: TPath; virtual;
     function Gettags: TPath; virtual;
     function Gettrunk: TPath; virtual;
     function GetRepo: TPath; virtual;
+    function PathIsURL(const pPath: string): boolean;
   public
     constructor Create(Owner: TScriptElement); override;
     destructor Destroy; override;
 
     procedure Execute; override;
+    class function EncodeURL(Value: string): string;
+    class function DecodeURL(Value: string): string;
+    class function PathToURL(const pPath: string): string;
 
     property ConvertSVNOutput: boolean read FConvertSVNOutput write FConvertSVNOutput;
     property IncrementalOutput: boolean read FIncrementalOutput write FIncrementalOutput;
@@ -417,14 +423,16 @@ type
   TSVNLogTask = class(TCustomSVNTask)
   private
     FLastRevisionTask: TSVNLastRevisionTask;
-    FInfo: TSVNInfoTask;
     Flimit: Integer;
     Fxml: boolean;
     Fxls: string;
+    Flast: Integer;
   protected
+    FInfo: TSVNInfoTask;
+    
     function Getrevision: string; override;
     procedure DoNextArguments; override;
-    function GetRepo: TPath; override;
+    function Gettrunk: TPath; override;
     function Gettags: TPath; override;
     function DoGetRevisions: boolean;
   public
@@ -440,11 +448,10 @@ type
 
     property quiet;
     property branches;
-    property dest;
     property filter;
+    property last: Integer read Flast write Flast;
     property limit: Integer read Flimit write Flimit;
     property output;
-    property repo;
     property revision;
     property tags;
     property trunk;
@@ -568,7 +575,7 @@ begin
     Result := Result + URLDelimiter;
 end;
 
-function TCustomSVNTask.DecodeURL(Value: string): string;
+class function TCustomSVNTask.DecodeURL(Value: string): string;
 // function implementation copied from the unit IdURI
 // class function TIdURI.URLDecode;
 var
@@ -615,11 +622,14 @@ end;
 
 function TCustomSVNTask.GetRepoPath(const pRepo, pPath: string): string;
 begin
-  // returns path of pPath relative to pRepo if it is begun with /
+  // returns path of pPath relative to pRepo if it is begun with . (dot)
   // otherwise pPath
   if pPath <> '' then
-    if Pos(URLDelimiter, pPath) = 1 then
-      Result := ExTURLD(pRepo) + pPath
+    if Pos('.', pPath) = 1 then
+      if PathIsURL(pRepo) then
+        Result := CombineURLs(InTURLD(pRepo), pPath)
+      else
+        Result := ExTURLD(pRepo) + pPath
     else
       Result := pPath
   else
@@ -631,7 +641,7 @@ begin
   Result := Frevision;
 end;
 
-function TCustomSVNTask.EncodeURL(Value: string): string;
+class function TCustomSVNTask.EncodeURL(Value: string): string;
 // function implementation copied from the unit IdURI
 // class function TIdURI.PathEncode
 const
@@ -660,6 +670,20 @@ begin
   Result := InTURLD(pToBase) + Result;
   if (Result <> '') and (Result[1] = URLDelimiter) then
     Delete(Result, 1, 1);
+end;
+
+function TCustomSVNTask.PathIsURL(const pPath: string): boolean;
+begin
+  Result := PerlRE.Match('^\w+://', pPath);
+end;
+
+class function TCustomSVNTask.PathToURL(const pPath: string): string;
+begin
+  Result := AnsiReplaceText(IncludeTrailingPathDelimiter(pPath), '\', '/');
+  Result := CombineURLs(Result, '.');
+  Result := StringReplace(Result, 'file://', 'file:///', []);
+  Result := AnsiReplaceText(Result, '\', '/');
+  Result := AnsiReplaceText(Result, '+', '%2B');
 end;
 
 function TCustomSVNTask.Getbranches: TPath;
@@ -1047,6 +1071,7 @@ end;
 constructor TSVNInfoTask.Create(Owner: TScriptElement);
 begin
   inherited;
+  ConvertSVNOutput := False;
   command := 'info';
   FFiles := TStringList.Create;
   CurrentItemIndex := -1;
@@ -1429,6 +1454,7 @@ constructor TSVNLogTask.Create(Owner: TScriptElement);
 begin
   inherited;
   command := 'log';
+  ConvertSVNOutput := False;
   FLastRevisionTask := TSVNLastRevisionTask.Create(Self);
   FInfo := TSVNInfoTask.Create(Self);
   Flimit := 0;
@@ -1443,20 +1469,25 @@ end;
 
 function TSVNLogTask.DoGetRevisions: boolean;
 begin
-//  FLastRevisionTask.repo := repo;
-  FLastRevisionTask.tags := tags;
-  FLastRevisionTask.fullpath := True;
-  FLastRevisionTask.Execute;
+  if Ftags <> EmptyStr then
+  begin
+    Log(vlDebug, '<tags> is set.');
+    FLastRevisionTask.tags := tags;
+    FLastRevisionTask.last := last;
+    FLastRevisionTask.fullpath := True;
+    FLastRevisionTask.Execute;
 
-  FInfo.SetItem(FLastRevisionTask.LastRevision);
-  FInfo.Execute_(False);
-  Frevision := FInfo.Items[0].CommitRevision;
-  Log(vlVerbose, 'Last tag revision = ' + Frevision);
+    FInfo.SetItem(FLastRevisionTask.LastRevision);
+    FInfo.Execute_(False);
+    Frevision := FInfo.Items[0].CommitRevision;
+    Log(vlVerbose, 'Last tag revision = ' + Frevision);
+  end;
   
-  FInfo.SetItem(repo);
+  FInfo.SetItem(trunk);
   FInfo.Execute_(False);
   Log(vlVerbose, 'repo revision = ' + FInfo.Items[0].CommitRevision);
-  Frevision := FInfo.Items[0].CommitRevision + ':' + Frevision;
+  Frevision := FInfo.Items[0].CommitRevision
+    + IfThen(Ftags <> EmptyStr, ':' + Frevision);
 end;
 
 procedure TSVNLogTask.DoNextArguments;
@@ -1481,21 +1512,22 @@ begin
   inherited;
 end;
 
-function TSVNLogTask.GetRepo: TPath;
+function TSVNLogTask.Gettrunk: TPath;
 begin
-  Result := FRepo;
+  Result := Ftrunk;
   if Result <> '.' then
     Exit;
   // get real URL of WC
-  FInfo.SetItem(Frepo);
+  FInfo.SetItem(Ftrunk);
   FInfo.Execute_(False);
   if FInfo.ItemsCount > 0 then
-    Result := FInfo.Items[0].URL;
+    Ftrunk := FInfo.Items[0].URL;
+  Result := Ftrunk;
 end;
 
 function TSVNLogTask.Getrevision: string;
 begin
-  Result := Frevision; 
+  Result := Frevision;
 end;
 
 function TSVNLogTask.Gettags: TPath;
@@ -1506,7 +1538,7 @@ end;
 procedure TSVNLogTask.Init;
 begin
   inherited;
-  RequireAttribute('repo');
+  RequireAttribute('trunk');
   if limit < 0 then
     WantError('<limit> parameter must be greater than 0');
 end;

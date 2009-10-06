@@ -57,7 +57,7 @@ type
     procedure AddValue(const pValue: string;
       pForceQuote: boolean = False);
     procedure AddOption(const pOption: string;
-      const pValue: string = '';
+      pValue: string = '';
       pForceQuote: boolean = False); overload;
     procedure AddOption(const pOption: string;
       const pFmt: string;
@@ -391,13 +391,12 @@ begin
       Line := Child.ReadLine;
       Line := ConvertOutputLine(Line); 
       Log(vlDebug, 'output :%s', [Line]);
-      if output <> '' then
-        if Child.EOF then // trick - do not add CRLF for the last line
-          Write(OutFile, Line)
-        else
-          Writeln(OutFile, Line)
+      if output = '' then
+        HandleOutputLine(Line)
+      else if Child.EOF then // trick - do not add CRLF for the last line
+        Write(OutFile, Line)
       else
-        HandleOutputLine(Line);
+        Writeln(OutFile, Line);
     end;
   finally
     if output <> '' then
@@ -545,9 +544,11 @@ end;
 { TArgumentsList }
 
 procedure TArgumentsList.AddOption(const pOption: string;
-  const pValue: string = '';
+  pValue: string = '';
   pForceQuote: boolean = False);
 begin
+  // avoid error when pValue constains %
+  pValue := AnsiReplaceText(pValue, '%', '%%');
   AddOption(pOption, pValue, [], pForceQuote);
 end;
 

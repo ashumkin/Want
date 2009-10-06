@@ -13,6 +13,8 @@ uses
   TextTestRunner,
   TestFramework,
   RunnerTests,
+
+  TestuURI in '..\lib\Common\tests\TestuURI.pas',
   WantClassesTest in 'WantClassesTest.pas',
   FileSetTests in 'FileSetTests.pas',
   ExecTasksTest in 'ExecTasksTest.pas',
@@ -28,7 +30,8 @@ uses
   XmlPropertyTests in 'XmlPropertyTests.pas',
   FilterElementsTests in 'FilterElementsTests.pas',
   LoadFileTests in 'LoadFileTests.pas',
-  TempFileTests in 'TempFileTests.pas';
+  TempFileTests in 'TempFileTests.pas',
+  SVNTasksTest in 'SVNTasksTest.pas';
 
 {$R *.RES}
 

@@ -17,6 +17,9 @@ uses
   ShareMem,
   TestFramework,
   Win32Implementations in '..\src\win32\Win32Implementations.pas',
+
+  TestuURI in '..\lib\Common\tests\TestuURI.pas',
+  
   WantClassesTest in 'WantClassesTest.pas',
   FileSetTests in 'FileSetTests.pas',
   ExecTasksTest in 'ExecTasksTest.pas',
@@ -32,7 +35,8 @@ uses
   TempFileTests in 'TempFileTests.pas',
   XmlPropertyTests in 'XmlPropertyTests.pas',
   FilterElementsTests in 'FilterElementsTests.pas',
-  LoadFileTests in 'LoadFileTests.pas';
+  LoadFileTests in 'LoadFileTests.pas',
+  SVNTasksTest in 'SVNTasksTest.pas';
 
 {$R *.RES}
 
