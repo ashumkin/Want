@@ -150,18 +150,12 @@ type
     function ConvertOutputLineHandle(const Line: string): string;
     procedure DoParseOutput; virtual;
 
-    function ExTURLD(const Value: string): string;
-    function InTURLD(const Value: string): string;
-    function MoveURL(const pPath, pFromBase: string;
-      const pToBase: string = ''): string;
-
-    function GetRepoPath(const pRepo, pPath: string): string; virtual;
     function Getrevision: string; virtual;
     function Getbranches: TPath; virtual;
     function Gettags: TPath; virtual;
     function Gettrunk: TPath; virtual;
     function GetRepo: TPath; virtual;
-    function PathIsURL(const pPath: string): boolean;
+    class function PathIsURL(const pPath: string): boolean;
   public
     constructor Create(Owner: TScriptElement); override;
     destructor Destroy; override;
@@ -170,6 +164,11 @@ type
     class function EncodeURL(Value: string): string;
     class function DecodeURL(Value: string): string;
     class function PathToURL(const pPath: string): string;
+    class function ExTURLD(const Value: string): string;
+    class function InTURLD(const Value: string): string;
+    class function MoveURL(const pPath, pFromBase: string;
+      const pToBase: string = ''): string;
+    class function GetRepoPath(const pRepo, pPath: string): string; virtual;
 
     property ConvertSVNOutput: boolean read FConvertSVNOutput write FConvertSVNOutput;
     property IncrementalOutput: boolean read FIncrementalOutput write FIncrementalOutput;
@@ -546,7 +545,7 @@ begin
   end;
 end;
 
-function TCustomSVNTask.ExTURLD(const Value: string): string;
+class function TCustomSVNTask.ExTURLD(const Value: string): string;
 begin
   Result := Trim(Value);
   if Result = '' then
@@ -566,7 +565,7 @@ begin
   inherited;
 end;
 
-function TCustomSVNTask.InTURLD(const Value: string): string;
+class function TCustomSVNTask.InTURLD(const Value: string): string;
 begin
   Result := Trim(Value);
   if Result = '' then
@@ -620,14 +619,14 @@ begin
   DoParseOutput;
 end;
 
-function TCustomSVNTask.GetRepoPath(const pRepo, pPath: string): string;
+class function TCustomSVNTask.GetRepoPath(const pRepo, pPath: string): string;
 begin
   // returns path of pPath relative to pRepo if it is begun with . (dot)
   // otherwise pPath
   if pPath <> '' then
     if Pos('.', pPath) = 1 then
       if PathIsURL(pRepo) then
-        Result := CombineURLs(InTURLD(pRepo), pPath)
+        Result := CombineURLs2(InTURLD(pRepo), pPath)
       else
         Result := ExTURLD(pRepo) + pPath
     else
@@ -659,7 +658,7 @@ begin
   end;
 end;
 
-function TCustomSVNTask.MoveURL(const pPath, pFromBase: string;
+class function TCustomSVNTask.MoveURL(const pPath, pFromBase: string;
   const pToBase: string = ''): string;
 begin
   // delete base path
@@ -672,7 +671,7 @@ begin
     Delete(Result, 1, 1);
 end;
 
-function TCustomSVNTask.PathIsURL(const pPath: string): boolean;
+class function TCustomSVNTask.PathIsURL(const pPath: string): boolean;
 begin
   Result := PerlRE.Match('^\w+://', pPath);
 end;
@@ -680,7 +679,7 @@ end;
 class function TCustomSVNTask.PathToURL(const pPath: string): string;
 begin
   Result := AnsiReplaceText(IncludeTrailingPathDelimiter(pPath), '\', '/');
-  Result := CombineURLs(Result, '.');
+  Result := CombineURLs2(Result, '.');
   Result := StringReplace(Result, 'file://', 'file:///', []);
   Result := AnsiReplaceText(Result, '\', '/');
   Result := AnsiReplaceText(Result, '+', '%2B');
@@ -1027,7 +1026,7 @@ end;
 
 function TSVNLastRevisionTask.GetRepo: TPath;
 begin
-  Result := tags;
+  Result := PathToURL(tags);
 end;
 
 procedure TSVNLastRevisionTask.Init;
@@ -1472,6 +1471,7 @@ begin
   if Ftags <> EmptyStr then
   begin
     Log(vlDebug, '<tags> is set.');
+    FLastRevisionTask.repo := trunk;
     FLastRevisionTask.tags := tags;
     FLastRevisionTask.last := last;
     FLastRevisionTask.fullpath := True;

@@ -47,7 +47,6 @@ type
 
   TTestCustomSVNTaskClass = class(TCustomSVNTask)
   public
-    function PathIsURL(const pPath: string): boolean;
   end;
 
   TSVNTaskTestsCommon = class(TProjectBaseCase)
@@ -64,6 +63,7 @@ type
     procedure SetUp;    override;
     procedure TearDown; override;
   published
+    procedure TestGetRepoPath;
     procedure TestPathIsURL;
     procedure TestDecodeURL;
     procedure TestPathToURL; 
@@ -86,7 +86,9 @@ type
     procedure TearDown; override;
   published
     procedure TestLog;
-    procedure Testtrunk;
+    procedure Testtrunkonly;
+    procedure Testrevision;
+    procedure Testrevision_tags;
   end;
 
 implementation
@@ -113,6 +115,13 @@ procedure TCustomSVNTaskTests.TestDecodeURL;
 begin
   CheckEquals('file://c:/Program files/Path',
     TCustomSVNTask.DecodeURL('file://c:/Program%20files/Path'));
+end;
+
+procedure TCustomSVNTaskTests.TestGetRepoPath;
+begin
+  CheckEquals('http://localhost/project+name/tags',
+    TCustomSVNTask.GetRepoPath('http://localhost/project+name/trunk',
+      '../tags'));
 end;
 
 procedure TCustomSVNTaskTests.TestPathIsURL;
@@ -163,13 +172,6 @@ begin
   CheckEquals('http://localhost/tags', FSVNTask.tags);
 end;
 
-{ TTestCustomSVNTaskClass }
-
-function TTestCustomSVNTaskClass.PathIsURL(const pPath: string): boolean;
-begin
-  Result := inherited PathIsURL(pPath);
-end;
-
 { TSVNTestsSetup }
 
 procedure TSVNTestsSetup.AddTestCommits;
@@ -179,14 +181,35 @@ begin
   pp := GetCurrentDir;
   ChDir(FCheckoutDir);
   try
+    // first commit
+    // add dirs "trunk" and "tags"
+    RunCmd('cmd.exe /c mkdir trunk tags');
+    // add files
     RunCmd('cmd.exe /c echo generated file > file.txt');
-    RunCmd('svn add file.txt');
+    RunCmd('cmd.exe /c echo generated trunk file > trunk/file.txt');
+    // add to svn
+    RunCmd('svn add *');
+    // commit then
     RunCmd('svn commit -m "first commit"');
 
+    // second commit
+    // add file
     RunCmd('cmd.exe /c echo generated file 2 > file2.txt');
     RunCmd('svn add file2.txt');
-    RunCmd('svn commit -m "second commit"');
+    // create tag v1.1
+    RunCmd('svn copy trunk tags/v1.1');
+    // commit
+    RunCmd('svn commit -m "second commit; tagged v1.1"');
+
+    // third commit
+    RunCmd('cmd.exe /c echo added line to trunk/file >> trunk/file.txt');
+    // commit
+    RunCmd('svn commit -m "third commit"');
+    
+    // update WC to actualize latest revision
     RunCmd('svn up');
+    // remove "tags" folder to test relavitely trunk and repository only
+    RunCmd('cmd.exe /c rmdir /q /s tags');
   finally
     ChDir(pp);
   end;
@@ -289,12 +312,27 @@ begin
   FSVNLogTask.Execute;
 end;
 
-procedure TSVNLogTests.Testtrunk;
+procedure TSVNLogTests.Testrevision;
+begin
+  FSVNLogTask.trunk := '.';
+  FSVNLogTask.Execute;
+  CheckEquals('3', FSVNLogTask.revision);
+end;
+
+procedure TSVNLogTests.Testrevision_tags;
+begin
+  FSVNLogTask.trunk := '.';
+  FSVNLogTask.tags := '../tags';
+  FSVNLogTask.Execute;
+  CheckEquals('3:2', FSVNLogTask.revision);
+end;
+
+procedure TSVNLogTests.Testtrunkonly;
 var
   s: string;
 begin
   FSVNLogTask.trunk := '.';
-  s := TCustomSVNTask.PathToURL(FRepoDir);
+  s := TCustomSVNTask.PathToURL(FRepoDir + '\trunk');
   CheckTrue(AnsiSameText(s, FSVNLogTask.trunk + URLDelimiter),
     s + ' = ' + FSVNLogTask.trunk + URLDelimiter);
 end;
@@ -307,7 +345,7 @@ begin
   if Assigned(FProject.Listener) then
     FProject.Listener.Level := vlDebug;
   FPrevPath := GetCurrentDir;
-  ChDir(FCheckoutDir);
+  ChDir(FCheckoutDir + '\trunk');
 end;
 
 procedure TSVNTaskTestsCommon.TearDown;
