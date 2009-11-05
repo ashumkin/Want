@@ -31,7 +31,9 @@ uses
   FilterElementsTests in 'FilterElementsTests.pas',
   LoadFileTests in 'LoadFileTests.pas',
   TempFileTests in 'TempFileTests.pas',
-  SVNTasksTest in 'SVNTasksTest.pas';
+  SVNTasksTest in 'SVNTasksTest.pas',
+  SpecialTest in 'SpecialTest.pas',
+  TestStrNatCmp in '..\lib\StrNatCmp\tests\TestStrNatCmp.pas';
 
 {$R *.RES}
 

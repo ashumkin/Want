@@ -1004,7 +1004,12 @@ begin
   if FExecOutput.Text <> '' then
   begin
     InvertCompare_NaturalSort := True;
+    // due to bug(?) of Compare_NaturalSort
+    // replace _ with * (as filenames cannot contain *)
+    FExecOutput.Text := AnsiReplaceText(FExecOutput.Text, '_', '*');
     FExecOutput.CustomSort(Compare_NaturalSort);
+    // replace back
+    FExecOutput.Text := AnsiReplaceText(FExecOutput.Text, '*', '_');
     if last > FExecOutput.Count - 1 then
       TaskError(Format('<last> parameter (%d) is greater then revisions count (%d)',
         [last, FExecOutput.Count]));

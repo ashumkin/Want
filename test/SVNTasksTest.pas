@@ -197,9 +197,9 @@ begin
     RunCmd('cmd.exe /c echo generated file 2 > file2.txt');
     RunCmd('svn add file2.txt');
     // create tag v1.1
-    RunCmd('svn copy trunk tags/v1.1');
+    RunCmd('svn copy trunk tags/v1_1');
     // commit
-    RunCmd('svn commit -m "second commit; tagged v1.1"');
+    RunCmd('svn commit -m "second commit; tagged v1_1"');
 
     // third commit
     RunCmd('cmd.exe /c echo added line to trunk/file >> trunk/file.txt');
