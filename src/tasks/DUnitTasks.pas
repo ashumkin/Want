@@ -119,7 +119,7 @@ end;
 
 function TDUnitTask.ShouldRunTest(test: ITest): boolean;
 begin
-  Result := true;
+  Result := test.Enabled;
 end;
 
 procedure TDUnitTask.StartTest(test: ITest);
