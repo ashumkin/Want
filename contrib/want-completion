@@ -1,0 +1,16 @@
+_want_completion()
+{
+	local cur prev opts script_name
+	script_name="apt-cyg"
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+	if [[ ${cur} == -* ]] ; then
+        opts=`want -h | sed -ne 's/^\(.\{24\}\) [A-Z].\+$/\1/p' | sed -e 's/<.\+>//'`
+	else
+		opts=`cat want.xml 2>/dev/null | sed -ne 's/\s*<target name="\(\S\+\)".\+/\1/p'`
+	fi
+	COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+}
+complete -F _want_completion want

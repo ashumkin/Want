@@ -340,6 +340,7 @@ begin
   Exclude('**/CVS/**');
   Exclude('**/.cvsignore');
   Exclude('**/.svn/**');
+  Exclude('**/.git/**');
 
   Exclude('**/*~');
   Exclude('**/#*#');
