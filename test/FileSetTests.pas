@@ -184,14 +184,23 @@ begin
   FS := TFileSet.Create(FProject);
   FS.basedir := test_dir;
   try
-    FS.Include('**/*.pas');
+    FS.Include('*.dfm|**/*.pas');
     FS.Include('**/*.dpr');
+    FS.Include('**/*.dpr');// duplicate must not be added
     FS.Include('**/*.html');
     FS.Include('**/*.css');
     FS.Include('doc/**/*');
     FS.Include('du/**/*.txt');
     FS.Exclude('test/*');
     FS.Exclude('**/*Test*');
+    FS.Exclude('**/Test|test/1');
+    FS.Exclude('*.ini'#13#10'*.inc '#13#10' *.inf');
+    CheckEquals('*.dfm,**/*.pas,**/*.dpr,**/*.html,**/*.css,doc/**/*,du/**/*.txt',
+      FS.Includes.DelimitedText);
+    CheckEquals('test/*,**/*Test*,**/Test,test/1,*.ini,*.inc,*.inf',
+      FS.Excludes.DelimitedText);
+    CheckEquals(7, FS.Includes.Count);
+    CheckEquals(7, FS.Excludes.Count);
     TouchFile('/tmp/test.txt');
     Check(PathIsFile('/tmp/test.txt'));
     (*

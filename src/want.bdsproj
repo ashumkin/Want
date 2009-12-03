@@ -130,11 +130,11 @@
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>
 		<Parameters>
-			<Parameters Name="RunParams">all -debug</Parameters>
+			<Parameters Name="RunParams">compile -log</Parameters>
 			<Parameters Name="HostApplication"></Parameters>
 			<Parameters Name="Launcher"></Parameters>
 			<Parameters Name="UseLauncher">False</Parameters>
-			<Parameters Name="DebugCWD">c:\OCP\projects\billing+beeline\branches\v2_4\tests\</Parameters>
+			<Parameters Name="DebugCWD">d:\Temp\BBA\ocp-git\projects\billing+beeline\</Parameters>
 			<Parameters Name="Debug Symbols Search Path"></Parameters>
 			<Parameters Name="LoadAllSymbols">True</Parameters>
 			<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>

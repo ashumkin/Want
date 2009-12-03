@@ -52,10 +52,16 @@ type
     procedure SetValue(Value: string); override;
   end;
 
+  TIncludeExclude = class(TStringList)
+  public
+    constructor Create;
+    function Add(const S: string): Integer; override;
+  end;
+
   TPatternSet = class(TScriptElement)
   protected
-    FIncludes: TStrings;
-    FExcludes: TStrings;
+    FIncludes: TIncludeExclude;
+    FExcludes: TIncludeExclude;
 
     FPatternSets: array of TPatternSet;
 
@@ -98,8 +104,8 @@ type
     function RelativePaths: TPaths;
     function MovePaths(ToBase: TPath): TPaths;
 
-    property Includes: TStrings read FIncludes;
-    property Excludes: TStrings read FExcludes;
+    property Includes: TIncludeExclude read FIncludes;
+    property Excludes: TIncludeExclude read FExcludes;
 
     property Sorted: boolean read FSorted write FSorted;
     
@@ -138,6 +144,9 @@ type
 
 implementation
 
+uses
+  SysUtils;
+  
 { TIncludeElement }
 
 procedure TIncludeElement.SetValue(Value: string);
@@ -159,8 +168,8 @@ end;
 constructor TPatternSet.Create(Owner: TScriptElement);
 begin
   inherited Create(Owner);
-  FIncludes := TStringList.Create;
-  FExcludes := TStringList.Create;
+  FIncludes := TIncludeExclude.Create;
+  FExcludes := TIncludeExclude.Create;
 
   FSorted := true;
 end;
@@ -184,14 +193,12 @@ end;
 
 procedure TPatternSet.Include(Pattern: TPath);
 begin
-  if (Pattern <> '') and (FIncludes.IndexOf(Pattern) < 0) then
-    FIncludes.Add(Pattern);
+  FIncludes.Add(Pattern);
 end;
 
 procedure TPatternSet.Exclude(Pattern: TPath);
 begin
-  if (Pattern <> '') and (FExcludes.IndexOf(Pattern) < 0) then
-    FExcludes.Add(Pattern);
+  FExcludes.Add(Pattern);
 end;
 
 procedure TPatternSet.DoInclude(Files: TStrings; Pattern: TPath; Base: string; IncAtt, ExcAtt: TFileAttributes);
@@ -370,6 +377,34 @@ begin
   inherited DoExcludes(Files, Base);
 end;
 
+
+{ TIncludeExclude }
+
+function TIncludeExclude.Add(const S: string): Integer;
+var
+  Strs: TStringList;
+  i: Integer;
+begin
+  Strs := TStringList.Create;
+  try
+    ExtractStrings(['|'], [' '], PAnsiChar(S), Strs);
+//    StrToStrings(S, '|', Strs);
+    for i := 0 to Strs.Count - 1 do
+    begin
+      Strs[i] := TrimRight(Strs[i]);
+      if (Strs[i] <> '') and (IndexOf(Strs[i]) < 0) then
+        Result := inherited Add(Strs[i]);
+    end;
+  finally
+    FreeAndNil(Strs);
+  end;
+end;
+
+constructor TIncludeExclude.Create;
+begin
+  inherited Create;
+  QuoteChar := ' ';
+end;
 
 initialization
   RegisterElement(TPatternSet);
