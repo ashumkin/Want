@@ -25,16 +25,14 @@ uses
 
   TestFramework,
   TestExtensions,
-  WantClassesTest;
+  WantClassesTest,
+  uTestClasses;
 
 type
-  TSVNTestsSetup = class(TTestSetup)
+  TSVNTestsSetup = class(TTestCaseSetup)
   private
     FDir: string;
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-
     procedure RunCmd(const pCmd: string);
     procedure DelDir(const pDir: string);
     procedure CreateRepo;
@@ -42,7 +40,10 @@ type
     procedure AddTestCommits;
     function ToSystemPath(const pDir: string): string;
   public
-    function  GetName: string; override;
+    function GetName: string; override;
+
+    procedure SetUp; override;
+    procedure TearDown; override;
   end;
 
   TTestCustomSVNTaskClass = class(TCustomSVNTask)
@@ -57,7 +58,8 @@ type
     procedure TearDown; override;
   end;
 
-  TCustomSVNTaskTests = class(TSVNTaskTestsCommon)
+  TSVNTaskPathsTests = class(TSVNTaskTestsCommon)
+  private
     FCustomSVNTask: TTestCustomSVNTaskClass;
   protected
     procedure SetUp;    override;
@@ -93,52 +95,55 @@ type
 
 implementation
 
+uses
+  Windows;
+  
 var
   FCheckoutDir: string;
   FRepoDir: string;
 
 { TCustomSVNTaskTests }
 
-procedure TCustomSVNTaskTests.SetUp;
+procedure TSVNTaskPathsTests.SetUp;
 begin
   inherited;
   FCustomSVNTask := TTestCustomSVNTaskClass.Create(FProject);
 end;
 
-procedure TCustomSVNTaskTests.TearDown;
+procedure TSVNTaskPathsTests.TearDown;
 begin
   FreeAndNil(FCustomSVNTask);
   inherited;
 end;
 
-procedure TCustomSVNTaskTests.TestDecodeURL;
+procedure TSVNTaskPathsTests.TestDecodeURL;
 begin
   CheckEquals('file://c:/Program files/Path',
     TCustomSVNTask.DecodeURL('file://c:/Program%20files/Path'));
 end;
 
-procedure TCustomSVNTaskTests.TestGetRepoPath;
+procedure TSVNTaskPathsTests.TestGetRepoPath;
 begin
   CheckEquals('http://localhost/project+name/tags',
     TCustomSVNTask.GetRepoPath('http://localhost/project+name/trunk',
       '../tags'));
 end;
 
-procedure TCustomSVNTaskTests.TestPathIsURL;
+procedure TSVNTaskPathsTests.TestPathIsURL;
 begin
   CheckFalse(FCustomSVNTask.PathIsURL('c:/path/to/file'));
   CheckTrue(FCustomSVNTask.PathIsURL('svn://path/to/file'));
   CheckTrue(FCustomSVNTask.PathIsURL('http://path/to/file'));
 end;
 
-procedure TCustomSVNTaskTests.TestPathToURL;
+procedure TSVNTaskPathsTests.TestPathToURL;
 begin
   CheckTrue(AnsiSameText('file:///c:/Program%20files/path%2Bpath/',
     TCustomSVNTask.PathToURL('c:\Program%20files\path+path')),
     TCustomSVNTask.PathToURL('c:\Program%20files\path+path'));
 end;
 
-procedure TCustomSVNTaskTests.Testtags;
+procedure TSVNTaskPathsTests.Testtags;
 begin
   FCustomSVNTask.repo := 'http://localhost/path/';
   FCustomSVNTask.tags := './tags';
@@ -355,7 +360,8 @@ begin
 end;
 
 initialization
-  RegisterTests([TSVNTestsSetup.Create(TCustomSVNTaskTests.Suite)]);
-  RegisterTests([TSVNTestsSetup.Create(TSVNTaskTests.Suite)]);
-  RegisterTests([TSVNTestsSetup.Create(TSVNLogTests.Suite)]);
+  RegisterTest(TSVNTestsSetup.Create([
+    TSVNTaskPathsTests.Suite,
+    TSVNTaskTests.Suite,
+    TSVNLogTests.Suite]));
 end.

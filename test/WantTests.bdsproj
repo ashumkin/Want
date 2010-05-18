@@ -123,7 +123,7 @@
 			<Directories Name="UnitOutputDir">..\dcu\ide</Directories>
 			<Directories Name="PackageDLLOutputDir"></Directories>
 			<Directories Name="PackageDCPOutputDir"></Directories>
-			<Directories Name="SearchPath">..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit-7.2.1;..\lib\PCRE-4.5;..\lib\dunit-7.2.1\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\abstractdo;..\lib\Imports</Directories>
+			<Directories Name="SearchPath">..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\abstractdo;..\lib\Imports</Directories>
 			<Directories Name="Packages">Vcl50;Vclx50;VclSmp50;Vcldb50;vclado50;ibevnt50;Vclbde50;vcldbx50;Qrpt50;TeeUI50;TeeDB50;Tee50;Dss50;TeeQR50;VCLIB50;Vclmid50;vclie50;Inetdb50;Inet50;NMFast50;webmid50;dclocx50;dclaxserver50;Indy50;OE;RxCtl5;RxBDE5;RxDB5;msxml;OpenXML_D5</Directories>
 			<Directories Name="Conditionals">USE_JEDI_JCL;DUNIT_DLL;SUPPORTS_WIDESTRING;USE_TEXT_RUNNER0</Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
