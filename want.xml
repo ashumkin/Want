@@ -76,7 +76,7 @@ See http://www.suigeneris.org/want/ for details.
     <include  name="${lib}/RegExpr/Source" />
     <include  name="${lib}/Common" />
     <include  name="${lib}/StrNatCmp" />
-    <include  name="${lib}/abstractdo" />
+    <include  name="${lib}/AbstractXML" />
     
     <include  name="${src}" />
     <include  name="${src}/tasks" />

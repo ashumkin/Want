@@ -30,14 +30,16 @@ uses
 
 type
   TSVNTestsSetup = class(TTestCaseSetup)
-  private
-    FDir: string;
   protected
+    FDir: string;
+    FCommitCount: Integer;
     procedure RunCmd(const pCmd: string);
     procedure DelDir(const pDir: string);
     procedure CreateRepo;
     procedure CheckoutRepo;
     procedure AddTestCommits;
+    procedure Commit(const pMessage: string);
+    procedure AddTag(const pTag: string);
     function ToSystemPath(const pDir: string): string;
   public
     function GetName: string; override;
@@ -50,18 +52,18 @@ type
   public
   end;
 
-  TSVNTaskTestsCommon = class(TProjectBaseCase)
-  private
-    FPrevPath: string;
+  TCustomSVNTaskTest = class(TProjectBaseCase)
   protected
+    FPrevPath: string;
+  public
     procedure SetUp;    override;
     procedure TearDown; override;
   end;
 
-  TSVNTaskPathsTests = class(TSVNTaskTestsCommon)
-  private
-    FCustomSVNTask: TTestCustomSVNTaskClass;
+  TTestTSVNTaskPaths = class(TCustomSVNTaskTest)
   protected
+    FCustomSVNTask: TTestCustomSVNTaskClass;
+  public
     procedure SetUp;    override;
     procedure TearDown; override;
   published
@@ -72,18 +74,40 @@ type
     procedure Testtags;
   end;
 
-  TSVNTaskTests = class(TSVNTaskTestsCommon)
-    FSVNTask: TSVNTask;
+  TTestTSVNTask = class(TCustomSVNTaskTest)
   protected
+    FSVNTask: TSVNTask;
+  public
     procedure SetUp;    override;
     procedure TearDown; override;
   published
     procedure Testtags;
   end;
 
-  TSVNLogTests = class(TSVNTaskTestsCommon)
-    FSVNLogTask: TSVNLogTask;
+  TTestTSVNLastRevisionTask = class(TCustomSVNTaskTest)
   protected
+    FSVNLastRevisionTask: TSVNLastRevisionTask;
+  public
+    procedure SetUp;    override;
+    procedure TearDown; override;
+  published
+    procedure TestLastRevision;
+  end;
+
+  TTestTSVNInfoTask = class(TCustomSVNTaskTest)
+  protected
+    FSVNInfoTask: TSVNInfoTask;
+  public
+    procedure SetUp;    override;
+    procedure TearDown; override;
+  published
+    procedure TestInfo;
+  end;
+
+  TTestTSVNLog = class(TCustomSVNTaskTest)
+  protected
+    FSVNLogTask: TSVNLogTask;
+  public
     procedure SetUp;    override;
     procedure TearDown; override;
   published
@@ -91,6 +115,7 @@ type
     procedure Testtrunkonly;
     procedure Testrevision;
     procedure Testrevision_tags;
+    procedure TestGetTrunkPointsTo;
   end;
 
 implementation
@@ -104,46 +129,46 @@ var
 
 { TCustomSVNTaskTests }
 
-procedure TSVNTaskPathsTests.SetUp;
+procedure TTestTSVNTaskPaths.SetUp;
 begin
   inherited;
   FCustomSVNTask := TTestCustomSVNTaskClass.Create(FProject);
 end;
 
-procedure TSVNTaskPathsTests.TearDown;
+procedure TTestTSVNTaskPaths.TearDown;
 begin
   FreeAndNil(FCustomSVNTask);
   inherited;
 end;
 
-procedure TSVNTaskPathsTests.TestDecodeURL;
+procedure TTestTSVNTaskPaths.TestDecodeURL;
 begin
   CheckEquals('file://c:/Program files/Path',
     TCustomSVNTask.DecodeURL('file://c:/Program%20files/Path'));
 end;
 
-procedure TSVNTaskPathsTests.TestGetRepoPath;
+procedure TTestTSVNTaskPaths.TestGetRepoPath;
 begin
   CheckEquals('http://localhost/project+name/tags',
     TCustomSVNTask.GetRepoPath('http://localhost/project+name/trunk',
       '../tags'));
 end;
 
-procedure TSVNTaskPathsTests.TestPathIsURL;
+procedure TTestTSVNTaskPaths.TestPathIsURL;
 begin
   CheckFalse(FCustomSVNTask.PathIsURL('c:/path/to/file'));
   CheckTrue(FCustomSVNTask.PathIsURL('svn://path/to/file'));
   CheckTrue(FCustomSVNTask.PathIsURL('http://path/to/file'));
 end;
 
-procedure TSVNTaskPathsTests.TestPathToURL;
+procedure TTestTSVNTaskPaths.TestPathToURL;
 begin
   CheckTrue(AnsiSameText('file:///c:/Program%20files/path%2Bpath/',
     TCustomSVNTask.PathToURL('c:\Program%20files\path+path')),
     TCustomSVNTask.PathToURL('c:\Program%20files\path+path'));
 end;
 
-procedure TSVNTaskPathsTests.Testtags;
+procedure TTestTSVNTaskPaths.Testtags;
 begin
   FCustomSVNTask.repo := 'http://localhost/path/';
   FCustomSVNTask.tags := './tags';
@@ -159,18 +184,18 @@ end;
 
 { TSVNTaskTests }
 
-procedure TSVNTaskTests.SetUp;
+procedure TTestTSVNTask.SetUp;
 begin
   inherited;
   FSVNTask := TSVNTask.Create(FProject);
 end;
 
-procedure TSVNTaskTests.TearDown;
+procedure TTestTSVNTask.TearDown;
 begin
   FreeAndNil(FSVNTask);
 end;
 
-procedure TSVNTaskTests.Testtags;
+procedure TTestTSVNTask.Testtags;
 begin
   FSVNTask.repo := 'http://localhost/path/';
   FSVNTask.tags := '../tags';
@@ -178,6 +203,14 @@ begin
 end;
 
 { TSVNTestsSetup }
+
+procedure TSVNTestsSetup.AddTag(const pTag: string);
+begin
+  // create tag
+  RunCmd('svn copy trunk tags/v' + pTag);
+  // commit
+  Commit('tagged v' + pTag);
+end;
 
 procedure TSVNTestsSetup.AddTestCommits;
 var
@@ -187,32 +220,48 @@ begin
   ChDir(FCheckoutDir);
   try
     // first commit
-    // add dirs "trunk" and "tags"
-    RunCmd('cmd.exe /c mkdir trunk tags');
+    // add dirs "trunk" and "tags" and "branches"
+    RunCmd('cmd.exe /c mkdir trunk tags branches');
     // add files
     RunCmd('cmd.exe /c echo generated file > file.txt');
     RunCmd('cmd.exe /c echo generated trunk file > trunk/file.txt');
     // add to svn
     RunCmd('svn add *');
-    // commit then
-    RunCmd('svn commit -m "first commit"');
+    // commit then - revision 1
+    Commit('');
+    AddTag('_');
 
     // second commit
     // add file
     RunCmd('cmd.exe /c echo generated file 2 > file2.txt');
     RunCmd('svn add file2.txt');
-    // create tag v1.1
-    RunCmd('svn copy trunk tags/v1_1');
-    // commit
-    RunCmd('svn commit -m "second commit; tagged v1_1"');
+    // create tag v11.1 - revision 2
+    AddTag('11_1');
 
     // third commit
     RunCmd('cmd.exe /c echo added line to trunk/file >> trunk/file.txt');
-    // commit
-    RunCmd('svn commit -m "third commit"');
-    
-    // update WC to actualize latest revision
-    RunCmd('svn up');
+    // commit - revision 3
+    Commit('');
+
+    //  - revision 4 points to revision 3
+    AddTag('1_2');
+
+    // revision 5 points to revision 4
+    RunCmd('svn copy trunk branches/v1_3');
+    Commit('branch trunk to v1_3');
+    // modify branch
+    RunCmd('cmd.exe /c echo added line to branch/v1_3/file >>'
+      + ' branches/v1_3/file.txt');
+    // revision 6
+    Commit('modified branch v1_3');
+
+    // create tag v11.31 - revision 7
+    AddTag('11_31');
+
+    // create tag v11.32 - revision 8 points to revision 7
+    RunCmd('svn copy branches/v1_3 tags/v11_32');
+    Commit('tagged branch v1_3 to v11_32');
+
     // remove "tags" folder to test relavitely trunk and repository only
     RunCmd('cmd.exe /c rmdir /q /s tags');
   finally
@@ -226,6 +275,14 @@ var
 begin
   s := TCustomSVNTask.PathToURL(FRepoDir);
   RunCmd('svn checkout ' + s + ' ' + ToSystemPath(FCheckoutDir));
+end;
+
+procedure TSVNTestsSetup.Commit(const pMessage: string);
+begin
+  Inc(FCommitCount);
+  RunCmd(Format('svn commit -m "%d commit;%s"', [FCommitCount, pMessage]));
+  // update WC to actualize latest revision
+  RunCmd('svn up');
 end;
 
 procedure TSVNTestsSetup.CreateRepo;
@@ -268,7 +325,7 @@ end;
 procedure TSVNTestsSetup.SetUp;
 begin
   inherited;
-  FDir := './svn+tests';
+  FDir := ExtractFilePath(ParamStr(0)) + 'svn+tests';
   FRepoDir := ExpandFileName(FDir + '/repo');
   FCheckoutDir := ExpandFileName(FDir + '/checkout');
   FDir := ExpandFileName(FDir);
@@ -279,6 +336,7 @@ begin
 
   CreateRepo;
   CheckoutRepo;
+  FCommitCount := 0;
   AddTestCommits;
 end;
 
@@ -297,19 +355,19 @@ end;
 
 { TSVNLogTests }
 
-procedure TSVNLogTests.SetUp;
+procedure TTestTSVNLog.SetUp;
 begin
   inherited;
   FSVNLogTask := TSVNLogTask.Create(FProject);
 end;
 
-procedure TSVNLogTests.TearDown;
+procedure TTestTSVNLog.TearDown;
 begin
   FreeAndNil(FSVNLogTask);
   inherited;
 end;
 
-procedure TSVNLogTests.TestLog;
+procedure TTestTSVNLog.TestLog;
 begin
   FSVNLogTask.trunk := '.';
   FSVNLogTask.xml := True;
@@ -317,22 +375,57 @@ begin
   FSVNLogTask.Execute;
 end;
 
-procedure TSVNLogTests.Testrevision;
+procedure TTestTSVNLog.Testrevision;
 begin
   FSVNLogTask.trunk := '.';
   FSVNLogTask.Execute;
-  CheckEquals('3', FSVNLogTask.revision);
+  CheckEquals('4', FSVNLogTask.revision);
 end;
 
-procedure TSVNLogTests.Testrevision_tags;
+procedure TTestTSVNLog.TestGetTrunkPointsTo;
+begin
+  FSVNLogTask.repo := FSVNLogTask.PathToURL(
+      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v1_2';
+  CheckTrue(FSVNLogTask.GetTrunkPointsTo);
+  CheckEquals('4', FSVNLogTask.TrunkPointsTo);
+
+  FSVNLogTask.repo := FSVNLogTask.PathToURL(
+      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v11_1';
+  CheckTrue(FSVNLogTask.GetTrunkPointsTo);
+  CheckEquals('2', FSVNLogTask.TrunkPointsTo);
+end;
+
+procedure TTestTSVNLog.Testrevision_tags;
 begin
   FSVNLogTask.trunk := '.';
   FSVNLogTask.tags := '../tags';
   FSVNLogTask.Execute;
-  CheckEquals('3:2', FSVNLogTask.revision);
+  CheckEquals('4:8', FSVNLogTask.revision);
+
+  // + version filter
+  FSVNLogTask.versionfilter := '^v_.*';
+  FSVNLogTask.filter := 'commit';
+  FSVNLogTask.Execute;
+  CheckEquals('4:1', FSVNLogTask.revision);
+
+  // + version filter
+  FSVNLogTask.versionfilter := 'v1_.*';
+  FSVNLogTask.Execute;
+  CheckEquals('4:4', FSVNLogTask.revision);
+
+  // v1.x
+  FSVNLogTask.branches := '../branches/v1_3';
+  FSVNLogTask.tags := '../tags';
+  FSVNLogTask.Execute;
+  CheckEquals('7:4', FSVNLogTask.revision);
+
+  // v11.x
+  FSVNLogTask.versionfilter := 'v11_.*';
+  FSVNLogTask.Execute;
+  CheckEquals('7:8', FSVNLogTask.revision);
 end;
 
-procedure TSVNLogTests.Testtrunkonly;
+procedure TTestTSVNLog.Testtrunkonly;
 var
   s: string;
 begin
@@ -344,7 +437,7 @@ end;
 
 { TSVNTaskTestsCommon }
 
-procedure TSVNTaskTestsCommon.SetUp;
+procedure TCustomSVNTaskTest.SetUp;
 begin
   inherited;
   if Assigned(FProject.Listener) then
@@ -353,15 +446,76 @@ begin
   ChDir(FCheckoutDir + '\trunk');
 end;
 
-procedure TSVNTaskTestsCommon.TearDown;
+procedure TCustomSVNTaskTest.TearDown;
 begin
   ChDir(FPrevPath);
   inherited;
 end;
 
+{ TTestTSVNLastRevisionTask }
+
+procedure TTestTSVNLastRevisionTask.SetUp;
+begin
+  inherited;
+  FSVNLastRevisionTask := TSVNLastRevisionTask.Create(FProject);
+end;
+
+procedure TTestTSVNLastRevisionTask.TearDown;
+begin
+  FreeAndNil(FSVNLastRevisionTask);
+  inherited;
+end;
+
+procedure TTestTSVNLastRevisionTask.TestLastRevision;
+var
+  FSVNLogTask: TSVNLogTask;
+begin
+  FSVNLogTask := TSVNLogTask.Create(FProject);
+  try
+    FSVNLogTask.trunk := '.';
+    FSVNLastRevisionTask.repo := FSVNLogTask.trunk;
+  finally
+    FreeAndNil(FSVNLogTask);
+  end;
+  FSVNLastRevisionTask.tags := '../tags';
+  FSVNLastRevisionTask.last := 0;
+  FSVNLastRevisionTask.fullpath := True;
+//  FSVNLastRevisionTask.versionfilter := '';
+  FSVNLastRevisionTask.Execute;
+  CheckTrue(AnsiSameText(FSVNLastRevisionTask.PathToURL(
+      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v11_32',
+    FSVNLastRevisionTask.LastRevision),
+    FSVNLastRevisionTask.PathToURL(
+      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v11_32');
+end;
+
+{ TTestTSVNInfoTask }
+
+procedure TTestTSVNInfoTask.SetUp;
+begin
+  inherited;
+  FSVNInfoTask := TSVNInfoTask.Create(FProject);
+end;
+
+procedure TTestTSVNInfoTask.TearDown;
+begin
+  FreeAndNil(FSVNInfoTask);
+  inherited;
+end;
+
+procedure TTestTSVNInfoTask.TestInfo;
+begin
+  FSVNInfoTask.SetItem(FSVNInfoTask.PathToURL(
+      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v11_32');
+  FSVNInfoTask.Execute_(False);
+  CheckEquals('9', FSVNInfoTask.Items[0].CommitRevision);
+end;
+
 initialization
   RegisterTest(TSVNTestsSetup.Create([
-    TSVNTaskPathsTests.Suite,
-    TSVNTaskTests.Suite,
-    TSVNLogTests.Suite]));
+    TTestTSVNTaskPaths.Suite,
+    TTestTSVNTask.Suite,
+    TTestTSVNLastRevisionTask.Suite,
+    TTestTSVNInfoTask.Suite,
+    TTestTSVNLog.Suite]));
 end.

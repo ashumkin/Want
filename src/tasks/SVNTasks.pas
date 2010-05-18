@@ -131,12 +131,12 @@ type
     Fbranches: TPath;
     Ftrunk: TPath;
     Ftags: TPath;
-    FExecOutput: TStringList;
     FOutputIsUTF8: boolean;
     FConvertSVNOutput: boolean;
     FIncrementalOutput: boolean;
     Frevision: string;
   protected
+    FExecOutput: TStringList;
     function BuildArguments: string; override;
 
     procedure BuildArgumentsGlobal; virtual;
@@ -178,6 +178,7 @@ type
     property branches: TPath read Getbranches write Fbranches;
     property command: string read FCommand write FCommand;
     property dest: string read FDest write FDest;
+    property ExecOutput: TStringList read FExecOutput;
     property repo: TPath read GetRepo write Frepo;
     property revision: string read Getrevision write Frevision;
     property tags: TPath read Gettags write Ftags;
@@ -212,9 +213,11 @@ type
     Flast: Integer;
     FLastRevision: string;
     Ffullpath: boolean;
+    Fversionfilter: string;
     procedure SetLastRevision(const Value: string);
   protected
     function GetRepo: TPath; override;
+    procedure DoFilterRevisions;
     procedure DoParseOutput; override;
   public
     constructor Create(Owner: TScriptElement); override;
@@ -229,6 +232,7 @@ type
 
     property output;
     property failonerror;
+    property versionfilter: string read Fversionfilter write Fversionfilter;
 
     property quiet;
     property repo;
@@ -426,20 +430,29 @@ type
     Fxml: boolean;
     Fxls: string;
     Flast: Integer;
+    Fversionfilter: string;
+    Fverbose: boolean;
+    FTrunkPointsTo: string;
+    FIsToGetTrunkPointsTo: boolean;
   protected
     FInfo: TSVNInfoTask;
-    
+    FLog: TSVNInfoLog;
+
     function Getrevision: string; override;
     procedure DoNextArguments; override;
     function Gettrunk: TPath; override;
-    function Gettags: TPath; override;
-    function DoGetRevisions: boolean;
+    procedure DoGetRevisions;
+    procedure DoParseOutput; override;
   public
     constructor Create(Owner: TScriptElement); override;
     destructor Destroy; override;
-    
+
     procedure Execute; override;
     procedure Init; override;
+    function GetTrunkPointsTo: boolean;
+
+    property IsToGetTrunkPointsTo: boolean read FIsToGetTrunkPointsTo;
+    property TrunkPointsTo: string read FTrunkPointsTo;
   published
     property failonerror;
     property Arguments;
@@ -452,8 +465,10 @@ type
     property limit: Integer read Flimit write Flimit;
     property output;
     property revision;
+    property versionfilter: string read Fversionfilter write Fversionfilter;
     property tags;
     property trunk;
+    property verbose: boolean read Fverbose write Fverbose;
     property xml: boolean read Fxml write Fxml;
   end;
   
@@ -988,11 +1003,25 @@ begin
   inherited;
   command := 'list';
   last := 0;
+  Fversionfilter := '';
 end;
 
 function TSVNLastRevisionTask.CreateProperty: TSubPropertyElement;
 begin
   Result := TSubPropertyElement.Create(Self);
+end;
+
+procedure TSVNLastRevisionTask.DoFilterRevisions;
+var                     
+  i: Integer;
+begin
+  if versionfilter = '' then
+    Exit;
+  Log(vlDebug, 'Version filter is set=' + versionfilter);
+  for i := FExecOutput.Count - 1 downto 0 do
+    if not Match(versionfilter, FExecOutput[i]) then
+      FExecOutput.Delete(i);
+  Log(vlDebug, 'Filtered tags: ' + FExecOutput.Text);
 end;
 
 procedure TSVNLastRevisionTask.DoParseOutput;
@@ -1001,8 +1030,12 @@ var
 begin
   inherited;
   FExecOutput.Text := Trim(FExecOutput.Text);
-  if FExecOutput.Text <> '' then
+  if FExecOutput.Text = '' then
+    TaskError('There are no any revision')
+  else
   begin
+    // filter revisions
+    DoFilterRevisions;
     InvertCompare_NaturalSort := True;
     // due to bug(?) of Compare_NaturalSort
     // replace _ with * (as filenames cannot contain *)
@@ -1011,16 +1044,14 @@ begin
     // replace back
     FExecOutput.Text := AnsiReplaceText(FExecOutput.Text, '*', '_');
     if last > FExecOutput.Count - 1 then
-      TaskError(Format('<last> parameter (%d) is greater then revisions count (%d)',
-        [last, FExecOutput.Count]));
+      TaskFailureFmt('<last> parameter (%d) is greater then revisions count (%d)',
+        [last, FExecOutput.Count]);
     LastRevision := ExTURLD(FExecOutput.Strings[last]);
     for i := 0 to ChildCount - 1 do
       if Children[i] is TSubPropertyElement then
         Project.SetProperty(TSubPropertyElement(Children[i]).name,
           LastRevision, TSubPropertyElement(Children[i]).overwrite);
-  end
-  else
-    TaskError('There are no any revision');
+  end;
 end;
 
 procedure TSVNLastRevisionTask.Execute;
@@ -1462,16 +1493,22 @@ begin
   FLastRevisionTask := TSVNLastRevisionTask.Create(Self);
   FInfo := TSVNInfoTask.Create(Self);
   Flimit := 0;
+  Fversionfilter := '';
+  Fverbose := False;
+  FIsToGetTrunkPointsTo := False;
 end;
 
 destructor TSVNLogTask.Destroy;
 begin
   FreeAndNil(FInfo);
   FreeAndNil(FLastRevisionTask);
+  FreeAndNil(FLog);
   inherited;
 end;
 
-function TSVNLogTask.DoGetRevisions: boolean;
+procedure TSVNLogTask.DoGetRevisions;
+var
+  lt: TSVNLogTask;
 begin
   if Ftags <> EmptyStr then
   begin
@@ -1480,15 +1517,30 @@ begin
     FLastRevisionTask.tags := tags;
     FLastRevisionTask.last := last;
     FLastRevisionTask.fullpath := True;
+    FLastRevisionTask.versionfilter := Self.versionfilter;
     FLastRevisionTask.Execute;
 
-    FInfo.SetItem(FLastRevisionTask.LastRevision);
-    FInfo.Execute_(False);
-    Frevision := FInfo.Items[0].CommitRevision;
+    lt := TSVNLogTask.Create(Self);
+    try
+      lt.repo := FLastRevisionTask.LastRevision;
+      if lt.GetTrunkPointsTo then
+        Frevision := lt.TrunkPointsTo
+      else
+      begin
+        FInfo.SetItem(FLastRevisionTask.LastRevision);
+        FInfo.Execute_(False);
+        Frevision := FInfo.Items[0].CommitRevision;
+      end;
+    finally
+      FreeAndNil(lt);
+    end;
     Log(vlVerbose, 'Last tag revision = ' + Frevision);
   end;
-  
-  FInfo.SetItem(trunk);
+
+  if branches = '' then
+    FInfo.SetItem(trunk)
+  else
+    FInfo.SetItem(branches);
   FInfo.Execute_(False);
   Log(vlVerbose, 'repo revision = ' + FInfo.Items[0].CommitRevision);
   Frevision := FInfo.Items[0].CommitRevision
@@ -1507,14 +1559,30 @@ begin
     Log(vlDebug, 'limit = %d', [limit]);
     ArgumentList.AddOption('--limit=', IntToStr(limit));
   end;
+  if verbose then
+  begin
+    Log(vlDebug, 'verbose is on');
+    ArgumentList.AddValue('-v');
+  end;
   inherited;
+end;
+
+procedure TSVNLogTask.DoParseOutput;
+begin
+  inherited;
+  FLog := TSVNInfoLog.CreateByContext(FExecOutput.Text);
+  if FIsToGetTrunkPointsTo then
+    if Assigned(FLog.Log[0]) then
+      if Assigned(FLog.Log[0].Paths.Path[0]) then
+        FTrunkPointsTo := FLog.Log[0].Paths.Path[0].copyfrom_rev;
 end;
 
 procedure TSVNLogTask.Execute;
 begin
   Log(vlNormal, 'Getting log');
-  DoGetRevisions;
-  inherited;
+  if not IsToGetTrunkPointsTo then
+    DoGetRevisions;
+  inherited Execute;
 end;
 
 function TSVNLogTask.Gettrunk: TPath;
@@ -1535,9 +1603,22 @@ begin
   Result := Frevision;
 end;
 
-function TSVNLogTask.Gettags: TPath;
+function TSVNLogTask.GetTrunkPointsTo: boolean;
 begin
-  Result := inherited Gettags;
+  tags := '';
+  branches := '';
+  FTrunkPointsTo := '-';
+  limit := 1;
+  verbose := True;
+  xml := True;
+  Frevision := '';
+  FIsToGetTrunkPointsTo := True;
+  try
+    Execute;
+  finally
+    Result := StrToIntDef(FTrunkPointsTo, -1) <> -1;
+    FIsToGetTrunkPointsTo := False;
+  end;
 end;
 
 procedure TSVNLogTask.Init;

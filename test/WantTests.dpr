@@ -15,6 +15,7 @@ uses
   RunnerTests,
 
   TestuURI in '..\lib\Common\tests\TestuURI.pas',
+  TestuProps in '..\lib\Common\tests\TestuProps.pas',
   WantClassesTest in 'WantClassesTest.pas',
   FileSetTests in 'FileSetTests.pas',
   ExecTasksTest in 'ExecTasksTest.pas',

@@ -123,18 +123,18 @@
 			<Directories Name="UnitOutputDir">..\dcu\ide</Directories>
 			<Directories Name="PackageDLLOutputDir"></Directories>
 			<Directories Name="PackageDCPOutputDir"></Directories>
-			<Directories Name="SearchPath">..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\abstractdo;..\lib\Imports</Directories>
+			<Directories Name="SearchPath">..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</Directories>
 			<Directories Name="Packages">Vcl40;Vclx40;Vcldb40;vcldbx40;VclSmp40;Qrpt40;TeeUI40;teedb40;tee40;ibevnt40;nmfast40</Directories>
-			<Directories Name="Conditionals">USE_JEDI_JCL;DUNIT_DLL</Directories>
+			<Directories Name="Conditionals">USE_JEDI_JCL;DUNIT_DLL;SUPPORTS_WIDESTRING;USE_TEXT_RUNNER0</Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>
 		<Parameters>
-			<Parameters Name="RunParams">compile -log</Parameters>
+			<Parameters Name="RunParams">-debug changelog -log</Parameters>
 			<Parameters Name="HostApplication"></Parameters>
 			<Parameters Name="Launcher"></Parameters>
 			<Parameters Name="UseLauncher">False</Parameters>
-			<Parameters Name="DebugCWD">d:\Temp\BBA\ocp-git\projects\billing+beeline\</Parameters>
+			<Parameters Name="DebugCWD">c:\OCP\projects\billing+beeline\trunk</Parameters>
 			<Parameters Name="Debug Symbols Search Path"></Parameters>
 			<Parameters Name="LoadAllSymbols">True</Parameters>
 			<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
