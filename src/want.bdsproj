@@ -130,11 +130,11 @@
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>
 		<Parameters>
-			<Parameters Name="RunParams">-debug changelog -log</Parameters>
+			<Parameters Name="RunParams">-debug -log </Parameters>
 			<Parameters Name="HostApplication"></Parameters>
 			<Parameters Name="Launcher"></Parameters>
 			<Parameters Name="UseLauncher">False</Parameters>
-			<Parameters Name="DebugCWD">c:\OCP\projects\billing+beeline\trunk</Parameters>
+			<Parameters Name="DebugCWD">c:\OCP\projects\billing+beeline\trunk\HashMaker</Parameters>
 			<Parameters Name="Debug Symbols Search Path"></Parameters>
 			<Parameters Name="LoadAllSymbols">True</Parameters>
 			<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>

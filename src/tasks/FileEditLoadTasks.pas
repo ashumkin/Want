@@ -21,6 +21,8 @@ type
     function ConvertFromTo(pStr: string; _from, _to: TEncoding): string; virtual;
     function Convert(pStr: string; from: boolean): string; overload; virtual;
   public
+    constructor Create(Owner :TScriptElement); override;
+
     property encoding: string read Getencoding write Setencoding;
   end;
 
@@ -42,17 +44,28 @@ begin
   end;
 end;
 
+constructor TFileEditLoadTask.Create(Owner: TScriptElement);
+begin
+  inherited;
+  Fencoding := eANSI;
+end;
+
 function TFileEditLoadTask.Convert(pStr: string; from: boolean): string;
 var
   TE: TEncoder;
   ie, oe: TEncoding;
 begin
-  ie := TE.InputEncoding;
-  oe := TE.OutputEncoding;
-  if from then
-    ie := Fencoding
-  else
-    oe := Fencoding;
+  TE := TEncoder.Create;
+  try
+    ie := TE.InputEncoding;
+    oe := TE.OutputEncoding;
+    if from then
+      ie := Fencoding
+    else
+      oe := Fencoding;
+  finally
+    FreeAndNil(TE);
+  end;
   Result := ConvertFromTo(pStr, ie, oe);
 end;
 
