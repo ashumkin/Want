@@ -1518,6 +1518,7 @@ begin
     FLastRevisionTask.last := last;
     FLastRevisionTask.fullpath := True;
     FLastRevisionTask.versionfilter := Self.versionfilter;
+    FLastRevisionTask.Init;
     FLastRevisionTask.Execute;
 
     lt := TSVNLogTask.Create(Self);
