@@ -389,6 +389,7 @@ begin
   CheckTrue(FSVNLogTask.GetTrunkPointsTo);
   CheckEquals('4', FSVNLogTask.TrunkPointsTo);
 
+  FSVNLogTask.ClearArguments;
   FSVNLogTask.repo := FSVNLogTask.PathToURL(
       ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v11_1';
   CheckTrue(FSVNLogTask.GetTrunkPointsTo);
@@ -403,23 +404,27 @@ begin
   CheckEquals('4:8', FSVNLogTask.revision);
 
   // + version filter
+  FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := '^v_.*';
   FSVNLogTask.filter := 'commit';
   FSVNLogTask.Execute;
   CheckEquals('4:1', FSVNLogTask.revision);
 
   // + version filter
+  FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := 'v1_.*';
   FSVNLogTask.Execute;
   CheckEquals('4:4', FSVNLogTask.revision);
 
   // v1.x
+  FSVNLogTask.ClearArguments;
   FSVNLogTask.branches := '../branches/v1_3';
   FSVNLogTask.tags := '../tags';
   FSVNLogTask.Execute;
   CheckEquals('7:4', FSVNLogTask.revision);
 
   // v11.x
+  FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := 'v11_.*';
   FSVNLogTask.Execute;
   CheckEquals('7:8', FSVNLogTask.revision);

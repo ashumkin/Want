@@ -160,6 +160,7 @@ type
     constructor Create(Owner: TScriptElement); override;
     destructor Destroy; override;
 
+    procedure ClearArguments; 
     procedure Execute; override;
     class function EncodeURL(Value: string): string;
     class function DecodeURL(Value: string): string;
@@ -627,7 +628,7 @@ end;
 
 procedure TCustomSVNTask.Execute;
 begin
-  ArgumentList.Clear;
+//  ArgumentList.Clear;
   if not IncrementalOutput then
     FExecOutput.Clear;
   inherited;
@@ -722,6 +723,11 @@ begin
     Log(vlVerbose, 'Revision=%s', [revision]);
     ArgumentList.AddOption('-r ', revision);
   end;
+end;
+
+procedure TCustomSVNTask.ClearArguments;
+begin
+  ArgumentList.Clear;
 end;
 
 function TCustomSVNTask.ConvertOutputLineHandle(const Line: string): string;
@@ -879,6 +885,7 @@ var
 begin
   Log(vlNormal, 'Getting diff');
 //  FLastRevisionTask.Assign(Self);
+  FLastRevisionTask.ClearArguments;
   FLastRevisionTask.repo := frepo;
   FLastRevisionTask.tags := ftags;
   FLastRevisionTask.last := last;
@@ -1513,6 +1520,7 @@ begin
   if Ftags <> EmptyStr then
   begin
     Log(vlDebug, '<tags> is set.');
+    FLastRevisionTask.ClearArguments;
     FLastRevisionTask.repo := trunk;
     FLastRevisionTask.tags := tags;
     FLastRevisionTask.last := last;
@@ -1528,6 +1536,7 @@ begin
         Frevision := lt.TrunkPointsTo
       else
       begin
+        FInfo.ClearArguments;
         FInfo.SetItem(FLastRevisionTask.LastRevision);
         FInfo.Execute_(False);
         Frevision := FInfo.Items[0].CommitRevision;
@@ -1542,6 +1551,7 @@ begin
     FInfo.SetItem(trunk)
   else
     FInfo.SetItem(branches);
+  FInfo.ClearArguments;
   FInfo.Execute_(False);
   Log(vlVerbose, 'repo revision = ' + FInfo.Items[0].CommitRevision);
   Frevision := FInfo.Items[0].CommitRevision

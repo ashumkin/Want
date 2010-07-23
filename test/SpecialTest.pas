@@ -11,17 +11,19 @@ type
     procedure TestSpecial;
   end;
 
-
 implementation
 
 uses
   SysUtils;
 
+type
+  ESpecialException = class(Exception);
+
 { TTestSpecial }
 
 procedure TTestSpecial.TestSpecial;
 begin
-  raise Exception.Create('Special exception');
+  raise ESpecialException.Create('Special exception');
 end;
 
 initialization
