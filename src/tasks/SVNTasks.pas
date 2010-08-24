@@ -1554,8 +1554,9 @@ begin
   FInfo.ClearArguments;
   FInfo.Execute_(False);
   Log(vlVerbose, 'repo revision = ' + FInfo.Items[0].CommitRevision);
+  // сообщения лога нужно будет получить со следующей после последней ревизии 
   Frevision := FInfo.Items[0].CommitRevision
-    + IfThen(Ftags <> EmptyStr, ':' + Frevision);
+    + IfThen(Ftags <> EmptyStr, ':' + IntToStr(StrToIntDef(Frevision, -1) + 1));
 end;
 
 procedure TSVNLogTask.DoNextArguments;
@@ -1579,13 +1580,15 @@ begin
 end;
 
 procedure TSVNLogTask.DoParseOutput;
+var
+  i: Integer;
 begin
   inherited;
   FLog := TSVNInfoLog.CreateByContext(FExecOutput.Text);
-  if FIsToGetTrunkPointsTo then
-    if Assigned(FLog.Log[0]) then
-      if Assigned(FLog.Log[0].Paths.Path[0]) then
-        FTrunkPointsTo := FLog.Log[0].Paths.Path[0].copyfrom_rev;
+  if FIsToGetTrunkPointsTo and Assigned(FLog.Log[0]) then
+    for i := 0 to FLog.Log[0].Paths.Count - 1 do
+      if FLog.Log[0].Paths.Path[i].copyfrom_rev <> EmptyStr then
+        FTrunkPointsTo := FLog.Log[0].Paths.Path[i].copyfrom_rev;
 end;
 
 procedure TSVNLogTask.Execute;

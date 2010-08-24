@@ -111,18 +111,20 @@ type
     procedure SetUp;    override;
     procedure TearDown; override;
   published
-    procedure TestLog;
     procedure Testtrunkonly;
     procedure Testrevision;
     procedure Testrevision_tags;
     procedure TestGetTrunkPointsTo;
+    procedure TestLog;
   end;
 
 implementation
 
 uses
   Windows;
-  
+
+const
+  cLastRevision = '10';
 var
   FCheckoutDir: string;
   FRepoDir: string;
@@ -243,6 +245,9 @@ begin
     // commit - revision 3
     Commit('');
 
+    // modify trunk
+    RunCmd('cmd.exe /c echo added line to trunk/file.txt >>'
+      + ' trunk/file.txt');
     //  - revision 4 points to revision 3
     AddTag('1_2');
 
@@ -262,6 +267,12 @@ begin
     RunCmd('svn copy branches/v1_3 tags/v11_32');
     Commit('tagged branch v1_3 to v11_32');
 
+    // modify trunk
+    RunCmd('cmd.exe /c echo added one more line to trunk/file.txt >>'
+      + ' trunk/file.txt');
+    // commit - revision 10
+    Commit('one more line changes');
+
     // remove "tags" folder to test relavitely trunk and repository only
     RunCmd('cmd.exe /c rmdir /q /s tags');
   finally
@@ -280,7 +291,7 @@ end;
 procedure TSVNTestsSetup.Commit(const pMessage: string);
 begin
   Inc(FCommitCount);
-  RunCmd(Format('svn commit -m "%d commit;%s"', [FCommitCount, pMessage]));
+  RunCmd(Format('svn commit -m "%d commit; %s"', [FCommitCount, pMessage]));
   // update WC to actualize latest revision
   RunCmd('svn up');
 end;
@@ -363,6 +374,7 @@ end;
 
 procedure TTestTSVNLog.TearDown;
 begin
+  DeleteFile(PAnsiChar(FSVNLogTask.output));
   FreeAndNil(FSVNLogTask);
   inherited;
 end;
@@ -379,7 +391,7 @@ procedure TTestTSVNLog.Testrevision;
 begin
   FSVNLogTask.trunk := '.';
   FSVNLogTask.Execute;
-  CheckEquals('4', FSVNLogTask.revision);
+  CheckEquals(cLastRevision, FSVNLogTask.revision);
 end;
 
 procedure TTestTSVNLog.TestGetTrunkPointsTo;
@@ -401,33 +413,34 @@ begin
   FSVNLogTask.trunk := '.';
   FSVNLogTask.tags := '../tags';
   FSVNLogTask.Execute;
-  CheckEquals('4:8', FSVNLogTask.revision);
+  CheckEquals(cLastRevision + ':9', FSVNLogTask.revision);
 
   // + version filter
   FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := '^v_.*';
   FSVNLogTask.filter := 'commit';
   FSVNLogTask.Execute;
-  CheckEquals('4:1', FSVNLogTask.revision);
+  CheckEquals(cLastRevision + ':2', FSVNLogTask.revision);
 
   // + version filter
   FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := 'v1_.*';
   FSVNLogTask.Execute;
-  CheckEquals('4:4', FSVNLogTask.revision);
+  // берём лог со следующей после последней ревизии 
+  CheckEquals(cLastRevision + ':5', FSVNLogTask.revision);
 
   // v1.x
   FSVNLogTask.ClearArguments;
   FSVNLogTask.branches := '../branches/v1_3';
   FSVNLogTask.tags := '../tags';
   FSVNLogTask.Execute;
-  CheckEquals('7:4', FSVNLogTask.revision);
+  CheckEquals('7:5', FSVNLogTask.revision);
 
   // v11.x
   FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := 'v11_.*';
   FSVNLogTask.Execute;
-  CheckEquals('7:8', FSVNLogTask.revision);
+  CheckEquals('7:9', FSVNLogTask.revision);
 end;
 
 procedure TTestTSVNLog.Testtrunkonly;
