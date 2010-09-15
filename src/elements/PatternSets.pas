@@ -151,6 +151,8 @@ uses
 
 procedure TIncludeElement.SetValue(Value: string);
 begin
+  if not Enabled then
+    Exit;
   Log(vlDebug, 'include name="%s"', [Value]);
  (Owner as TPatternSet).Include(Value);
 end;
@@ -159,6 +161,8 @@ end;
 
 procedure TExcludeElement.SetValue(Value: string);
 begin
+  if not Enabled then
+    Exit;
   Log(vlDebug, 'exclude name="%s"', [Value]);
  (Owner as TPatternSet).Exclude(Value);
 end;
