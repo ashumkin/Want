@@ -50,7 +50,7 @@ type
   protected
     FBuildFile   :string;
     FTargets     :TStringArray;
-    FDoNotStopOnVersion   :boolean;
+    FAntCompatibilityOn: boolean;
 
     procedure ParseCommandLine(Project :TProject); overload; virtual;
     function  ParseArgument(Project: TProject; var N :Integer;
@@ -186,17 +186,16 @@ begin
     Usage;
     Halt(2);
   end
-  else if AnsiSameText(Switch, 'dsv')
-      or AnsiSameText(Switch, 'dont-stop-version')
-      or AnsiSameText(Switch, '-dont-stop-version') then
-    FDoNotStopOnVersion := True
-  else if (Switch = 'v')
-    or (Switch = 'version')
+  else if (Switch = 'v') then
+    if FAntCompatibilityOn then
+      Result := ParseOption(Project, N, 'verbose', CommandLine)
+    else
+      Result := ParseOption(Project, N, 'version', CommandLine)
+  else if (Switch = 'version')
     or (Switch = '-version') then
   begin
     WriteLn(Copyright);
-    if not FDoNotStopOnVersion then
-      Halt(2);
+    Halt(2);
   end
   else if (Switch = 'L') then
   begin
@@ -204,7 +203,10 @@ begin
     Halt(3);
   end
   else if (Switch = 'buildfile')
-    or (Switch = 'b') then
+      or (Switch = 'b')
+      or (((Switch = 'f')
+          or (Switch = 'file'))
+        and FAntCompatibilityOn) then
     FBuildFile := ToPath(GetNextParam())
   else if Switch = 'verbose' then
     Listener.Level := vlVerbose
@@ -219,7 +221,17 @@ begin
     Log(vlDebug, 'Parsing commandline');
   end
   else if Switch = 'log' then
-    Listener.LogFile := ToSystemPath(ToPath(Trim(GetNextParam())))
+  begin
+    Switch := Trim(GetNextParam());
+    // если следующий параметр - ключ
+    if Copy(Switch, 1, 1) = '-' then
+      Dec(N) // возвращаем счётчик параметров
+    else
+      Listener.LogFile := ToSystemPath(ToPath(Switch))
+  end
+  else if AnsiSameText('ant', Switch)
+      or AnsiSameText('dsv', Switch) then
+    FAntCompatibilityOn := True
   else if (Switch = 'quiet')
       or (Switch = 'q')
       or (Switch = 'warnings') then
@@ -244,6 +256,16 @@ begin
 
     Project.SetProperty(PropName, PropValue);
   end
+  // unknown switches
+  else if FAntCompatibilityOn then
+  begin
+    if Switch = 'logger' then
+      GetNextParam()
+    else if (Switch = 'e')
+        or (Switch = 'emacs') then
+    else
+      Result := False
+  end
   else
     Result := False;
 end;
@@ -259,13 +281,13 @@ begin
     while p < CommandLine.Count do
     begin
       Param := CommandLine.Strings[p];
-      if Param[1] in ['-','/'] then
+      if Param[1] in ['-', '/'] then
       begin
         if not ParseOption(Project, p, Copy(Param, 2, Length(Param)), CommandLine) then
           raise EWantError.Create('Unknown commandline option: ' + Param);
       end
       else if not ParseArgument(Project, p, Param) then
-          raise EWantError.Create('Don''t know what to do with argument : ' + Param);
+        raise EWantError.Create('Don''t know what to do with argument : ' + Param);
       Inc(p);
     end;
   except

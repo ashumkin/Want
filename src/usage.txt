@@ -4,15 +4,21 @@ Usage:
 Options:
   -h, -H, -?, -help      Displays this help text.
   -L                     Displays licensing information.
-  -b[uildfile] <file>    Specifies the build file. Default is want.xml
+  -f[ile],
+  -b[uildfile] <file>
+                         Specifies the build file. Default is want.xml
   -Dname=value           Define property "name".
-  -q, -quiet, -warnings  Be very quiet. 
+  -q[uiet], -warnings    Be very quiet.
   -verbose               Be extra verbose.
-  -debug                 Print debugging information.
+  -d[ebug]               Print debugging information.
   -nocolor               Do not use color in console output.
   -v[ersion], --version  Shows version and stops.
   -ansi                  Converts output from ANSI to OEM (readable on console)
-  -dsv                   Do not stop on switch -v (must be defined BEFORE -v)
-  -is,
-        --ignore-scratch Ignore scratch verify
-  -log <file>            Also write debug-log to the <file>                  
+  -is, --ignore-scratch  Ignore scratch verify
+  -log[file] <file>      Also write debug-log to the <file>.
+                         Default name is "want.debug.log"
+  -ant|-dsv              Ant compatibility mode:
+                           Do not stop on switch -v (must be defined BEFORE -v)
+                           ignore:
+                             -logger, -emacs, -e
+
