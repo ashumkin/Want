@@ -106,7 +106,8 @@ type
 
 implementation
 
-uses FileListener;
+uses
+  FileListener, WantResources;
 
 { TConsoleListener }
 
@@ -287,11 +288,14 @@ procedure TConsoleListener.BuildFinished;
 begin
   inherited BuildFinished;
   if Failures or Errors then
-    LogMessage('BUILD FAILED', '', vlErrors)
+    LogMessage(F_BuildFailedMsg, '', vlErrors)
   else
   begin
     Log(vlNormal);
-    Log(vlNormal, 'Build complete.');
+    if AntCompatibilityOn then
+      Log(vlNormal, F_BuildDoneMsgAnt)
+    else
+      Log(vlNormal, F_BuildDoneMsg);
   end;
 end;
 

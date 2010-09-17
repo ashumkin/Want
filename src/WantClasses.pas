@@ -125,6 +125,7 @@ type
     FANSI: boolean;
     FIgnoreScratch: boolean;
     FLogFile: string;
+    FAntCompatibilityOn: boolean;
     function GetLogFile: string; virtual; 
     procedure SetLogFile(const Value: string); virtual; 
   public
@@ -148,6 +149,8 @@ type
 
     property Level :TLogLevel read FLevel write FLevel;
     property ANSI: boolean read FANSI write FANSI;
+    property AntCompatibilityOn: boolean read FAntCompatibilityOn
+      write FAntCompatibilityOn;
     property IgnoreScratch: boolean read FIgnoreScratch write FIgnoreScratch;
     property LogFile: string read GetLogFile write SetLogFile;
   published
@@ -1637,8 +1640,10 @@ end;
 constructor TBuildListener.Create;
 begin
   inherited;
+  FLogFile := EmptyStr;
   FANSI := False;
   FIgnoreScratch := False;
+  FAntCompatibilityOn := False;
 end;
 
 function TBuildListener.GetLogFile: string;

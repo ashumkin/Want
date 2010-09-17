@@ -53,7 +53,8 @@ resourcestring
   F_TaskFailure               = '%s';
 
   F_BuildStartMsg             = 'buildfile: %s';
-  F_BuildDoneMsg              = 'build complete';
+  F_BuildDoneMsg              = 'Build complete.';
+  F_BuildDoneMsgAnt           = 'BUILD SUCCESSFUL';
   F_BuildFailedMsg            = 'BUILD FAILED';
 
   F_BuildFileNotFound         = 'Cannot find %s';

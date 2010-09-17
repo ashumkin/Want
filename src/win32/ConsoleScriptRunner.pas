@@ -50,7 +50,6 @@ type
   protected
     FBuildFile   :string;
     FTargets     :TStringArray;
-    FAntCompatibilityOn: boolean;
 
     procedure ParseCommandLine(Project :TProject); overload; virtual;
     function  ParseArgument(Project: TProject; var N :Integer;
@@ -187,7 +186,7 @@ begin
     Halt(2);
   end
   else if (Switch = 'v') then
-    if FAntCompatibilityOn then
+    if Listener.AntCompatibilityOn then
       Result := ParseOption(Project, N, 'verbose', CommandLine)
     else
       Result := ParseOption(Project, N, 'version', CommandLine)
@@ -206,7 +205,7 @@ begin
       or (Switch = 'b')
       or (((Switch = 'f')
           or (Switch = 'file'))
-        and FAntCompatibilityOn) then
+        and Listener.AntCompatibilityOn) then
     FBuildFile := ToPath(GetNextParam())
   else if Switch = 'verbose' then
     Listener.Level := vlVerbose
@@ -231,7 +230,7 @@ begin
   end
   else if AnsiSameText('ant', Switch)
       or AnsiSameText('dsv', Switch) then
-    FAntCompatibilityOn := True
+    Listener.AntCompatibilityOn := True
   else if (Switch = 'quiet')
       or (Switch = 'q')
       or (Switch = 'warnings') then
@@ -257,7 +256,7 @@ begin
     Project.SetProperty(PropName, PropValue);
   end
   // unknown switches
-  else if FAntCompatibilityOn then
+  else if Listener.AntCompatibilityOn then
   begin
     if Switch = 'logger' then
       GetNextParam()
