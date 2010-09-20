@@ -1,0 +1,30 @@
+[DSP upload]
+Filename=perlre.zip
+Replacements=
+Version=1.1
+FileURL=
+Description=Win32 port of PCRE (Perl-Compatible Regular Expression).   Includes perlre.dll and Delphi class wrapper
+Delphi 1.0=N
+Delphi 2.0=N
+Delphi 3.0=N
+Delphi 4.0=Y
+C++Builder 1.0=N
+File Status=Freeware
+Full Source=Included
+Category=Classes and units
+Note=free, with source
+Additional info=
+
+[DSP Support]
+DSP Support=Y
+
+[Versions available]
+Delphi 1.0=
+Delphi 2.0=
+Delphi 3.0=
+C++Builder 1.0=
+
+[Uploader]
+Author name=Luu Tran
+Author E-mail=luutran@geocities.com
+Author URL=http://www.geocities.com/SiliconValley/Heights/9860/

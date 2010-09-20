@@ -1,0 +1,121 @@
+
+  TPerlRe - Luu Tran <luutran@geocities.com>
+
+  Version 1.1
+
+  Last Updated: 3-Mar-99
+
+  This is the Delphi4 wrapper for perlre.dll, the win32 port of
+  Philip Hazel's PCRE (Perl Compatible Regular Expression) package.
+  PCRE itself can be found at:
+
+  ftp://ftp.cus.cam.ac.uk/pub/software/programs/pcre/
+
+  Read pcre.html.  This is the html-ized man page that came with pcre.
+
+  This is freeware. The software is provided in hope that it will be 
+  of use.  The author is NOT responsible for any errors, mishaps, 
+  disasters, or calamities that may result from its use.
+
+  Permission is granted to anyone to use this software for any purpose 
+  on any computer system, and to redistribute it freely, subject to 
+  the following restrictions:
+
+1. This software is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+2. The origin of this software must not be misrepresented, either by
+   explicit claim or by omission.
+
+3. Altered versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+
+
+========================================================================
+
+Turn on word wrap to better view this file.
+
+Using TPerlRe
+
+TPerlRe is just a class wrapper to interface with perlre.dll.  I use Delphi4's overloading and default paramater quite a bit, so if you use an older version you'll have to make some modifications.  The interface is as follows:
+
+    property RegExp: string
+		the regex pattern
+
+    property Options: integer
+		ORed values of the following: see pcre.html for explanation of these
+		options
+		  PCRE_CASELESS
+		  PCRE_MULTILINE
+		  PCRE_DOTALL
+		  PCRE_SINGLELINE
+		  PCRE_EXTENDED
+		  PCRE_ANCHORED
+		  PCRE_DOLLAR_ENDONLY
+		  PCRE_EXTRA
+		  PCRE_NOTBOL
+		  PCRE_NOTEOL
+		  PCRE_UNGREEDY
+
+    property Text: string
+		subject text to match
+
+    property SubExp[I:integer]: TSubExp
+		returns info for the Ith subexpression, where 0th expression
+		is the entire matching string
+		TSubExp stores 1) the subexpression string; 2) the 1-based index
+		of the subexpression into Text; and 3) length of subexpression.
+
+    property SubExpCount: integer
+		returns how many sub expressions were matched (not incl. the 0th one)
+		
+    constructor Create( doStudy: boolean=true; opts:integer=DefaultOpts);
+		set doStudy to false if you don't want to study the regex,
+		i.e., optimize it.
+		(If you use the regex inside a loop, chances are you DO want to
+		study it.)
+
+    procedure Reset;
+		TPerlre keeps an internal pointer of current position in the
+		Text, so that successive calls to Match will find more occurrences.
+
+    procedure Split( const regexp: string; str: string; elems:
+                     TStrings; doTrim: boolean=true);
+		similar to Perl's split command
+		doTrim=true => trim leading and trailing space of split strings.
+
+    procedure Compile( const regexp: string); overload;
+    procedure Compile( const regexp: string; MatchCase: boolean); overload;
+    procedure Compile( const regexp: string; opts: integer); overload;
+		different variations of Compile; not strictly necessary, just
+		makes life simpler for me.
+
+    function Match: boolean; overload;
+    function Match( const str: string): boolean; overload;
+    function Match( const regexp, str: string): boolean; overload;
+    function Match( const regexp, str: string; opts: integer): boolean;
+                                                               overload;
+		Same here.  The last 3 matches function simply sets 
+		the parameters then call Match()
+
+Here's a simple example of TPerlre at work:
+
+function SaneEmail( const Str: string):boolean;
+begin
+  with TPerlre.Create( false, 0) do
+  Try
+    Result:=Match( '^[^@ ]+\@[^@ ]+\.[^@ ]+$', Str);
+  Finally
+    Free;
+  end;
+end;
+
+====================================================
+
+
+2) Known issues.
+
+I did not completely port some functions, notably those in maketables.c which allows you to define character tables for foreign languages and locales.
+
+Version 1.1+ uses 2 obj files built with Borland C Builder and no longer requires a DLL.  The package will simply be compiled into your app.
