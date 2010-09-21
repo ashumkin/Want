@@ -1554,8 +1554,8 @@ begin
   FInfo.ClearArguments;
   FInfo.Execute_(False);
   Log(vlVerbose, 'repo revision = ' + FInfo.Items[0].CommitRevision);
-  // сообщения лога нужно будет получить со следующей после последней ревизии 
-  Frevision := FInfo.Items[0].CommitRevision
+  // log messages are retrieved from <lastrevision>+1 to <last_tag_revision>+1   
+  Frevision := IntToStr(StrToIntDef(FInfo.Items[0].CommitRevision, -1) + 1)
     + IfThen(Ftags <> EmptyStr, ':' + IntToStr(StrToIntDef(Frevision, -1) + 1));
 end;
 
