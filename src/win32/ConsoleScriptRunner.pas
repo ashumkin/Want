@@ -214,7 +214,8 @@ begin
   else if (Switch = 'is')
       or (Switch = '-ignore-scratch') then
     Listener.IgnoreScratch := True
-  else if Switch = 'debug' then
+  else if (Switch = 'debug')
+    or ((Switch = 'd') and Listener.AntCompatibilityOn) then
   begin
     Listener.Level := vlDebug;
     Log(vlDebug, 'Parsing commandline');
@@ -292,7 +293,7 @@ begin
   except
     on e :Exception do
     begin
-      Listener.Log(vlErrors, e.Message);
+      Listener.BuildFailed(Project, e.Message);
       raise;
     end;
   end;
