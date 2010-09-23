@@ -124,8 +124,7 @@ uses
   Windows;
 
 const
-  cLastTrunkRevision = '10';
-  cLastTrunkRevisionPlus1 = '11';
+  cLastRevision = '10';
 var
   FCheckoutDir: string;
   FRepoDir: string;
@@ -274,9 +273,6 @@ begin
     // commit - revision 10
     Commit('one more line changes');
 
-    // revision 11 points to revision 10
-    RunCmd('svn copy trunk branches/v1_4');
-    Commit('branch trunk to v1_4');
     // remove "tags" folder to test relavitely trunk and repository only
     RunCmd('cmd.exe /c rmdir /q /s tags');
   finally
@@ -395,7 +391,7 @@ procedure TTestTSVNLog.Testrevision;
 begin
   FSVNLogTask.trunk := '.';
   FSVNLogTask.Execute;
-  CheckEquals(cLastTrunkRevisionPlus1, FSVNLogTask.revision);
+  CheckEquals(cLastRevision, FSVNLogTask.revision);
 end;
 
 procedure TTestTSVNLog.TestGetTrunkPointsTo;
@@ -417,34 +413,34 @@ begin
   FSVNLogTask.trunk := '.';
   FSVNLogTask.tags := '../tags';
   FSVNLogTask.Execute;
-  CheckEquals(cLastTrunkRevisionPlus1 + ':9', FSVNLogTask.revision);
+  CheckEquals(cLastRevision + ':9', FSVNLogTask.revision);
 
   // + version filter
   FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := '^v_.*';
   FSVNLogTask.filter := 'commit';
   FSVNLogTask.Execute;
-  CheckEquals(cLastTrunkRevisionPlus1 + ':2', FSVNLogTask.revision);
+  CheckEquals(cLastRevision + ':2', FSVNLogTask.revision);
 
   // + version filter
   FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := 'v1_.*';
   FSVNLogTask.Execute;
   // берём лог со следующей после последней ревизии 
-  CheckEquals(cLastTrunkRevisionPlus1 + ':5', FSVNLogTask.revision);
+  CheckEquals(cLastRevision + ':5', FSVNLogTask.revision);
 
   // v1.x
   FSVNLogTask.ClearArguments;
   FSVNLogTask.branches := '../branches/v1_3';
   FSVNLogTask.tags := '../tags';
   FSVNLogTask.Execute;
-  CheckEquals('8:5', FSVNLogTask.revision);
+  CheckEquals('7:5', FSVNLogTask.revision);
 
   // v11.x
   FSVNLogTask.ClearArguments;
   FSVNLogTask.versionfilter := 'v11_.*';
   FSVNLogTask.Execute;
-  CheckEquals('8:9', FSVNLogTask.revision);
+  CheckEquals('7:9', FSVNLogTask.revision);
 end;
 
 procedure TTestTSVNLog.Testtrunkonly;
