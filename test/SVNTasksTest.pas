@@ -15,7 +15,7 @@ uses
   SysUtils,
   StrUtils,
   JclFileUtils,
-  
+
   uURI,
 
   WildPaths,
@@ -114,14 +114,23 @@ type
     procedure Testtrunkonly;
     procedure Testrevision;
     procedure Testrevision_tags;
-    procedure TestGetTrunkPointsTo;
     procedure TestLog;
+  end;
+
+  TTestTSVNTagPointsToTask = class(TCustomSVNTaskTest)
+  protected
+    FSVNTagPointsToTask: TSVNTagPointsToTask;
+  public
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestGetPointsTo;
   end;
 
 implementation
 
 uses
-  Windows;
+  Windows, Properties;
 
 const
   cLastRevision = '10';
@@ -394,20 +403,6 @@ begin
   CheckEquals(cLastRevision, FSVNLogTask.revision);
 end;
 
-procedure TTestTSVNLog.TestGetTrunkPointsTo;
-begin
-  FSVNLogTask.repo := FSVNLogTask.PathToURL(
-      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v1_2';
-  CheckTrue(FSVNLogTask.GetTrunkPointsTo);
-  CheckEquals('4', FSVNLogTask.TrunkPointsTo);
-
-  FSVNLogTask.ClearArguments;
-  FSVNLogTask.repo := FSVNLogTask.PathToURL(
-      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v11_1';
-  CheckTrue(FSVNLogTask.GetTrunkPointsTo);
-  CheckEquals('2', FSVNLogTask.TrunkPointsTo);
-end;
-
 procedure TTestTSVNLog.Testrevision_tags;
 begin
   FSVNLogTask.trunk := '.';
@@ -529,11 +524,48 @@ begin
   CheckEquals('9', FSVNInfoTask.Items[0].CommitRevision);
 end;
 
+{ TTestTSVNTagPointsToTask }
+
+procedure TTestTSVNTagPointsToTask.SetUp;
+
+begin
+  inherited;
+  FSVNTagPointsToTask := TSVNTagPointsToTask.Create(FProject);
+  with FSVNTagPointsToTask.CreateProperty do
+  begin
+    name := 'pointsto';
+    overwrite := True;
+  end;
+end;
+
+procedure TTestTSVNTagPointsToTask.TearDown;
+begin
+  FreeAndNil(FSVNTagPointsToTask);
+  inherited;
+end;
+
+procedure TTestTSVNTagPointsToTask.TestGetPointsTo;
+begin
+  FSVNTagPointsToTask.repo := FSVNTagPointsToTask.PathToURL(
+      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v1_2';
+  FSVNTagPointsToTask.Execute;
+  CheckEquals('4', FSVNTagPointsToTask.PointsTo);
+  CheckEquals('4', FProject.PropertyValue('pointsto'));
+
+  FSVNTagPointsToTask.ClearArguments;
+  FSVNTagPointsToTask.repo := FSVNTagPointsToTask.PathToURL(
+      ExtractFilePath(ParamStr(0)) + 'svn+tests/repo/tags') + 'v11_1';
+  FSVNTagPointsToTask.Execute;
+  CheckEquals('2', FSVNTagPointsToTask.PointsTo);
+  CheckEquals('2', FProject.PropertyValue('pointsto'));
+end;
+
 initialization
   RegisterTest(TSVNTestsSetup.Create([
     TTestTSVNTaskPaths.Suite,
     TTestTSVNTask.Suite,
     TTestTSVNLastRevisionTask.Suite,
     TTestTSVNInfoTask.Suite,
-    TTestTSVNLog.Suite]));
+    TTestTSVNLog.Suite,
+    TTestTSVNTagPointsToTask.Suite]));
 end.

@@ -102,10 +102,6 @@ type
     procedure Init; override;
 
     class function TagName :string; override;
-
-    property path;
-    property _file;
-    property section;
   end;
 
   // authorization entity
@@ -156,6 +152,7 @@ type
     function Gettrunk: TPath; virtual;
     function GetRepo: TPath; virtual;
     class function PathIsURL(const pPath: string): boolean;
+    function GetWCURL(const pPath: string): string;
   public
     constructor Create(Owner: TScriptElement); override;
     destructor Destroy; override;
@@ -220,6 +217,7 @@ type
     function GetRepo: TPath; override;
     procedure DoFilterRevisions;
     procedure DoParseOutput; override;
+    procedure SetSubProperties;
   public
     constructor Create(Owner: TScriptElement); override;
     procedure Execute; override;
@@ -433,8 +431,6 @@ type
     Flast: Integer;
     Fversionfilter: string;
     Fverbose: boolean;
-    FTrunkPointsTo: string;
-    FIsToGetTrunkPointsTo: boolean;
   protected
     FInfo: TSVNInfoTask;
     FLog: TSVNInfoLog;
@@ -442,18 +438,14 @@ type
     function Getrevision: string; override;
     procedure DoNextArguments; override;
     function Gettrunk: TPath; override;
-    procedure DoGetRevisions;
-    procedure DoParseOutput; override;
+    procedure DoGetRevisions; virtual;
   public
     constructor Create(Owner: TScriptElement); override;
     destructor Destroy; override;
 
     procedure Execute; override;
     procedure Init; override;
-    function GetTrunkPointsTo: boolean;
 
-    property IsToGetTrunkPointsTo: boolean read FIsToGetTrunkPointsTo;
-    property TrunkPointsTo: string read FTrunkPointsTo;
   published
     property failonerror;
     property Arguments;
@@ -472,7 +464,23 @@ type
     property verbose: boolean read Fverbose write Fverbose;
     property xml: boolean read Fxml write Fxml;
   end;
-  
+
+  TSVNTagPointsToTask = class(TSVNLogTask)
+  protected
+    FPointsTo: string;
+    procedure DoParseOutput; override;
+    procedure DoGetRevisions; override;
+    procedure SetSubProperties;
+  public
+    procedure Execute; override;
+
+    property PointsTo: string read FPointsTo;
+  published
+    function CreateProperty: TSubPropertyElement;
+    
+    property repo;
+  end;
+
 const
   URLDelimiter = '/';
   // regexp for parsing "svn diff --summarize" output
@@ -714,6 +722,25 @@ end;
 function TCustomSVNTask.Gettrunk: TPath;
 begin
   Result := GetRepoPath(Frepo, Ftrunk);
+end;
+
+function TCustomSVNTask.GetWCURL(const pPath: string): string;
+var
+  FInfo: TSVNInfoTask;
+begin
+  Result := pPath;
+  if Result <> '.' then
+    Exit;
+  // get real URL of WC
+  FInfo := TSVNInfoTask.Create(Self);
+  try
+    FInfo.SetItem(pPath);
+    FInfo.Execute_(False);
+    if FInfo.ItemsCount > 0 then
+      Result := FInfo.Items[0].URL;
+  finally
+    FreeAndNil(FInfo);
+  end;
 end;
 
 procedure TCustomSVNTask.DoRevision;
@@ -1032,33 +1059,25 @@ begin
 end;
 
 procedure TSVNLastRevisionTask.DoParseOutput;
-var
-  i: Integer;
 begin
   inherited;
   FExecOutput.Text := Trim(FExecOutput.Text);
   if FExecOutput.Text = '' then
-    TaskError('There are no any revision')
-  else
-  begin
-    // filter revisions
-    DoFilterRevisions;
-    InvertCompare_NaturalSort := True;
-    // due to bug(?) of Compare_NaturalSort
-    // replace _ with * (as filenames cannot contain *)
-    FExecOutput.Text := AnsiReplaceText(FExecOutput.Text, '_', '*');
-    FExecOutput.CustomSort(Compare_NaturalSort);
-    // replace back
-    FExecOutput.Text := AnsiReplaceText(FExecOutput.Text, '*', '_');
-    if last > FExecOutput.Count - 1 then
-      TaskFailureFmt('<last> parameter (%d) is greater then revisions count (%d)',
-        [last, FExecOutput.Count]);
-    LastRevision := ExTURLD(FExecOutput.Strings[last]);
-    for i := 0 to ChildCount - 1 do
-      if Children[i] is TSubPropertyElement then
-        Project.SetProperty(TSubPropertyElement(Children[i]).name,
-          LastRevision, TSubPropertyElement(Children[i]).overwrite);
-  end;
+    TaskError('There are no any revision');
+  // filter revisions
+  DoFilterRevisions;
+  InvertCompare_NaturalSort := True;
+  // due to bug(?) of Compare_NaturalSort
+  // replace _ with * (as filenames cannot contain *)
+  FExecOutput.Text := AnsiReplaceText(FExecOutput.Text, '_', '*');
+  FExecOutput.CustomSort(Compare_NaturalSort);
+  // replace back
+  FExecOutput.Text := AnsiReplaceText(FExecOutput.Text, '*', '_');
+  if last > FExecOutput.Count - 1 then
+    TaskFailureFmt('<last> parameter (%d) is greater then revisions count (%d)',
+      [last, FExecOutput.Count]);
+  LastRevision := ExTURLD(FExecOutput.Strings[last]);
+  SetSubProperties;
 end;
 
 procedure TSVNLastRevisionTask.Execute;
@@ -1069,6 +1088,7 @@ end;
 
 function TSVNLastRevisionTask.GetRepo: TPath;
 begin
+  Frepo := GetWCURL(Frepo);
   Result := PathToURL(tags);
 end;
 
@@ -1089,6 +1109,16 @@ begin
   else
     FLastRevision := Value;
   Log(vlNormal, 'LastRevision=' + LastRevision);
+end;
+
+procedure TSVNLastRevisionTask.SetSubProperties;
+var
+  i: Integer;
+begin
+  for i := 0 to ChildCount - 1 do
+    if Children[i] is TSubPropertyElement then
+      Project.SetProperty(TSubPropertyElement(Children[i]).name,
+        LastRevision, TSubPropertyElement(Children[i]).overwrite);
 end;
 
 { TSubPropertyElement }
@@ -1502,7 +1532,6 @@ begin
   Flimit := 0;
   Fversionfilter := '';
   Fverbose := False;
-  FIsToGetTrunkPointsTo := False;
 end;
 
 destructor TSVNLogTask.Destroy;
@@ -1515,7 +1544,7 @@ end;
 
 procedure TSVNLogTask.DoGetRevisions;
 var
-  lt: TSVNLogTask;
+  lt: TSVNTagPointsToTask;
 begin
   if Ftags <> EmptyStr then
   begin
@@ -1529,18 +1558,11 @@ begin
     FLastRevisionTask.Init;
     FLastRevisionTask.Execute;
 
-    lt := TSVNLogTask.Create(Self);
+    lt := TSVNTagPointsToTask.Create(Self);
     try
       lt.repo := FLastRevisionTask.LastRevision;
-      if lt.GetTrunkPointsTo then
-        Frevision := lt.TrunkPointsTo
-      else
-      begin
-        FInfo.ClearArguments;
-        FInfo.SetItem(FLastRevisionTask.LastRevision);
-        FInfo.Execute_(False);
-        Frevision := FInfo.Items[0].CommitRevision;
-      end;
+      lt.Execute;
+      Frevision := lt.PointsTo;
     finally
       FreeAndNil(lt);
     end;
@@ -1579,60 +1601,21 @@ begin
   inherited;
 end;
 
-procedure TSVNLogTask.DoParseOutput;
-var
-  i: Integer;
-begin
-  inherited;
-  FLog := TSVNInfoLog.CreateByContext(FExecOutput.Text);
-  if FIsToGetTrunkPointsTo and Assigned(FLog.Log[0]) then
-    for i := 0 to FLog.Log[0].Paths.Count - 1 do
-      if FLog.Log[0].Paths.Path[i].copyfrom_rev <> EmptyStr then
-        FTrunkPointsTo := FLog.Log[0].Paths.Path[i].copyfrom_rev;
-end;
-
 procedure TSVNLogTask.Execute;
 begin
   Log(vlNormal, 'Getting log');
-  if not IsToGetTrunkPointsTo then
-    DoGetRevisions;
+  DoGetRevisions;
   inherited Execute;
 end;
 
 function TSVNLogTask.Gettrunk: TPath;
 begin
-  Result := Ftrunk;
-  if Result <> '.' then
-    Exit;
-  // get real URL of WC
-  FInfo.SetItem(Ftrunk);
-  FInfo.Execute_(False);
-  if FInfo.ItemsCount > 0 then
-    Ftrunk := FInfo.Items[0].URL;
-  Result := Ftrunk;
+  Result := GetWCURL(Ftrunk);
 end;
 
 function TSVNLogTask.Getrevision: string;
 begin
   Result := Frevision;
-end;
-
-function TSVNLogTask.GetTrunkPointsTo: boolean;
-begin
-  tags := '';
-  branches := '';
-  FTrunkPointsTo := '-';
-  limit := 1;
-  verbose := True;
-  xml := True;
-  Frevision := '';
-  FIsToGetTrunkPointsTo := True;
-  try
-    Execute;
-  finally
-    Result := StrToIntDef(FTrunkPointsTo, -1) <> -1;
-    FIsToGetTrunkPointsTo := False;
-  end;
 end;
 
 procedure TSVNLogTask.Init;
@@ -1643,8 +1626,63 @@ begin
     WantError('<limit> parameter must be greater than 0');
 end;
 
+{ TSVNTagPointsToTask }
+
+function TSVNTagPointsToTask.CreateProperty: TSubPropertyElement;
+begin
+  Result := TSubPropertyElement.Create(Self);
+end;
+
+procedure TSVNTagPointsToTask.DoGetRevisions;
+begin
+  // do nothing - we do not need to get revisions already
+end;
+
+procedure TSVNTagPointsToTask.DoParseOutput;
+var
+  i: Integer;
+begin
+  inherited;
+  FLog := TSVNInfoLog.CreateByContext(FExecOutput.Text);
+  if Assigned(FLog.Log[0]) then
+    for i := 0 to FLog.Log[0].Paths.Count - 1 do
+      if FLog.Log[0].Paths.Path[i].copyfrom_rev <> EmptyStr then
+        FPointsTo := FLog.Log[0].Paths.Path[i].copyfrom_rev;
+end;
+
+procedure TSVNTagPointsToTask.Execute;
+begin
+  tags := '';
+  branches := '';
+  FPointsTo := '-';
+  limit := 1;
+  verbose := True;
+  xml := True;
+  Frevision := '';
+  inherited;
+  if StrToIntDef(FPointsTo, -1) = -1 then
+  begin
+    FInfo.ClearArguments;
+    FInfo.SetItem(FLastRevisionTask.LastRevision);
+    FInfo.Execute_(False);
+    FPointsTo := FInfo.Items[0].CommitRevision;
+  end;
+  SetSubProperties;
+end;
+
+procedure TSVNTagPointsToTask.SetSubProperties;
+var
+  i: Integer;
+begin
+  for i := 0 to ChildCount - 1 do
+    if Children[i] is TSubPropertyElement then
+      Project.SetProperty(TSubPropertyElement(Children[i]).name,
+        PointsTo, TSubPropertyElement(Children[i]).overwrite);
+end;
+
 initialization
   RegisterTasks([TSVNTask, TSVNAuthTask, TSVNDiffTask, TSVNLastRevisionTask,
-    TSVNCommitTask, TSVNLogTask]);
+    TSVNCommitTask, TSVNLogTask, TSVNTagPointsToTask]);
   RegisterElements(TSVNLastRevisionTask, [TSubPropertyElement]);
+  RegisterElements(TSVNTagPointsToTask, [TSubPropertyElement]);
 end.

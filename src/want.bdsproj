@@ -130,11 +130,11 @@
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>
 		<Parameters>
-			<Parameters Name="RunParams">-d</Parameters>
+			<Parameters Name="RunParams">changelog changelog-out -Dsvn.project.tags=../../tags -Dbin=. -Dtags.last=5  -verbose -log</Parameters>
 			<Parameters Name="HostApplication"></Parameters>
 			<Parameters Name="Launcher"></Parameters>
 			<Parameters Name="UseLauncher">False</Parameters>
-			<Parameters Name="DebugCWD">c:\OCP\projects\billing+beeline\branches\v2_6\</Parameters>
+			<Parameters Name="DebugCWD">c:\OCP\projects\billing+beeline\branches\v3_0\</Parameters>
 			<Parameters Name="Debug Symbols Search Path"></Parameters>
 			<Parameters Name="LoadAllSymbols">True</Parameters>
 			<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
