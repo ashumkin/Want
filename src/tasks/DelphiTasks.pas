@@ -451,7 +451,7 @@ begin
     WantUtils.GetEnvironmentVar('delphi_version', V, true);
   end;
   if V = '' then begin
-     V := '10,9,8,7,6,5,4';
+     V := '13,12,11,10,9,8,7,6,5,4';
   end;
   vers := StringToArray(V);
   for i := 0 to High(vers) do

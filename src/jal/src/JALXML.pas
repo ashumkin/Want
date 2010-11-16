@@ -126,7 +126,7 @@ begin
    end;
    while i <= n do begin
      j := i;
-     while (s[j] <> '&') and (j <= n) do
+     while (j <= n) and (s[j] <> '&') do
         inc(j);
      result := result + copy(s, i, j-i);
      i := j+1;
