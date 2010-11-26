@@ -9,7 +9,7 @@ _want_completion()
 	if [[ ${cur} == -* ]] ; then
         opts=`want -h | sed -ne 's/^\(.\{24\}\) [A-Z].\+$/\1/p' | sed -e 's/<.\+>//'`
 	else
-		opts=`cat want.xml 2>/dev/null | sed -ne 's/\s*<target name="\(\S\+\)".\+/\1/p'`
+		opts=`cat want.xml 2>/dev/null | sed -ne 's/\s*<target name="\(\S\+\)".*/\1/p'`
 	fi
 	COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
 }
