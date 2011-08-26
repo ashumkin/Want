@@ -74,6 +74,7 @@ const
   DelphiRegRoot   = 'SOFTWARE\Borland\Delphi';
   CBuilderRegRoot = 'SOFTWARE\Borland\C++Builder';
   BDSRegRoot      = 'SOFTWARE\Borland\BDS';
+  EDSRegRoot      = 'SOFTWARE\CodeGear\BDS';
   DelphiRootKey   = 'RootDir';
   
   __RENAMED_CFG_EXT = '.want.cfg';
@@ -451,7 +452,7 @@ begin
     WantUtils.GetEnvironmentVar('delphi_version', V, true);
   end;
   if V = '' then begin
-     V := '13,12,11,10,9,8,7,6,5,4';
+     V := '14,13,12,11,10,9,8,7,6,5,4';
   end;
   vers := StringToArray(V);
   for i := 0 to High(vers) do
@@ -530,12 +531,16 @@ begin
     end
     else begin
       DecimalSeparator := '.';
-      if StrToFloatDef(version, 0) > 8 then
+      if StrToFloatDef(version, 0) <= 8 then
+        RegRoot := DelphiRegRoot
+      else
       begin
-        RegRoot := BDSRegRoot;
+        if StrToFloatDef(version, 0) < 12 then
+          RegRoot := BDSRegRoot
+        else
+          RegRoot := EDSRegRoot;
         version := Format('%.1f', [StrToFloatDef(version, 0) - 6]);
-      end else
-        RegRoot := DelphiRegRoot;
+      end;
     end;
     Result := Format('%s\%s', [RegRoot, version]);
   finally
