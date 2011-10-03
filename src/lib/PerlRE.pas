@@ -58,17 +58,13 @@ end;
 function Replace(const Pattern, Subst, Text :string; All :boolean = true) :string;
 var
   s: string;
-  g: string;
 begin
   // for backward compatibility
   // change $1 to \$1
   s := ReplaceRegExpr('(\$\d)', Subst, '\\$1', True);
   // change \1 to $1
   s := ReplaceRegExpr('\\\{?(\d)\}?', s, '${$1}', True);
-  g := 'g';
-  if not All then
-    g := '-' + g;
-  Result := ReplaceRegExpr('(?i' + g + ')' + Pattern, Text, s, True);
+  Result := ReplaceRegExpr('(?i)' + Pattern, Text, s, True);
 end;
 
 { TXRegexp }
