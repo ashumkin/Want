@@ -158,7 +158,7 @@ begin
   Result :=
    'WANT - A Build Management tool. v' + WantVersion         + C_EOL +
    'Copyright (c) 2001-2003 Juancarlo Anez, Caracas, Venezuela.'  + C_EOL +
-   'Copyright (c) 2008 Zapped'  + C_EOL +
+   'Copyright (c) 2008-2013 Alexey Shumkin aka Zapped'  + C_EOL +
    'All rights reserved'                                          + C_EOL;
 end;
 

@@ -28,7 +28,7 @@ BEGIN
             VALUE "FileDescription", "WANT. Alexey Shumkin mod\0"
             VALUE "FileVersion", "${version}\0"
             VALUE "InternalName", "want.exe\0"
-            VALUE "LegalCopyright", "Copyright \251 2009, Alexey Shumkin\0"
+            VALUE "LegalCopyright", "Copyright \251 2008-2013, Alexey Shumkin\0"
             VALUE "OriginalFilename", "want.exe\0"
             VALUE "ProductName", "WANT\0"
             VALUE "ProductVersion", "${version}\0"

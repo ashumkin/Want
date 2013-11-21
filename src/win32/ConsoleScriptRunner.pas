@@ -126,7 +126,8 @@ begin
   try
     Project.Listener := Listener;
     ParseCommandLine(Project);
-    Log(vlDebug, 'WANT started at ' + FormatDateTime('yyyy-dd-mm hh:nn:ss', Now));
+    Log(vlDebug, Format('WANT (v%s) started at %s',
+      [WantVersion, FormatDateTime('yyyy-dd-mm hh:nn:ss', Now)]));
     if FBuildFile = '' then
       FBuildFile := FindBuildFile(True);
     LoadProject(Project, FBuildFile);
