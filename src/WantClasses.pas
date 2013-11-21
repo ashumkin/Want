@@ -191,7 +191,6 @@ type
     procedure Log(Msg: string = ''; Level: TLogLevel = vlNormal); overload;
     procedure Log(Level: TLogLevel; Msg: string = '');            overload; virtual;
     function  Log(const Format: string; const Args: array of const; Level: TLogLevel = vlNormal): string; overload;
-    function  Log(Level: TLogLevel; const Format: string; const Args: array of const): string; overload;
 
     procedure WantError(Msg: string = ''; Addr :Pointer = nil); virtual;
 
@@ -215,6 +214,7 @@ type
     function  SetupChild(ChildName :string; Atts :TStrings):TScriptElement; virtual;
     procedure Configure(recurse :boolean = true); virtual;
 
+    function  Log(Level: TLogLevel; const Format: string; const Args: array of const): string; overload;
     procedure SetProperty(Name, Value: string; overwrite :boolean = false;
       pToLog: boolean = False); virtual;
     function  PropertyDefined(Name: string): boolean;    virtual;

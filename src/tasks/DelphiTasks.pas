@@ -117,10 +117,10 @@ type
     procedure HandleOutputLine(Line :string); override;
 
     class function RootForVersion(version: string; UseCBuilder: boolean = false): string;
-    class function ReadDelphiDir(const ver :string = ''; UseCBuilder: boolean = false) :string;
+    class function ReadDelphiDir(LoggerElement: TCustomDelphiTask; const ver :string = ''; UseCBuilder: boolean = false) :string;
     class function ReadUserOption(const Key, Name, Ver :string):string;
 
-    class function FindDelphi(V: string): TDelphiVersion;
+    class function FindDelphi(LoggerElement: TCustomDelphiTask; V: string): TDelphiVersion;
     class function ToolName :string; virtual;  abstract;
 
     procedure FindTool;
@@ -436,7 +436,7 @@ var
 
 { TCustomDelphiTask }
 
-class function TCustomDelphiTask.FindDelphi(V: string) : TDelphiVersion;
+class function TCustomDelphiTask.FindDelphi(LoggerElement: TCustomDelphiTask; V: string) : TDelphiVersion;
 var
   vers: TStringArray;
   i     :Integer;
@@ -466,7 +466,7 @@ begin
       vers[i] := StrRestOf(vers[i], 2);
       UseCBuilder := true;
     end;
-    Path := ReadDelphiDir(vers[i], UseCBuilder);
+    Path := ReadDelphiDir(LoggerElement, vers[i], UseCBuilder);
     if Path <> '' then
     begin
       Tool := Path + '\' + ToolName;
@@ -485,7 +485,7 @@ end;
 
 procedure TCustomDelphiTask.FindTool;
 begin
-  with FindDelphi(versions) do
+  with FindDelphi(Self, versions) do
   begin
     FVersionFound := Version;
     FDelphiDir    := Directory;
@@ -499,11 +499,18 @@ begin
 end;
 
 
-class function TCustomDelphiTask.ReadDelphiDir(const ver: string = '';
+class function TCustomDelphiTask.ReadDelphiDir(LoggerElement: TCustomDelphiTask;
+  const ver: string = '';
   UseCBuilder: boolean = False): string;
+var
+  s: string;
 begin
   assert(ver <> '');
-  Result := RegReadStringDef(HKEY_LOCAL_MACHINE, RootForVersion(ver, UseCBuilder), DelphiRootKey, '');
+  s := RootForVersion(ver, UseCBuilder);
+  Result := RegReadStringDef(HKEY_LOCAL_MACHINE, s, DelphiRootKey, '');
+  if Assigned(LoggerElement) then
+    LoggerElement.Log(vlDebug, 'Searching for tool path "%s" (%s) in "%s@%s": %s',
+      [LoggerElement.ToolName, LoggerElement.ClassName, s, DelphiRootKey, Result]);
 end;
 
 class function TCustomDelphiTask.ReadUserOption(const Key, Name, Ver: string): string;
@@ -1625,7 +1632,7 @@ initialization
                          TWarningElement,
                          TUnitAliasElement
                          ]);
-  with TDelphiCompileTask.FindDelphi('') do
+  with TDelphiCompileTask.FindDelphi(nil, '') do
   begin
     JclSysInfo.SetEnvironmentVar('delphi.version', Version);
     JclSysInfo.SetEnvironmentVar('delphi.dir',     Directory);
