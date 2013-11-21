@@ -117,7 +117,9 @@ type
     procedure HandleOutputLine(Line :string); override;
 
     class function RootForVersion(version: string; UseCBuilder: boolean = false): string;
-    class function ReadDelphiDir(LoggerElement: TCustomDelphiTask; const ver :string = ''; UseCBuilder: boolean = false) :string;
+    class function ReadDelphiDir(LoggerElement: TCustomDelphiTask; const ver :string = '';
+      UseCBuilder: boolean = false;
+      UseCurrentUserKey: Boolean = False) :string;
     class function ReadUserOption(const Key, Name, Ver :string):string;
     class function ReadOption(RootKey: DelphiHKEY;
       const Root, Key, Name: string):string;
@@ -468,7 +470,9 @@ begin
       vers[i] := StrRestOf(vers[i], 2);
       UseCBuilder := true;
     end;
-    Path := ReadDelphiDir(LoggerElement, vers[i], UseCBuilder);
+    Path := ReadDelphiDir(LoggerElement, vers[i], UseCBuilder, False);
+    if Path = '' then
+      Path := ReadDelphiDir(LoggerElement, vers[i], UseCBuilder, True);
     if Path <> '' then
     begin
       Tool := Path + '\' + ToolName;
@@ -503,16 +507,22 @@ end;
 
 class function TCustomDelphiTask.ReadDelphiDir(LoggerElement: TCustomDelphiTask;
   const ver: string = '';
-  UseCBuilder: boolean = False): string;
+  UseCBuilder: boolean = False;
+  UseCurrentUserKey: Boolean = False): string;
 var
   s: string;
+  RootKey: DelphiHKEY;
 begin
   assert(ver <> '');
   s := RootForVersion(ver, UseCBuilder);
-  Result := ReadOption(HKEY_LOCAL_MACHINE, s, '', DelphiRootKey);
+  if UseCurrentUserKey then
+    RootKey := HKEY_CURRENT_USER
+  else
+    RootKey := HKEY_LOCAL_MACHINE;
+  Result := ReadOption(RootKey, s, '', DelphiRootKey);
   if Assigned(LoggerElement) then
-    LoggerElement.Log(vlDebug, 'Searching for tool path "%s" (%s) in "%s@%s": %s',
-      [LoggerElement.ToolName, LoggerElement.ClassName, s, DelphiRootKey, Result]);
+    LoggerElement.Log(vlDebug, 'Searching for tool path "%s" (%s) in "0x%x:%s@%s": %s',
+      [LoggerElement.ToolName, LoggerElement.ClassName, RootKey, s, DelphiRootKey, Result]);
 end;
 
 class function TCustomDelphiTask.ReadOption(RootKey: DelphiHKEY;
