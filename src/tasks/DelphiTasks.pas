@@ -119,6 +119,8 @@ type
     class function RootForVersion(version: string; UseCBuilder: boolean = false): string;
     class function ReadDelphiDir(LoggerElement: TCustomDelphiTask; const ver :string = ''; UseCBuilder: boolean = false) :string;
     class function ReadUserOption(const Key, Name, Ver :string):string;
+    class function ReadOption(RootKey: DelphiHKEY;
+      const Root, Key, Name: string):string;
 
     class function FindDelphi(LoggerElement: TCustomDelphiTask; V: string): TDelphiVersion;
     class function ToolName :string; virtual;  abstract;
@@ -507,15 +509,21 @@ var
 begin
   assert(ver <> '');
   s := RootForVersion(ver, UseCBuilder);
-  Result := RegReadStringDef(HKEY_LOCAL_MACHINE, s, DelphiRootKey, '');
+  Result := ReadOption(HKEY_LOCAL_MACHINE, s, '', DelphiRootKey);
   if Assigned(LoggerElement) then
     LoggerElement.Log(vlDebug, 'Searching for tool path "%s" (%s) in "%s@%s": %s',
       [LoggerElement.ToolName, LoggerElement.ClassName, s, DelphiRootKey, Result]);
 end;
 
+class function TCustomDelphiTask.ReadOption(RootKey: DelphiHKEY;
+  const Root, Key, Name: string): string;
+begin
+  Result := RegReadStringDef(RootKey, Root + '\' + Key, Name, '');
+end;
+
 class function TCustomDelphiTask.ReadUserOption(const Key, Name, Ver: string): string;
 begin
-  Result := RegReadStringDef(HKEY_CURRENT_USER, RootForVersion(Ver)+'\'+Key, Name, '');
+  Result := ReadOption(HKEY_CURRENT_USER, RootForVersion(Ver), Key, Name);
 end;
 
 class function TCustomDelphiTask.RootForVersion(version: string; UseCBuilder: boolean): string;
