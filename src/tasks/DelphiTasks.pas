@@ -119,7 +119,6 @@ type
     class function RootForVersion(version: string; UseCBuilder: boolean = false): string;
     class function ReadDelphiDir(const ver :string = ''; UseCBuilder: boolean = false) :string;
     class function ReadUserOption(const Key, Name, Ver :string):string;
-    class function ReadMachineOption(const Key, Name, Ver :string):string;
 
     class function FindDelphi(V: string): TDelphiVersion;
     class function ToolName :string; virtual;  abstract;
@@ -505,11 +504,6 @@ class function TCustomDelphiTask.ReadDelphiDir(const ver: string = '';
 begin
   assert(ver <> '');
   Result := RegReadStringDef(HKEY_LOCAL_MACHINE, RootForVersion(ver, UseCBuilder), DelphiRootKey, '');
-end;
-
-class function TCustomDelphiTask.ReadMachineOption(const Key, Name, Ver: string): string;
-begin
-  Result := RegReadStringDef(HKEY_LOCAL_MACHINE, RootForVersion(Ver)+'\'+Key, Name, '');
 end;
 
 class function TCustomDelphiTask.ReadUserOption(const Key, Name, Ver: string): string;
