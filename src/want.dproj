@@ -1,0 +1,115 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{ea856ecd-a7dc-44f7-a726-56740a946f15}</ProjectGuid>
+    <MainSource>want.dpr</MainSource>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+    <DCC_DependencyCheckOutputName>..\bin\ide\want.exe</DCC_DependencyCheckOutputName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_DebugInformation>False</DCC_DebugInformation>
+    <DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
+    <DCC_Optimize>False</DCC_Optimize>
+    <DCC_RangeChecking>True</DCC_RangeChecking>
+    <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+    <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+    <DCC_Hints>False</DCC_Hints>
+    <DCC_ConsoleTarget>True</DCC_ConsoleTarget>
+    <DCC_ExeOutput>..\bin\ide</DCC_ExeOutput>
+    <DCC_DcuOutput>..\dcu\ide</DCC_DcuOutput>
+    <DCC_ObjOutput>..\dcu\ide</DCC_ObjOutput>
+    <DCC_HppOutput>..\dcu\ide</DCC_HppOutput>
+    <DCC_UnitSearchPath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_UnitSearchPath>
+    <DCC_ResourcePath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_ResourcePath>
+    <DCC_ObjPath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_ObjPath>
+    <DCC_IncludePath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_IncludePath>
+    <DCC_Define>USE_JEDI_JCL;DUNIT_DLL;SUPPORTS_WIDESTRING;USE_TEXT_RUNNER0;RELEASE</DCC_Define>
+    <DCC_SYMBOL_DEPRECATED>False</DCC_SYMBOL_DEPRECATED>
+    <DCC_SYMBOL_PLATFORM>False</DCC_SYMBOL_PLATFORM>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Version>7.0</Version>
+    <DCC_Optimize>False</DCC_Optimize>
+    <DCC_RangeChecking>True</DCC_RangeChecking>
+    <DCC_GenerateStackFrames>True</DCC_GenerateStackFrames>
+    <DCC_SymbolReferenceInfo>2</DCC_SymbolReferenceInfo>
+    <DCC_Hints>False</DCC_Hints>
+    <DCC_ConsoleTarget>True</DCC_ConsoleTarget>
+    <DCC_ExeOutput>..\bin\ide</DCC_ExeOutput>
+    <DCC_DcuOutput>..\dcu\ide</DCC_DcuOutput>
+    <DCC_ObjOutput>..\dcu\ide</DCC_ObjOutput>
+    <DCC_HppOutput>..\dcu\ide</DCC_HppOutput>
+    <DCC_UnitSearchPath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_UnitSearchPath>
+    <DCC_ResourcePath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_ResourcePath>
+    <DCC_ObjPath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_ObjPath>
+    <DCC_IncludePath>..\src\;..\src\tasks;..\src\input;..\src\elements;..\src\lib;..\src\jal\src;..\src\jal\lib\paszlib;..\src\win32;..\lib\jcl\source;..\lib\jcl\source\common;..\lib\jcl\source\windows;..\lib\perlre-1.1;..\lib\dunit;..\lib\PCRE-4.5;..\lib\dunit\src;..\lib\dcpcrypt2;..\lib\dcpcrypt2\Ciphers;..\lib\dcpcrypt2\Hashes;..\lib\RegExpr\Source;..\lib\Common;..\lib\StrNatCmp;..\lib\AbstractXML;..\lib\Imports</DCC_IncludePath>
+    <DCC_Define>USE_JEDI_JCL;DUNIT_DLL;SUPPORTS_WIDESTRING;USE_TEXT_RUNNER0</DCC_Define>
+    <DCC_SYMBOL_DEPRECATED>False</DCC_SYMBOL_DEPRECATED>
+    <DCC_SYMBOL_PLATFORM>False</DCC_SYMBOL_PLATFORM>
+  </PropertyGroup>
+  <ProjectExtensions>
+    <Borland.Personality>Delphi.Personality</Borland.Personality>
+    <Borland.ProjectType>VCLApplication</Borland.ProjectType>
+    <BorlandProject>
+<BorlandProject><Delphi.Personality><Parameters><Parameters Name="RunParams">changelog changelog-out -Dsvn.project.tags=../../tags -Dbin=. -Dtags.last=5  -verbose -log</Parameters><Parameters Name="UseLauncher">False</Parameters><Parameters Name="LoadAllSymbols">True</Parameters><Parameters Name="LoadUnspecifiedSymbols">False</Parameters></Parameters><VersionInfo><VersionInfo Name="IncludeVerInfo">False</VersionInfo><VersionInfo Name="AutoIncBuild">False</VersionInfo><VersionInfo Name="MajorVer">1</VersionInfo><VersionInfo Name="MinorVer">0</VersionInfo><VersionInfo Name="Release">0</VersionInfo><VersionInfo Name="Build">0</VersionInfo><VersionInfo Name="Debug">False</VersionInfo><VersionInfo Name="PreRelease">False</VersionInfo><VersionInfo Name="Special">False</VersionInfo><VersionInfo Name="Private">False</VersionInfo><VersionInfo Name="DLL">False</VersionInfo><VersionInfo Name="Locale">1033</VersionInfo><VersionInfo Name="CodePage">1252</VersionInfo></VersionInfo><VersionInfoKeys><VersionInfoKeys Name="CompanyName"></VersionInfoKeys><VersionInfoKeys Name="FileDescription"></VersionInfoKeys><VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="InternalName"></VersionInfoKeys><VersionInfoKeys Name="LegalCopyright"></VersionInfoKeys><VersionInfoKeys Name="LegalTrademarks"></VersionInfoKeys><VersionInfoKeys Name="OriginalFilename"></VersionInfoKeys><VersionInfoKeys Name="ProductName"></VersionInfoKeys><VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys><VersionInfoKeys Name="Comments"></VersionInfoKeys></VersionInfoKeys><Excluded_Packages>
+      
+      
+      
+      
+      
+      <Excluded_Packages Name="C:\Program Files\RemObjects Software\Everwood\Bin\RemObjects_Everwood_D10.bpl">File C:\Program Files\RemObjects Software\Everwood\Bin\RemObjects_Everwood_D10.bpl not found</Excluded_Packages>
+    </Excluded_Packages><Source><Source Name="MainSource">want.dpr</Source></Source></Delphi.Personality></BorlandProject></BorlandProject>
+  </ProjectExtensions>
+  <Import Project="$(MSBuildBinPath)\Borland.Delphi.Targets" />
+  <ItemGroup>
+    <DelphiCompile Include="want.dpr">
+      <MainSource>MainSource</MainSource>
+    </DelphiCompile>
+    <RcCompile Include="usage.rc">
+      <Form>usage.res</Form>
+    </RcCompile>
+    <DCCReference Include="BuildListeners.pas" />
+    <DCCReference Include="elements\Attributes.pas" />
+    <DCCReference Include="elements\PatternSets.pas" />
+    <DCCReference Include="elements\Properties.pas" />
+    <DCCReference Include="elements\RegexpElements.pas" />
+    <DCCReference Include="elements\StandardElements.pas" />
+    <DCCReference Include="elements\TimeElements.pas" />
+    <DCCReference Include="lib\ScriptParser.pas" />
+    <DCCReference Include="lib\WildPaths.pas" />
+    <DCCReference Include="ScriptRunner.pas" />
+    <DCCReference Include="tasks\CustomTasks.pas" />
+    <DCCReference Include="tasks\CVSTasks.pas" />
+    <DCCReference Include="tasks\DelphiTasks.pas" />
+    <DCCReference Include="tasks\DUnitTasks.pas" />
+    <DCCReference Include="tasks\EchoTasks.pas" />
+    <DCCReference Include="tasks\EditTasks.pas" />
+    <DCCReference Include="tasks\EncodeDecodeTasks.pas" />
+    <DCCReference Include="tasks\ExecTasks.pas" />
+    <DCCReference Include="tasks\FileTasks.pas" />
+    <DCCReference Include="tasks\GZipTasks.pas" />
+    <DCCReference Include="tasks\HashTasks.pas" />
+    <DCCReference Include="tasks\IniFileTasks.pas" />
+    <DCCReference Include="tasks\LoggerTask.pas" />
+    <DCCReference Include="tasks\StandardTasks.pas" />
+    <DCCReference Include="tasks\StyleTasks.pas" />
+    <DCCReference Include="tasks\SVNTasks.pas" />
+    <DCCReference Include="tasks\WantStandardTasks.pas" />
+    <DCCReference Include="tasks\WantTasks.pas" />
+    <DCCReference Include="tasks\ZipTasks.pas" />
+    <DCCReference Include="WantClasses.pas" />
+    <DCCReference Include="WantResources.pas" />
+    <DCCReference Include="WantUtils.pas" />
+    <DCCReference Include="win32\ConsoleListener.pas" />
+    <DCCReference Include="win32\ConsoleScriptRunner.pas" />
+    <DCCReference Include="win32\CRT32.pas" />
+    <DCCReference Include="win32\FileListener.pas" />
+    <DCCReference Include="win32\MSXMLEngineImpl.pas" />
+    <DCCReference Include="win32\Resources.pas" />
+    <DCCReference Include="win32\WIN32.pas" />
+    <DCCReference Include="win32\Win32Implementations.pas" />
+    <None Include="usage.txt" />
+  </ItemGroup>
+</Project>
