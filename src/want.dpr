@@ -94,11 +94,15 @@ begin
     end;
   except
     on e :EWantException do
-      Halt(1);
+    begin
+      ExitCode := 1;
+      Exit;
+    end;
     on e :Exception do
     begin
       Writeln(e.Message);
-      Halt(2);
+      ExitCode := 2;
+      Exit;
     end;
   end;
 end;
