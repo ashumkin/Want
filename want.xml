@@ -65,9 +65,9 @@ See http://www.suigeneris.org/want/ for details.
 
   <patternset id="sources" >
     <include  name="${lib}/" />
-    <include  name="${lib}/jcl/source" />
-    <include  name="${lib}/jcl/source/common" />
-    <include  name="${lib}/jcl/source/windows" />
+    <include  name="${lib}/jcl/jcl/source" />
+    <include  name="${lib}/jcl/jcl/source/common" />
+    <include  name="${lib}/jcl/jcl/source/windows" />
     <include  name="${lib}/perlre-1.1" />
     <include  name="${lib}/dunit" />
     <include  name="${lib}/dunit/src" />

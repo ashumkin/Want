@@ -1,0 +1,12 @@
+[submodule "lib/jcl"]
+	path = lib/jcl
+	url = ../jcl.git
+[submodule "lib/RegExpr"]
+	path = lib/RegExpr
+	url = ../RegExpr
+[submodule "lib/dUnit"]
+	path = lib/dUnit
+	url = ../dUnit
+[submodule "lib/DcpCrypt2"]
+	path = lib/DcpCrypt2
+	url = ../DcpCrypt2
