@@ -14,8 +14,6 @@
 
       <DefinitionInfo value="False" />
 
-      <UseVerbose value="True" />
-
       <warnings value="True" />
 
       <map value="detailed" />

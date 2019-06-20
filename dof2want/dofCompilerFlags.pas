@@ -115,10 +115,6 @@ begin
           end;
         end;
     end;
-  if fvalues.Count > 0 then
-    begin
-      fvalues.Values['UseVerbose'] := BoolToStr[True];
-    end;  
   try
     flagValue := freader.sectionValues.Values[dof_ShowWarnings];       
     flagState := Boolean(StrToInt(flagValue));
